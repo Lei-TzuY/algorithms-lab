@@ -1,0 +1,10 @@
+build/
+build-*/
+cmake-build-*/
+.compile_commands.json
+*.o
+*.obj
+*.a
+*.lib
+*.exe
+.DS_Store
