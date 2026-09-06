@@ -31,7 +31,11 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - Matrix-chain interval DP with checked `uint64_t` cost arithmetic, deterministic split plans, exhaustive small-chain parenthesization comparison, and replayed reconstruction.
 - Tree DP for maximum-weight independent set on the existing undirected `Graph`, with strict tree validation, take/skip reconstruction, checked arithmetic, and exhaustive small-tree verification.
 
-Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), and Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
+### Phase 4 — range-query and structural data structures — in progress
+
+- Fenwick tree with first-principles binary-indexed decomposition, zero-based point updates, half-open prefix/range queries, checked arithmetic, transactional overflow behavior, and randomized naïve-array differential verification.
+
+Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), and the active Phase-4 range-structure notes in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
 ## Repository layout
 
@@ -81,7 +85,7 @@ Do not compare timings across machines or build modes without controlling the en
 
 - C++20 is the primary language.
 - Standard containers and library algorithms may support an implementation when they are not the subject being demonstrated; tests may use independent library/oracle formulations.
-- Demonstrated heap/DSU/sorting logic remains first-principles rather than hidden behind library equivalents.
+- Demonstrated heap/DSU/sorting/range-structure logic remains first-principles rather than hidden behind library equivalents.
 - Dijkstra rejects the entire graph if any negative edge exists.
 - MST requires undirected input, supports disconnected graphs as forests, ignores self-loops, supports parallel/negative edges, and checks total-weight overflow.
 - SCC decomposition requires directed input; component IDs are not canonical labels.
@@ -91,8 +95,9 @@ Do not compare timings across machines or build modes without controlling the en
 - Edit distance is byte-oriented over `std::string_view`; operation kinds, not sentinel characters, distinguish insert/erase from embedded null bytes.
 - Matrix-chain costs are represented in `uint64_t`; overflowing parenthesizations are excluded while representable alternatives remain eligible.
 - Tree DP accepts only connected acyclic undirected simple graphs; edge weights are irrelevant to its vertex-weight objective.
+- Fenwick internal buckets and returned sums use checked `int64_t`; updates that would make an internal bucket unrepresentable are rejected transactionally.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1–3 are sealed. The active frontier is **Phase 4: range-query and structural data structures**, beginning with a first-principles Fenwick tree before progressing to segment trees, sparse tables, tries, and advanced DSU variants. The repository does not claim completeness.
+Phases 1–3 are sealed. Phase 4 is active with Fenwick tree as its first range-query foundation; the next ordered frontier is **segment tree**, followed by sparse table, tries, and advanced DSU variants. The repository does not claim completeness.

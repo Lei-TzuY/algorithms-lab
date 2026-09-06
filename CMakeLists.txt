@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(algorithms_lab VERSION 0.3.0 LANGUAGES CXX)
+project(algorithms_lab VERSION 0.4.0 LANGUAGES CXX)
 
 option(ALGORITHMS_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 option(ALGORITHMS_BUILD_BENCHMARKS "Build the reproducible benchmark harness" ON)
@@ -55,7 +55,8 @@ if(BUILD_TESTING)
     tests/test_lis.cpp
     tests/test_edit_distance.cpp
     tests/test_matrix_chain.cpp
-    tests/test_tree_independent_set.cpp)
+    tests/test_tree_independent_set.cpp
+    tests/test_fenwick_tree.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)
