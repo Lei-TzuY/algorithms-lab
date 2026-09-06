@@ -56,7 +56,8 @@ if(BUILD_TESTING)
     tests/test_edit_distance.cpp
     tests/test_matrix_chain.cpp
     tests/test_tree_independent_set.cpp
-    tests/test_fenwick_tree.cpp)
+    tests/test_fenwick_tree.cpp
+    tests/test_segment_tree.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)
