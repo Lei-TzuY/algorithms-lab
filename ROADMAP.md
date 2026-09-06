@@ -19,7 +19,7 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 ## Phase 3 — dynamic programming — IN PROGRESS
 
 - [x] 0/1 and unbounded knapsack with reconstruction and independent randomized oracles
-- [ ] Longest increasing subsequence
+- [x] Longest increasing subsequence with quadratic-vs-nlogn differential verification and reconstruction
 - [ ] Edit distance
 - [ ] Interval DP
 - [ ] Tree DP

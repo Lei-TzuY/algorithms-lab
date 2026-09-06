@@ -28,6 +28,8 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - 0/1 knapsack with explicit `dp[i][c]` state, deterministic reconstruction, zero-weight 0/1 items, and checked value overflow.
 - Unbounded knapsack with the contrasting same-row inclusion recurrence, explicit reconstruction counts, and strict positive-weight precondition.
 - Randomized 0/1 cases are checked against exhaustive subset enumeration; unbounded cases are checked against an independent capacity-recursion oracle.
+- Longest increasing subsequence is implemented twice: textbook `O(n^2)` ending-state DP and a first-principles `O(n log n)` tails/binary-search formulation, both with witness reconstruction.
+- LIS lengths are checked against exhaustive small-instance oracles and the two implementations are differentially compared on larger randomized inputs.
 
 Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), and the current DP state model in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
@@ -89,4 +91,4 @@ Do not compare timings across machines or build modes without controlling the en
 
 ## Current frontier
 
-Phases 1 and 2 are sealed. Phase 3 has established its first reusable DP state/reconstruction slice with 0/1 and unbounded knapsack. The next ordered Phase-3 frontier is **longest increasing subsequence**, followed by edit distance, interval DP, and tree DP. The repository does not claim completeness.
+Phases 1 and 2 are sealed. Phase 3 has established its first reusable DP state/reconstruction slice with 0/1 and unbounded knapsack. The next ordered Phase-3 frontier is **edit distance**, followed by interval DP and tree DP. The repository does not claim completeness.

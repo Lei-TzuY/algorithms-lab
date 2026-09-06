@@ -27,6 +27,7 @@ endfunction()
 
 add_library(algorithms_lab
   src/dynamic_programming/knapsack.cpp
+  src/dynamic_programming/longest_increasing_subsequence.cpp
   src/greedy/interval_scheduling.cpp
   src/graphs/graph.cpp
   src/graphs/traversal.cpp
@@ -47,7 +48,8 @@ if(BUILD_TESTING)
     tests/test_graphs.cpp
     tests/test_shortest_paths.cpp
     tests/test_phase2.cpp
-    tests/test_knapsack.cpp)
+    tests/test_knapsack.cpp
+    tests/test_lis.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)
