@@ -39,7 +39,11 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - Byte trie with arbitrary-byte keys, duplicate/empty-key multiplicity, exact and prefix counts, and randomized map/prefix-scan differential verification.
 - Rollback DSU with union-by-size reversible snapshots, no path compression, and randomized rebuilt-graph differential verification.
 
-Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), and Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
+### Phase 5 — string algorithms — in progress
+
+- KMP with explicit prefix/failure state, overlap-aware all-occurrence search, byte-oriented semantics, and randomized naïve differential verification.
+
+Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), and the active string-algorithm notes in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
 ## Repository layout
 
@@ -89,7 +93,7 @@ Do not compare timings across machines or build modes without controlling the en
 
 - C++20 is the primary language.
 - Standard containers and library algorithms may support an implementation when they are not the subject being demonstrated; tests may use independent library/oracle formulations.
-- Demonstrated heap/DSU/sorting/range-structure logic remains first-principles rather than hidden behind library equivalents.
+- Demonstrated heap/DSU/sorting/range/string logic remains first-principles rather than hidden behind library equivalents.
 - Dijkstra rejects the entire graph if any negative edge exists.
 - MST requires undirected input, supports disconnected graphs as forests, ignores self-loops, supports parallel/negative edges, and checks total-weight overflow.
 - SCC decomposition requires directed input; component IDs are not canonical labels.
@@ -104,8 +108,9 @@ Do not compare timings across machines or build modes without controlling the en
 - Sparse-table RMQ is immutable; queries must be non-empty and ties return the leftmost minimum index.
 - Byte-trie keys are arbitrary byte strings and insertion multiplicity is preserved; prefix counts include duplicate keys.
 - Rollback DSU uses union by size without path compression so every successful union has a compact exact undo record.
+- KMP operates on arbitrary bytes; an empty pattern matches every boundary and full-match fallback preserves overlapping occurrences.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1–4 are sealed. Phase 5 is the active frontier, beginning with **KMP** before Z-function, rolling hash, and suffix-array work. The repository does not claim completeness.
+Phases 1–4 are sealed. Phase 5 is active with KMP as its first exact-pattern foundation; the next ordered frontier is **Z-function**, followed by rolling hash and suffix-array work. The repository does not claim completeness.
