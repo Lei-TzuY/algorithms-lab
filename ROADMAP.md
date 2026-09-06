@@ -20,7 +20,7 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] 0/1 and unbounded knapsack with reconstruction and independent randomized oracles
 - [x] Longest increasing subsequence with quadratic-vs-nlogn differential verification and reconstruction
-- [ ] Edit distance
+- [x] Edit distance with deterministic edit-script reconstruction and metric/property verification
 - [ ] Interval DP
 - [ ] Tree DP
 

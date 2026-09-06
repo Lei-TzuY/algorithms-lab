@@ -85,6 +85,22 @@ If the search position is the current number of tails, the current value extends
 
 Deterministic tests cover empty/singleton input, already increasing and reverse order, duplicates, classic mixed examples, tie behavior, and signed 64-bit extreme values. Fixed-seed small random arrays are checked against exhaustive subset enumeration. Larger random arrays differentially compare the quadratic and `O(n log n)` lengths, and every returned witness is independently validated for strictly increasing indices and values.
 
+## Levenshtein edit distance
+
+The edit-distance slice uses byte-oriented `std::string_view` inputs. Match costs zero; substitution, erase, and insertion each cost one. The production solver returns both the distance and a deterministic edit script, so optimal cost is tied to executable reconstruction rather than a scalar-only result.
+
+Define `dp[i][j]` as the minimum cost to transform the source prefix `source[0,i)` into the target prefix `target[0,j)`. Empty-prefix base cases are `dp[i][0] = i` and `dp[0][j] = j`. If the final bytes match, the diagonal state is copied. Otherwise the recurrence takes one plus the minimum of diagonal substitution, upward erase, and leftward insertion.
+
+**Invariant.** Every edit sequence for two non-empty prefixes has exactly one final action: matching/substituting the final pair, erasing the final source byte, or inserting the final target byte. Removing that final action yields one of the three already-solved smaller prefixes, so taking the cheapest transition is optimal.
+
+**Reconstruction.** Walk backward from `(source.size(), target.size())`. Exact matches are taken first. For equal-cost edit choices, the deterministic order is substitute, then erase, then insert. The reversed walk is normalized into forward operations. Each operation stores the relevant source/target byte; the operation kind disambiguates embedded null bytes.
+
+**Complexity.** `O(|source| * |target|)` time and table storage. Full storage is intentional because this slice studies state semantics plus edit-script reconstruction; the independent test oracle uses a separate two-row distance-only formulation.
+
+### Edit-distance verification evidence
+
+Deterministic cases cover empty and identical strings, insertion-only and erase-only paths, classic `kitten -> sitting` and `flaw -> lawn`, deterministic substitution ties, and embedded null bytes. Fixed-seed random pairs are checked against the two-row oracle, symmetry `d(a,b) = d(b,a)`, the length-gap lower bound, and the maximum-length upper bound. Random triples additionally verify the triangle inequality. Every returned script is applied to the original byte sequence and must reproduce the target exactly with a non-match operation count equal to the reported distance.
+
 ## Frontier
 
-This document records an **in-progress** phase, not a completeness claim. Knapsack and LIS are now implemented. The next ordered DP slice is edit distance, followed by interval DP and tree DP.
+This document records an **in-progress** phase, not a completeness claim. Knapsack, LIS, and edit distance are now implemented. The next ordered DP slice is interval DP, followed by tree DP.
