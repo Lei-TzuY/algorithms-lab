@@ -16,9 +16,9 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Strongly connected components: Tarjan and Kosaraju with partition/reachability verification
 - [x] Advanced graph traversal integration: SCC condensation DAG verified through Phase-1 topological sort
 
-## Phase 3 — dynamic programming — NEXT
+## Phase 3 — dynamic programming — IN PROGRESS
 
-- [ ] 0/1 and unbounded knapsack
+- [x] 0/1 and unbounded knapsack with reconstruction and independent randomized oracles
 - [ ] Longest increasing subsequence
 - [ ] Edit distance
 - [ ] Interval DP

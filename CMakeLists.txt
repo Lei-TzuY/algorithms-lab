@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(algorithms_lab VERSION 0.2.0 LANGUAGES CXX)
+project(algorithms_lab VERSION 0.3.0 LANGUAGES CXX)
 
 option(ALGORITHMS_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 option(ALGORITHMS_BUILD_BENCHMARKS "Build the reproducible benchmark harness" ON)
@@ -26,6 +26,7 @@ function(algorithms_enable_sanitizers target)
 endfunction()
 
 add_library(algorithms_lab
+  src/dynamic_programming/knapsack.cpp
   src/greedy/interval_scheduling.cpp
   src/graphs/graph.cpp
   src/graphs/traversal.cpp
@@ -45,7 +46,8 @@ if(BUILD_TESTING)
     tests/test_data_structures.cpp
     tests/test_graphs.cpp
     tests/test_shortest_paths.cpp
-    tests/test_phase2.cpp)
+    tests/test_phase2.cpp
+    tests/test_knapsack.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)
