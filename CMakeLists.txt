@@ -36,7 +36,8 @@ add_library(algorithms_lab
   src/graphs/traversal.cpp
   src/graphs/shortest_paths.cpp
   src/graphs/minimum_spanning_tree.cpp
-  src/graphs/strongly_connected_components.cpp)
+  src/graphs/strongly_connected_components.cpp
+  src/graphs/max_flow.cpp)
 
 target_include_directories(algorithms_lab PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 algorithms_enable_strict_warnings(algorithms_lab)
@@ -64,7 +65,8 @@ if(BUILD_TESTING)
     tests/test_kmp.cpp
     tests/test_z_function.cpp
     tests/test_rolling_hash.cpp
-    tests/test_suffix_array.cpp)
+    tests/test_suffix_array.cpp
+    tests/test_max_flow.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)
