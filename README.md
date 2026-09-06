@@ -43,6 +43,7 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 
 - KMP with explicit prefix/failure state, overlap-aware all-occurrence search, byte-oriented semantics, and randomized naïve differential verification.
 - Z-function with explicit `z[0] = n`, rightmost half-open prefix-match-box reuse, arbitrary-byte semantics, and randomized naïve LCP differential verification.
+- Double-modular rolling hash with immutable substring fingerprints, arbitrary-byte semantics, O(1) extraction, and direct-polynomial randomized verification.
 
 Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), and the active string-algorithm notes in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
@@ -111,8 +112,9 @@ Do not compare timings across machines or build modes without controlling the en
 - Rollback DSU uses union by size without path compression so every successful union has a compact exact undo record.
 - KMP operates on arbitrary bytes; an empty pattern matches every boundary and full-match fallback preserves overlapping occurrences.
 - Z-function operates on arbitrary bytes, defines `z[0] = n` for non-empty input, and exposes prefix-LCP state rather than delimiter-based matching.
+- Rolling hash uses fixed public non-cryptographic parameters; equal fingerprints are only a collision-prone candidate filter and must not be treated as proof of byte equality. No numeric collision-probability claim is made without an input/adversary model.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1–4 are sealed. Phase 5 contains KMP and Z-function as two distinct linear-time prefix-reuse models; the next ordered frontier is **rolling hash**, followed by suffix-array work. The repository does not claim completeness.
+Phases 1–4 are sealed. Phase 5 now contains deterministic exact matching (KMP), deterministic prefix-LCP reuse (Z-function), and collision-prone O(1) substring fingerprints (rolling hash). The next ordered frontier is **suffix array and related structures**. The repository does not claim completeness.

@@ -36,8 +36,28 @@ The function runs in `O(n)` time and returns `O(n)` state, with `O(1)` auxiliary
 
 Deterministic tests cover empty/singleton inputs, all-equal bytes, no repeated prefix, periodic overlap, embedded null bytes, and high-bit bytes. Seven hundred fixed-seed randomized byte strings are compared element-for-element against an independent naïve longest-common-prefix scan. Additional invariants verify `z[i] <= n-i`, exact equality for every claimed prefix byte, and a mismatch immediately after each non-maximal match.
 
+## Rolling hash — immutable substring fingerprints
+
+`RollingHash` snapshots an arbitrary byte string and precomputes two polynomial prefix tables plus powers of a fixed base. Each byte is converted through `unsigned char` and encoded as `1..256`, so null and high-bit bytes remain ordinary deterministic symbols.
+
+For modulus `M`, the prefix recurrence is `H[i+1] = (H[i] * B + symbol[i]) mod M`. A substring `[l,r)` of length `d` therefore has normalized fingerprint `H[r] - H[l] * B^d (mod M)`, independent of its original position. Precomputed powers make extraction `O(1)` after `O(n)` construction.
+
+The implementation uses fixed base `257` and the two distinct prime moduli `1,000,000,007` and `1,000,000,009`. With these fixed parameters, every intermediate multiplication is safely representable in `uint64_t`; modular reduction is explicit rather than relying on unsigned overflow behavior.
+
+### Collision and security semantics
+
+This is a deterministic **non-cryptographic** fingerprint. Two byte-identical substrings necessarily receive the same pair, but equal fingerprints do **not** prove byte equality: modular polynomial hashes can collide, and fixed public parameters are not appropriate for adversarial collision resistance. Callers that require exact equality must confirm candidate matches by comparing bytes or use a deterministic exact-string algorithm.
+
+Two modular components avoid depending on one residue alone, but this repository makes no numeric collision-probability claim without a specified input distribution or adversary model. The construction is not a cryptographic hash and does not remove the possibility of collisions.
+
+### Rolling-hash complexity and verification
+
+Construction is `O(n)` time and storage. `fingerprint(begin,end)` is `O(1)` and uses half-open ranges with strict bounds validation. The object owns only precomputed numeric state, so later mutation of the caller's source string cannot change the snapshot fingerprint index.
+
+Deterministic tests cover empty/range behavior, equal substrings at different positions, snapshot immutability, embedded nulls, and high-bit bytes. Five hundred fixed-seed arbitrary-byte strings execute eighty random substring queries each; every production fingerprint is compared against an independent direct polynomial evaluation over that substring, which does not use prefix extraction.
+
 ## Scope boundary and frontier
 
-This slice deliberately exposes the Z-array rather than building pattern matching through `pattern + sentinel + text`: arbitrary-byte inputs have no universally safe one-byte sentinel. KMP already owns exact all-occurrence matching, while Z contributes a distinct reusable prefix-LCP state model.
+KMP supplies deterministic exact matching, Z-function supplies deterministic prefix-LCP reuse, and rolling hash supplies constant-time collision-prone substring fingerprints after preprocessing. Their verification oracles remain structurally independent.
 
-With KMP and Z-function represented, the next ordered Phase-5 frontier is rolling hash, where collision semantics and non-cryptographic guarantees must be explicit before suffix-array structures.
+The next ordered Phase-5 frontier is suffix array and related deterministic structures. Rolling-hash equality must never be promoted into an exact-match or cryptographic guarantee in later integration.
