@@ -35,7 +35,7 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 ## Phase 5 — string algorithms — IN PROGRESS
 
 - [x] KMP with explicit prefix/failure state, overlap-aware all-match search, and naïve differential verification
-- [ ] Z-function
+- [x] Z-function with a rightmost half-open Z-box and naïve LCP differential verification
 - [ ] Rolling hash
 - [ ] Suffix array and related structures
 
