@@ -21,7 +21,7 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] 0/1 and unbounded knapsack with reconstruction and independent randomized oracles
 - [x] Longest increasing subsequence with quadratic-vs-nlogn differential verification and reconstruction
 - [x] Edit distance with deterministic edit-script reconstruction and metric/property verification
-- [ ] Interval DP
+- [x] Interval DP: matrix-chain multiplication with reconstructable split plans and exhaustive small-instance verification
 - [ ] Tree DP
 
 ## Phase 4 — range-query and structural data structures
