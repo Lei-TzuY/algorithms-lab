@@ -93,6 +93,24 @@ For key length `L`, insertion, exact count, membership, and prefix count take `O
 
 Deterministic tests cover empty keys, duplicate multiplicity, nested prefixes, embedded null bytes, and `0x80`/`0xFF` bytes. Fixed-seed randomized traces compare exact counts and prefix multiplicities against an independent `std::map<std::string,count>` model plus a linear prefix scan.
 
+## Rollback DSU — reversible connectivity state
+
+The ordinary Phase-1 DSU optimizes repeated forward-only queries with path compression. Rollback DSU serves a different execution model: callers can checkpoint the partition, perform unions, and restore an earlier checkpoint exactly. This is the structural prerequisite for later divide-and-conquer/offline dynamic-connectivity algorithms.
+
+It retains union by size but deliberately **does not perform path compression**. A read-only `find` therefore changes no parent pointers. Each successful union changes exactly one root parent, one root component size, and the global component count; those pre-state fields fit in one history record.
+
+**Rollback invariant.** A snapshot token is the number of successful union records currently in history. Redundant unions between already-connected vertices add no record because they change no state. Rolling back to token `s` pops records in reverse order until history size is `s`, restoring the child as a root, the parent root's previous size, and the component count for every undone union.
+
+Union by size bounds tree height logarithmically: when a root becomes a child, its component is no larger than the new parent component, so every such depth increase at least doubles the containing component size. Thus read-only `find` remains `O(log n)` without compression.
+
+### Rollback-DSU complexity and verification
+
+`snapshot()` is `O(1)`. `unite` and connectivity/component-size queries use `O(log n)` root lookup; each successfully undone union costs `O(1)`. History storage is `O(u)` for `u` currently retained successful unions, while parent/size storage is `O(n)`.
+
+Deterministic tests cover nested snapshots, full rollback, redundant/self unions that must not consume history, empty structures, bounds, and rejection of snapshot tokens that lie beyond the current history after rollback.
+
+Fixed-seed randomized traces compare the DSU against a structurally independent graph oracle. The oracle stores only currently active successful-union edges; after unions or rollbacks it rebuilds connected components by graph traversal, then checks component count, every vertex's component size, and all-pairs connectivity against the rollback DSU.
+
 ## Frontier
 
-Fenwick/segment trees, sparse-table RMQ, and the byte trie now cover mutable numeric ranges, immutable preprocessed ranges, and prefix-structured keys. Advanced DSU variants are the final ordered Phase-4 frontier before the phase sealing audit.
+All ordered Phase-4 implementation slices are represented. The next action is an architecture/correctness sealing audit; Phase 5 must not be promoted until the exact Rollback-DSU candidate and merged-main CI both pass and that audit finds no unresolved Phase-4 integration blocker.

@@ -31,12 +31,13 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - Matrix-chain interval DP with checked `uint64_t` cost arithmetic, deterministic split plans, exhaustive small-chain parenthesization comparison, and replayed reconstruction.
 - Tree DP for maximum-weight independent set on the existing undirected `Graph`, with strict tree validation, take/skip reconstruction, checked arithmetic, and exhaustive small-tree verification.
 
-### Phase 4 — range-query and structural data structures — in progress
+### Phase 4 — range-query and structural data structures — implementation complete; sealing audit pending
 
 - Fenwick tree with first-principles binary-indexed decomposition, zero-based point updates, half-open prefix/range queries, checked arithmetic, transactional overflow behavior, and randomized naïve-array differential verification.
 - Segment tree with bottom-up explicit interval hierarchy, point assignment, half-open range sums, transactional ancestor-path recomputation, checked node/query arithmetic, and randomized Fenwick/naïve cross-structure verification.
 - Sparse table for immutable range minimum with `O(n log n)` preprocessing, `O(1)` non-empty half-open queries, deterministic leftmost argmin reconstruction, and exhaustive randomized naïve verification.
 - Byte trie with arbitrary-byte keys, duplicate/empty-key multiplicity, exact and prefix counts, and randomized map/prefix-scan differential verification.
+- Rollback DSU with union-by-size reversible snapshots, no path compression, and randomized rebuilt-graph differential verification.
 
 Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), and Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
@@ -102,8 +103,9 @@ Do not compare timings across machines or build modes without controlling the en
 - Segment-tree internal nodes and returned sums use checked `int64_t`; construction/assignment rejects any unrepresentable node summary transactionally.
 - Sparse-table RMQ is immutable; queries must be non-empty and ties return the leftmost minimum index.
 - Byte-trie keys are arbitrary byte strings and insertion multiplicity is preserved; prefix counts include duplicate keys.
+- Rollback DSU uses union by size without path compression so every successful union has a compact exact undo record.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1–3 are sealed. Phase 4 now spans mutable/immutable range structures plus prefix-structured byte keys. The final ordered Phase-4 frontier is **advanced DSU variants**, followed by an architecture/correctness sealing audit. The repository does not claim completeness.
+Phases 1–3 are sealed. Phase 4 implementation is complete but not yet sealed; its architecture/correctness audit is the next gate. Phase 5 is not promoted until that audit and exact merged-main CI are clean. The repository does not claim completeness.
