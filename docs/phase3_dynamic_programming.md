@@ -59,6 +59,32 @@ Randomized evidence uses two different references:
 
 Every reconstructed result is also validated independently: indices/counts are in range, 0/1 indices are unique, total weight respects capacity, and recomputed value/weight match the returned optimum.
 
+## Longest increasing subsequence
+
+The LIS slice compares two formulations of the same strictly increasing subsequence problem and returns input-index witnesses from both. Equal values do not extend a subsequence.
+
+### Quadratic ending-state DP
+
+Define `length[i]` as the maximum length of a strictly increasing subsequence ending **exactly** at index `i`. For every earlier `j < i` with `values[j] < values[i]`, the transition considers `length[j] + 1`. A predecessor array records the first improving predecessor, and the first end index reaching each new global maximum is retained.
+
+**Invariant.** After index `i` is processed, `length[i]` is optimal among all increasing subsequences whose final element is `values[i]`: every such subsequence either has length one or has a penultimate index `j < i` with a smaller value, and all such `j` have already been solved.
+
+**Complexity.** `O(n^2)` time and `O(n)` auxiliary space.
+
+### Tails / binary-search formulation
+
+For each discovered length `k + 1`, `tails[k]` stores an index whose value is the minimum tail value currently known for an increasing subsequence of that length. The retained tail values are strictly increasing, allowing a hand-written lower-bound binary search for the first tail value greater than or equal to the current value. Equal tail values keep the earlier retained index for deterministic tie behavior.
+
+If the search position is the current number of tails, the current value extends the longest known subsequence. Otherwise, a strictly smaller current value replaces the tail at that position. A predecessor link to `tails[position - 1]` is captured before replacement, preserving one concrete witness.
+
+**Invariant.** Replacing a tail by a smaller value cannot destroy the existence of a subsequence of that length and can only make future extension easier. The number of tails therefore equals the LIS length of the processed prefix.
+
+**Complexity.** `O(n log n)` time and `O(n)` auxiliary space. The binary search is implemented directly rather than hidden behind `std::lower_bound`.
+
+### LIS verification evidence
+
+Deterministic tests cover empty/singleton input, already increasing and reverse order, duplicates, classic mixed examples, tie behavior, and signed 64-bit extreme values. Fixed-seed small random arrays are checked against exhaustive subset enumeration. Larger random arrays differentially compare the quadratic and `O(n log n)` lengths, and every returned witness is independently validated for strictly increasing indices and values.
+
 ## Frontier
 
-This document records an **in-progress** phase, not a completeness claim. The next ordered DP slice is longest increasing subsequence, where the lab can compare the textbook quadratic recurrence against the `O(n log n)` tails formulation while preserving correctness evidence and sequence reconstruction.
+This document records an **in-progress** phase, not a completeness claim. Knapsack and LIS are now implemented. The next ordered DP slice is edit distance, followed by interval DP and tree DP.
