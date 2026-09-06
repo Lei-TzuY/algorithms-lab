@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(algorithms_lab VERSION 0.1.0 LANGUAGES CXX)
+project(algorithms_lab VERSION 0.2.0 LANGUAGES CXX)
 
 option(ALGORITHMS_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 option(ALGORITHMS_BUILD_BENCHMARKS "Build the reproducible benchmark harness" ON)
@@ -26,9 +26,12 @@ function(algorithms_enable_sanitizers target)
 endfunction()
 
 add_library(algorithms_lab
+  src/greedy/interval_scheduling.cpp
   src/graphs/graph.cpp
   src/graphs/traversal.cpp
-  src/graphs/shortest_paths.cpp)
+  src/graphs/shortest_paths.cpp
+  src/graphs/minimum_spanning_tree.cpp
+  src/graphs/strongly_connected_components.cpp)
 
 target_include_directories(algorithms_lab PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 algorithms_enable_strict_warnings(algorithms_lab)
@@ -41,7 +44,8 @@ if(BUILD_TESTING)
     tests/test_searching_sorting.cpp
     tests/test_data_structures.cpp
     tests/test_graphs.cpp
-    tests/test_shortest_paths.cpp)
+    tests/test_shortest_paths.cpp
+    tests/test_phase2.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)
