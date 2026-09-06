@@ -23,17 +23,15 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - SCC condensation DAG integrated with the existing topological-sort capability.
 - Randomized Kruskal-vs-Prim and Tarjan-vs-Kosaraju differential/property verification.
 
-### Phase 3 — dynamic programming — in progress
+### Phase 3 — dynamic programming — sealed
 
-- 0/1 knapsack with explicit `dp[i][c]` state, deterministic reconstruction, zero-weight 0/1 items, and checked value overflow.
-- Unbounded knapsack with the contrasting same-row inclusion recurrence, explicit reconstruction counts, and strict positive-weight precondition.
-- Randomized 0/1 cases are checked against exhaustive subset enumeration; unbounded cases are checked against an independent capacity-recursion oracle.
-- Longest increasing subsequence is implemented twice: textbook `O(n^2)` ending-state DP and a first-principles `O(n log n)` tails/binary-search formulation, both with witness reconstruction.
-- LIS lengths are checked against exhaustive small-instance oracles and the two implementations are differentially compared on larger randomized inputs.
-- Levenshtein edit distance uses explicit prefix-state DP and returns a deterministic match/substitute/erase/insert script that can be applied back to the source.
-- Edit distance is checked against a separate two-row oracle plus symmetry, length-bound, and triangle-inequality properties.
+- 0/1 and unbounded knapsack with explicit capacity/item-prefix state, deterministic reconstruction, checked value arithmetic, and independent randomized oracles.
+- Longest increasing subsequence in both textbook `O(n^2)` ending-state DP and first-principles `O(n log n)` tails/binary-search form, both with witness reconstruction and exhaustive/differential verification.
+- Byte-oriented Levenshtein edit distance with deterministic executable edit-script reconstruction, an independent two-row oracle, and metric/property checks.
+- Matrix-chain interval DP with checked `uint64_t` cost arithmetic, deterministic split plans, exhaustive small-chain parenthesization comparison, and replayed reconstruction.
+- Tree DP for maximum-weight independent set on the existing undirected `Graph`, with strict tree validation, take/skip reconstruction, checked arithmetic, and exhaustive small-tree verification.
 
-Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), and the current DP state model in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
+Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), and Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
 ## Repository layout
 
@@ -87,11 +85,14 @@ Do not compare timings across machines or build modes without controlling the en
 - Dijkstra rejects the entire graph if any negative edge exists.
 - MST requires undirected input, supports disconnected graphs as forests, ignores self-loops, supports parallel/negative edges, and checks total-weight overflow.
 - SCC decomposition requires directed input; component IDs are not canonical labels.
-- Knapsack DP is deliberately `O(n * capacity)` in both time and table storage to keep the state transition and reconstruction explicit; this is pseudo-polynomial in the numeric capacity.
-- 0/1 knapsack permits zero-weight items; unbounded knapsack rejects every zero-weight item so the mathematical optimum/reconstruction remains well-defined.
+- Knapsack DP deliberately keeps full tables for visible recurrence/reconstruction and is pseudo-polynomial in numeric capacity.
+- 0/1 knapsack permits zero-weight items; unbounded knapsack requires strictly positive weights.
+- LIS is strictly increasing; equal values never extend a subsequence.
 - Edit distance is byte-oriented over `std::string_view`; operation kinds, not sentinel characters, distinguish insert/erase from embedded null bytes.
+- Matrix-chain costs are represented in `uint64_t`; overflowing parenthesizations are excluded while representable alternatives remain eligible.
+- Tree DP accepts only connected acyclic undirected simple graphs; edge weights are irrelevant to its vertex-weight objective.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1 and 2 are sealed. Phase 3 now covers state/reconstruction across knapsack, LIS, and edit distance. The next ordered Phase-3 frontier is **interval DP**, followed by tree DP. The repository does not claim completeness.
+Phases 1–3 are sealed. The active frontier is **Phase 4: range-query and structural data structures**, beginning with a first-principles Fenwick tree before progressing to segment trees, sparse tables, tries, and advanced DSU variants. The repository does not claim completeness.
