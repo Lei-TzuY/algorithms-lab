@@ -30,6 +30,7 @@ add_library(algorithms_lab
   src/dynamic_programming/knapsack.cpp
   src/dynamic_programming/longest_increasing_subsequence.cpp
   src/dynamic_programming/matrix_chain.cpp
+  src/dynamic_programming/tree_independent_set.cpp
   src/greedy/interval_scheduling.cpp
   src/graphs/graph.cpp
   src/graphs/traversal.cpp
@@ -53,7 +54,8 @@ if(BUILD_TESTING)
     tests/test_knapsack.cpp
     tests/test_lis.cpp
     tests/test_edit_distance.cpp
-    tests/test_matrix_chain.cpp)
+    tests/test_matrix_chain.cpp
+    tests/test_tree_independent_set.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)

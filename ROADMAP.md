@@ -16,13 +16,13 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Strongly connected components: Tarjan and Kosaraju with partition/reachability verification
 - [x] Advanced graph traversal integration: SCC condensation DAG verified through Phase-1 topological sort
 
-## Phase 3 — dynamic programming — IN PROGRESS
+## Phase 3 — dynamic programming — IMPLEMENTATION COMPLETE; SEALING AUDIT PENDING
 
 - [x] 0/1 and unbounded knapsack with reconstruction and independent randomized oracles
 - [x] Longest increasing subsequence with quadratic-vs-nlogn differential verification and reconstruction
 - [x] Edit distance with deterministic edit-script reconstruction and metric/property verification
 - [x] Interval DP: matrix-chain multiplication with reconstructable split plans and exhaustive small-instance verification
-- [ ] Tree DP
+- [x] Tree DP: maximum-weight independent set with take/skip reconstruction and exhaustive small-tree verification
 
 ## Phase 4 — range-query and structural data structures
 
