@@ -31,7 +31,7 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - Matrix-chain interval DP with checked `uint64_t` cost arithmetic, deterministic split plans, exhaustive small-chain parenthesization comparison, and replayed reconstruction.
 - Tree DP for maximum-weight independent set on the existing undirected `Graph`, with strict tree validation, take/skip reconstruction, checked arithmetic, and exhaustive small-tree verification.
 
-### Phase 4 — range-query and structural data structures — implementation complete; sealing audit pending
+### Phase 4 — range-query and structural data structures — sealed
 
 - Fenwick tree with first-principles binary-indexed decomposition, zero-based point updates, half-open prefix/range queries, checked arithmetic, transactional overflow behavior, and randomized naïve-array differential verification.
 - Segment tree with bottom-up explicit interval hierarchy, point assignment, half-open range sums, transactional ancestor-path recomputation, checked node/query arithmetic, and randomized Fenwick/naïve cross-structure verification.
@@ -108,4 +108,4 @@ Do not compare timings across machines or build modes without controlling the en
 
 ## Current frontier
 
-Phases 1–3 are sealed. Phase 4 implementation is complete but not yet sealed; its architecture/correctness audit is the next gate. Phase 5 is not promoted until that audit and exact merged-main CI are clean. The repository does not claim completeness.
+Phases 1–4 are sealed. Phase 5 is the active frontier, beginning with **KMP** before Z-function, rolling hash, and suffix-array work. The repository does not claim completeness.
