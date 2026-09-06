@@ -46,7 +46,13 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - Double-modular rolling hash with immutable substring fingerprints, arbitrary-byte semantics, O(1) extraction, direct-polynomial randomized verification, and explicit collision/non-cryptographic limits.
 - Suffix array with prefix doubling, inverse suffix ranks, Kasai adjacent-LCP reconstruction, unsigned-byte ordering, and randomized raw-suffix/LCP differential verification.
 
-Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), and Phase 5 in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
+### Phase 6 — advanced graph/offline algorithms — active
+
+- Dinic max flow on directed multigraphs with explicit residual pairs, checked `int64_t` capacity arithmetic, per-original-edge realized flow, and residual source-side min-cut witness.
+- Max-flow/min-cut equality is executable evidence: the returned cut capacity must equal the returned flow value before the result is exposed.
+- Fixed-seed randomized graphs are checked against an independent Edmonds-Karp oracle and exhaustive cut enumeration, then replayed for capacity and conservation invariants.
+
+Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), Phase 5 in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md), and the active Phase 6 proof obligations in [`docs/phase6_advanced_graph_offline.md`](docs/phase6_advanced_graph_offline.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
 ## Repository layout
 
@@ -115,8 +121,10 @@ Do not compare timings across machines or build modes without controlling the en
 - Z-function operates on arbitrary bytes, defines `z[0] = n` for non-empty input, and exposes prefix-LCP state rather than delimiter-based matching.
 - Rolling hash uses fixed public non-cryptographic parameters; equal fingerprints are only a collision-prone candidate filter and must not be treated as proof of byte equality. No numeric collision-probability claim is made without an input/adversary model.
 - Suffix-array ordering uses unsigned byte values, excludes a synthetic empty suffix, and the prefix-doubling implementation intentionally claims `O(n log^2 n)` rather than radix/counting-sort complexity it does not implement.
+- Max flow is defined on directed capacity edges with non-negative `int64_t` capacities; parallel and antiparallel edges are independent, self-loops return canonical zero flow, and an unrepresentable total flow is rejected rather than wrapped.
+- Dinic claims the general `O(V^2 E)` bound; the blocking-flow DFS is recursive and can use `O(V)` call stack on a deep level graph.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1–5 are sealed. Phase 6 is the active frontier, beginning with **max flow / min cut**; later ordered slices are bipartite matching, lowest common ancestor, and offline algorithms. The repository does not claim completeness.
+Phases 1–5 are sealed. Phase 6 is active: max flow / min cut is the first executable slice, followed by bipartite matching, lowest common ancestor, and offline algorithms. The repository does not claim completeness.
