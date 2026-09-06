@@ -2,27 +2,35 @@
 
 A systematic rebuild of core algorithms and data-structure foundations in modern C++20.
 
-This repository is **not** a LeetCode dump, competitive-programming archive, or solution-count project. The goal is to make a small set of foundational techniques explainable, testable, and verifiably correct before expanding breadth.
+This repository is **not** a LeetCode dump, competitive-programming archive, or solution-count project. The goal is to make a deliberately bounded set of techniques explainable, testable, reusable, and verifiably correct before expanding breadth.
 
-## Milestone 1: foundations + graph-search vertical slice
+## Verified capability checkpoints
 
-Implemented in this checkpoint:
+### Phase 1 — foundations and graph search
 
-- Searching: binary search returning the first equivalent index.
-- Sorting: stable merge sort; median-of-three, three-way quicksort.
-- Data structures: binary heap / priority queue from first principles; disjoint-set union with path compression and union by size.
-- Graph model: directed or undirected adjacency lists, weighted edges, deterministic insertion-order iteration, explicit vertex validation, self-loops and parallel edges.
-- Traversal: BFS, DFS, shortest unweighted path reconstruction, reachability, undirected connected components, directed/undirected cycle detection, DAG topological sort.
-- Weighted shortest paths: Dijkstra for globally non-negative graphs and Bellman-Ford with reachable negative-cycle detection.
-- Verification: deterministic edge cases, adversarial shapes, fixed-seed randomized tests, sorting/heap reference checks, and Dijkstra-vs-Bellman-Ford differential testing.
+- Binary search; stable merge sort; median-of-three three-way quicksort.
+- First-principles binary heap / priority queue and DSU with path compression + union by size.
+- Directed/undirected weighted graph representation with deterministic insertion-order adjacency, validation, self-loops, and parallel edges.
+- BFS, DFS, unweighted path reconstruction, reachability/components, cycle detection, DAG topological sort.
+- Dijkstra and Bellman-Ford with fixed-seed randomized differential verification.
 
-The important invariants and proof sketches live in [`docs/invariants.md`](docs/invariants.md). The future sequence is in [`ROADMAP.md`](ROADMAP.md); later phases are intentionally not implemented yet.
+### Phase 2 — greedy reasoning and deeper graph structure
+
+- Maximum-cardinality interval scheduling by earliest finish time, checked against exhaustive small-instance oracles.
+- Kruskal minimum spanning forest using the lab DSU.
+- Prim minimum spanning forest using the lab binary heap.
+- Directed SCC decomposition with independently implemented Tarjan and Kosaraju algorithms.
+- SCC condensation DAG integrated with the existing topological-sort capability.
+- Randomized Kruskal-vs-Prim and Tarjan-vs-Kosaraju differential/property verification.
+
+Correctness notes for the original foundations live in [`docs/invariants.md`](docs/invariants.md). Phase-2 proof obligations and comparison boundaries are documented in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md). The ordered future sequence is in [`ROADMAP.md`](ROADMAP.md).
 
 ## Repository layout
 
 ```text
 include/algorithms/       public APIs and template implementations
-src/graphs/               graph/traversal/shortest-path implementations
+src/greedy/               greedy algorithm implementations
+src/graphs/               graph/traversal/path/structure implementations
 tests/                    deterministic, adversarial, randomized, differential tests
 benchmarks/               fixed-seed micro-benchmark harness
 examples/                 small usage examples
@@ -52,7 +60,7 @@ ctest --test-dir build-asan --output-on-failure
 
 ## Benchmark harness
 
-The benchmark executable uses a fixed seed and reports wall-clock microseconds for selected operations. It is evidence for experiments, **not** a substitute for asymptotic analysis or correctness tests.
+The benchmark executable uses a fixed seed and reports wall-clock microseconds for selected operations. It is experimental evidence, **not** a substitute for asymptotic analysis or correctness tests.
 
 ```bash
 ./build/algorithms_benchmark
@@ -63,12 +71,13 @@ Do not compare timings across machines or build modes without controlling the en
 ## Design constraints
 
 - C++20 is the primary language.
-- Standard containers are allowed as storage/oracles in tests, but `std::sort`, `std::priority_queue`, or a library DSU are not used as the demonstrated implementations.
-- Dijkstra rejects the entire input graph if any negative edge exists, even if that edge is unreachable from the selected source.
-- Bellman-Ford reports whether a negative cycle is reachable from the source; it does not yet return an explicit negative-cycle witness.
+- Standard containers and library algorithms may support an implementation when they are not the subject being demonstrated; tests may use independent library/oracle formulations.
+- Demonstrated heap/DSU/sorting logic remains first-principles rather than hidden behind library equivalents.
+- Dijkstra rejects the entire graph if any negative edge exists.
+- MST requires undirected input, supports disconnected graphs as forests, ignores self-loops, supports parallel/negative edges, and checks total-weight overflow.
+- SCC decomposition requires directed input; component IDs are not canonical labels.
 - Graph vertex IDs are dense integers in `[0, V)`.
-- Insertion order determines adjacency iteration; no canonical sorting of neighbors is imposed.
 
-## Current scope
+## Current frontier
 
-Milestone 1 deliberately stops after the first shortest-path comparison. It does **not** claim algorithmic completeness. MST, SCC, dynamic programming, range-query structures, string algorithms, flows, geometry, and number theory belong to later reviewed phases.
+Phases 1 and 2 establish the reusable foundations, shortest-path comparison, greedy proof pattern, minimum-spanning-forest comparison, SCC decomposition, and condensation integration. The next roadmap frontier is **Phase 3: dynamic programming**. The repository does not claim completeness.
