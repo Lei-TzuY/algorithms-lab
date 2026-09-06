@@ -111,6 +111,14 @@ Deterministic tests cover nested snapshots, full rollback, redundant/self unions
 
 Fixed-seed randomized traces compare the DSU against a structurally independent graph oracle. The oracle stores only currently active successful-union edges; after unions or rollbacks it rebuilds connected components by graph traversal, then checks component count, every vertex's component size, and all-pairs connectivity against the rollback DSU.
 
+## Sealing audit
+
+Phase 4 is sealed around five deliberately different structural-state models: Fenwick's mutable prefix decomposition, segment-tree hierarchical range summaries, immutable sparse-table RMQ preprocessing, byte-trie prefix-key multiplicity, and rollback-DSU reversible partitions. Each slice has executable behavior, explicit invariants, boundary semantics, deterministic regressions, and an independent or cross-structure randomized verification surface.
+
+The phase is intentionally bounded rather than a completeness claim. Lazy segment-tree propagation, generic sparse-table operators, compressed/deleting tries, persistent DSU variants, and other structure families remain future architectural extensions only if a later use case justifies them; they are not required to seal this learning checkpoint.
+
+The final Rollback-DSU candidate and its exact merged-main integration both passed the repository's GCC Release, Clang Release, and GCC ASan+UBSan gates. No unresolved Phase-4 correctness or integration blocker remained in the sealing audit.
+
 ## Frontier
 
-All ordered Phase-4 implementation slices are represented. The next action is an architecture/correctness sealing audit; Phase 5 must not be promoted until the exact Rollback-DSU candidate and merged-main CI both pass and that audit finds no unresolved Phase-4 integration blocker.
+Phase 4 is sealed. Phase 5 string algorithms are now the active frontier, beginning with KMP so the next slice introduces failure-function state and overlap-aware pattern matching rather than extending Phase-4 variants.

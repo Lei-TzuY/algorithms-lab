@@ -24,7 +24,7 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Interval DP: matrix-chain multiplication with reconstructable split plans and exhaustive small-instance verification
 - [x] Tree DP: maximum-weight independent set with take/skip reconstruction and exhaustive small-tree verification
 
-## Phase 4 — range-query and structural data structures — IMPLEMENTATION COMPLETE; SEALING AUDIT PENDING
+## Phase 4 — range-query and structural data structures — SEALED
 
 - [x] Fenwick tree with transactional checked updates and randomized naïve-array differential verification
 - [x] Segment tree with transactional point assignment and Fenwick/naïve cross-structure differential verification
@@ -32,7 +32,7 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Byte trie with multiset prefix counts and randomized map/prefix-scan differential verification
 - [x] Rollback DSU with reversible snapshots and randomized rebuilt-graph differential verification
 
-## Phase 5 — string algorithms
+## Phase 5 — string algorithms — ACTIVE FRONTIER
 
 - [ ] KMP
 - [ ] Z-function
