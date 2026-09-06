@@ -6,7 +6,7 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 
 ## Verified capability checkpoints
 
-### Phase 1 — foundations and graph search
+### Phase 1 — foundations and graph search — sealed
 
 - Binary search; stable merge sort; median-of-three three-way quicksort.
 - First-principles binary heap / priority queue and DSU with path compression + union by size.
@@ -14,7 +14,7 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - BFS, DFS, unweighted path reconstruction, reachability/components, cycle detection, DAG topological sort.
 - Dijkstra and Bellman-Ford with fixed-seed randomized differential verification.
 
-### Phase 2 — greedy reasoning and deeper graph structure
+### Phase 2 — greedy reasoning and deeper graph structure — sealed
 
 - Maximum-cardinality interval scheduling by earliest finish time, checked against exhaustive small-instance oracles.
 - Kruskal minimum spanning forest using the lab DSU.
@@ -23,12 +23,19 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - SCC condensation DAG integrated with the existing topological-sort capability.
 - Randomized Kruskal-vs-Prim and Tarjan-vs-Kosaraju differential/property verification.
 
-Correctness notes for the original foundations live in [`docs/invariants.md`](docs/invariants.md). Phase-2 proof obligations and comparison boundaries are documented in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md). The ordered future sequence is in [`ROADMAP.md`](ROADMAP.md).
+### Phase 3 — dynamic programming — in progress
+
+- 0/1 knapsack with explicit `dp[i][c]` state, deterministic reconstruction, zero-weight 0/1 items, and checked value overflow.
+- Unbounded knapsack with the contrasting same-row inclusion recurrence, explicit reconstruction counts, and strict positive-weight precondition.
+- Randomized 0/1 cases are checked against exhaustive subset enumeration; unbounded cases are checked against an independent capacity-recursion oracle.
+
+Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), and the current DP state model in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
 ## Repository layout
 
 ```text
 include/algorithms/       public APIs and template implementations
+src/dynamic_programming/  dynamic-programming implementations
 src/greedy/               greedy algorithm implementations
 src/graphs/               graph/traversal/path/structure implementations
 tests/                    deterministic, adversarial, randomized, differential tests
@@ -76,8 +83,10 @@ Do not compare timings across machines or build modes without controlling the en
 - Dijkstra rejects the entire graph if any negative edge exists.
 - MST requires undirected input, supports disconnected graphs as forests, ignores self-loops, supports parallel/negative edges, and checks total-weight overflow.
 - SCC decomposition requires directed input; component IDs are not canonical labels.
+- Knapsack DP is deliberately `O(n * capacity)` in both time and table storage to keep the state transition and reconstruction explicit; this is pseudo-polynomial in the numeric capacity.
+- 0/1 knapsack permits zero-weight items; unbounded knapsack rejects every zero-weight item so the mathematical optimum/reconstruction remains well-defined.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1 and 2 establish the reusable foundations, shortest-path comparison, greedy proof pattern, minimum-spanning-forest comparison, SCC decomposition, and condensation integration. The next roadmap frontier is **Phase 3: dynamic programming**. The repository does not claim completeness.
+Phases 1 and 2 are sealed. Phase 3 has established its first reusable DP state/reconstruction slice with 0/1 and unbounded knapsack. The next ordered Phase-3 frontier is **longest increasing subsequence**, followed by edit distance, interval DP, and tree DP. The repository does not claim completeness.
