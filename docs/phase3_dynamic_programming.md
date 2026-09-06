@@ -138,6 +138,19 @@ State additions use checked `int64_t` arithmetic. If a state exceeds the represe
 
 Deterministic tests cover empty/single/all-negative trees, tie behavior, a known reconstructed optimum, root validation, all non-tree input classes, ignored edge weights, and overflow. Fixed-seed random trees with up to 12 vertices are checked against exhaustive subset enumeration, and every reconstructed set is independently rechecked for uniqueness, independence, and total weight.
 
+## Phase-3 sealing audit
+
+The sealing audit reviewed all five Phase-3 surfaces after their exact merged-main CI gates passed under GCC Release, Clang Release, and GCC ASan+UBSan.
+
+- **State coverage:** item-prefix/capacity DP, ending-state vs tails DP, two-dimensional string-prefix DP, interval DP, and rooted-tree DP are materially different recurrence families rather than near-identical variants.
+- **Reconstruction:** every production slice returns a witness or decision structure: item choices/counts, LIS indices, edit operations, matrix-chain split plans, or independent-set vertices.
+- **Independent evidence:** small-state exhaustive or structurally independent oracles are used where practical; related formulations are differentially compared where that teaches an important boundary.
+- **Arithmetic/input boundaries:** table dimensions, signed objective values, matrix costs, graph shape, zero-weight semantics, and byte/string semantics have explicit checked behavior or preconditions.
+- **Integration:** tree DP reuses the Phase-1 graph abstraction; interval and edit reconstruction are independently replayable rather than trusted merely because they came from the same DP table.
+- **Scope discipline:** Phase 3 does not claim arbitrary DP completeness, memory-optimal variants, Unicode edit semantics, or unbounded numeric precision.
+
+No unresolved correctness or integration blocker remained at the audit checkpoint. Phase 3 is therefore sealed as a bounded foundations checkpoint rather than expanded with low-value DP variants.
+
 ## Frontier
 
-All ordered Phase-3 implementation slices are now represented: knapsack, LIS, edit distance, interval DP, and tree DP. After the exact tree-DP candidate passes integration CI on main, the next action is a Phase-3 architecture/correctness audit and seal before promotion to Phase 4.
+Phase 3 is sealed. The active roadmap frontier is Phase 4 — range-query and structural data structures — beginning with a first-principles Fenwick tree.
