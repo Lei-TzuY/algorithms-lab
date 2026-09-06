@@ -56,8 +56,22 @@ Construction is `O(n)` time and storage. `fingerprint(begin,end)` is `O(1)` and 
 
 Deterministic tests cover empty/range behavior, equal substrings at different positions, snapshot immutability, embedded nulls, and high-bit bytes. Five hundred fixed-seed arbitrary-byte strings execute eighty random substring queries each; every production fingerprint is compared against an independent direct polynomial evaluation over that substring, which does not use prefix extraction.
 
+## Suffix array — deterministic global suffix order
+
+The suffix array orders every non-empty suffix start `0..n-1` lexicographically. Bytes are promoted through `unsigned char`, so the order is platform-independent even where plain `char` is signed. The empty input has empty order/rank/LCP vectors; no synthetic empty suffix is inserted.
+
+The implementation starts with one-byte equivalence classes in `1..256`, reserving class `0` for an implicit end-of-string sentinel. In a doubling round with span `k`, a suffix is keyed by the pair `(rank[i], rank[i+k])`, using sentinel zero when the second half extends beyond the input. If the current ranks correctly order prefixes of length `k`, sorting these pairs correctly orders prefixes of length `2k`; assigning equal pairs the same new class establishes the invariant for the next round. Once all classes are distinct, the full suffix order is fixed.
+
+This checkpoint deliberately uses `std::sort` for rank-pair ordering because comparison sorting is not the algorithmic subject here and the repository already implements sorting fundamentals separately. Consequently the stated construction bound is **`O(n log^2 n)`**, not an unearned `O(n log n)` radix/counting-sort claim. Working storage is `O(n)`.
+
+`rank[start]` is the exact inverse permutation of the suffix array. Kasai's algorithm then computes adjacent LCP values in linear time: `lcp[0] = 0`, while `lcp[k]` is the common-prefix length of suffixes `order[k-1]` and `order[k]`. When moving from suffix `i` to `i+1`, a previously known common prefix can shrink by at most one before extension, so the carried `shared` length makes the full LCP pass `O(n)`.
+
+### Suffix-array verification
+
+Deterministic tests cover empty/singleton inputs, `banana`, all-equal suffix nesting, embedded null bytes, and unsigned high-bit ordering. Five hundred fixed-seed arbitrary-byte strings up to length 60 are compared against an independent raw-suffix lexicographic sort and direct adjacent LCP scan. Additional invariants require the order to be a permutation, `rank[order[k]] == k`, every adjacent suffix pair to be strictly increasing, and every reported LCP to equal a byte-by-byte direct count.
+
 ## Scope boundary and frontier
 
-KMP supplies deterministic exact matching, Z-function supplies deterministic prefix-LCP reuse, and rolling hash supplies constant-time collision-prone substring fingerprints after preprocessing. Their verification oracles remain structurally independent.
+KMP supplies deterministic exact matching, Z-function supplies deterministic prefix-LCP reuse, rolling hash supplies collision-prone O(1) substring candidate fingerprints, and the suffix array supplies deterministic global suffix ordering with adjacent LCP state. Their primary verification oracles remain structurally independent.
 
-The next ordered Phase-5 frontier is suffix array and related deterministic structures. Rolling-hash equality must never be promoted into an exact-match or cryptographic guarantee in later integration.
+All ordered Phase-5 implementation slices are now represented. The next action is an architecture/correctness sealing audit after the exact suffix-array candidate and merged-main CI are clean; Phase 6 must not be promoted before that audit.
