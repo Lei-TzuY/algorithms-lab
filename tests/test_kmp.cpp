@@ -127,8 +127,8 @@ TEST_CASE(kmp_matches_independent_naive_oracles_randomized) {
       REQUIRE(actual[index] <= text.size());
       if (!pattern.empty()) {
         REQUIRE(actual[index] <= text.size() - pattern.size());
-        REQUIRE(std::equal(pattern.begin(), pattern.end(),
-                           text.begin() + actual[index]));
+        REQUIRE(std::string_view{text}.substr(actual[index], pattern.size()) ==
+                std::string_view{pattern});
       }
     }
   }
