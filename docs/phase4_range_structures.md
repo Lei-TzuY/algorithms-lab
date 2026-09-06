@@ -57,6 +57,24 @@ Fixed-seed randomized traces maintain three independent views simultaneously: th
 
 Fenwick trees are compact and naturally express invertible prefix aggregates with point deltas. Segment trees spend a larger constant-factor hierarchy to make arbitrary canonical intervals explicit and are the structural foundation for later non-prefix monoids, richer queries, and lazy propagation. This checkpoint intentionally stops at point assignment + range sum; adding lazy range updates is a future architectural extension, not a near-duplicate API added for count.
 
+## Sparse table — immutable range minimum
+
+The sparse-table slice changes the update/query tradeoff rather than adding a third mutable range-sum structure. It snapshots an input array and precomputes minima for every power-of-two interval length.
+
+Level `k` stores one `Entry{value,index}` for each valid interval of length `2^k`. The base level stores individual elements. Each higher entry combines the two adjacent half-length entries from the previous level, choosing the smaller value and, on equal values, the smaller input index.
+
+**Preprocessing invariant.** After level `k` is built, `levels[k][i]` is the minimum value in `[i, i + 2^k)` and its leftmost occurrence in that interval. The recurrence is correct because the interval is exactly the union of its two `2^(k-1)` halves.
+
+For a non-empty query `[begin,end)`, let `k = floor(log2(end-begin))` and `span = 2^k`. The intervals `[begin, begin+span)` and `[end-span, end)` together cover the requested range and may overlap. Taking the better of their stored entries is still exact because minimum is **idempotent**: seeing an overlapping element twice cannot change the minimum or the leftmost tie-break.
+
+The query API therefore returns both the minimum value and its deterministic leftmost argmin index. Empty ranges are intentionally rejected: unlike sum, minimum has no natural identity value in the signed-64-bit domain exposed by this API. The structure is immutable after construction, so later changes to the caller's input vector cannot affect the snapshot.
+
+### Sparse-table complexity and verification
+
+Preprocessing uses `O(n log n)` time and storage. The precomputed floor-log table makes each non-empty RMQ `O(1)` with two table reads and one deterministic comparison.
+
+Deterministic tests cover all subranges of a known array, duplicate minima/tie behavior, empty and invalid ranges, signed extrema, and snapshot immutability. Fixed-seed randomized arrays are exhaustively checked over every non-empty subrange against a structurally independent linear scan that computes both minimum value and leftmost argmin.
+
 ## Frontier
 
-Fenwick tree and segment tree establish the mutable range-query comparison. Sparse table is next to introduce the contrasting immutable/preprocessed query regime before Phase 4 moves into tries and advanced DSU variants.
+Fenwick and segment trees establish mutable range-query decompositions; sparse table adds the contrasting immutable/preprocessed `O(1)` RMQ regime. Tries are next, moving Phase 4 from numeric index ranges to prefix-structured keys before advanced DSU variants close the structural-data-structure phase.
