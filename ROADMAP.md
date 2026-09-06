@@ -29,7 +29,7 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Fenwick tree with transactional checked updates and randomized naïve-array differential verification
 - [x] Segment tree with transactional point assignment and Fenwick/naïve cross-structure differential verification
 - [x] Sparse table with immutable O(1) RMQ, deterministic argmin, and exhaustive randomized naïve verification
-- [ ] Tries
+- [x] Byte trie with multiset prefix counts and randomized map/prefix-scan differential verification
 - [ ] Advanced DSU variants
 
 ## Phase 5 — string algorithms

@@ -75,6 +75,24 @@ Preprocessing uses `O(n log n)` time and storage. The precomputed floor-log tabl
 
 Deterministic tests cover all subranges of a known array, duplicate minima/tie behavior, empty and invalid ranges, signed extrema, and snapshot immutability. Fixed-seed randomized arrays are exhaustively checked over every non-empty subrange against a structurally independent linear scan that computes both minimum value and leftmost argmin.
 
+## Byte trie — prefix-structured multiset
+
+The trie moves Phase 4 from numeric index intervals to byte-string prefixes. Keys are arbitrary byte sequences rather than null-terminated text: empty strings, embedded null bytes, and bytes with the high bit set are all valid.
+
+Each node owns a fixed 256-way child-index table plus two multiplicities. `terminal_count` is the number of inserted keys ending exactly at that node. `subtree_count` is the total inserted multiplicity whose key has that node's prefix.
+
+**Node invariant.** `subtree_count = terminal_count + sum(child.subtree_count)`. The root represents the empty prefix, so its subtree count is the total number of insertions including duplicates. Inserting a key creates only the missing suffix, then increments the root and every node on the key path exactly once before incrementing the terminal multiplicity.
+
+Traversal converts `char` through `unsigned char` before indexing the 256-way table, so platforms with signed `char` cannot turn bytes such as `0xFF` into invalid negative alphabet indices. Duplicate keys deliberately remain duplicates; this is a multiset trie rather than a set wrapper.
+
+Before publishing a missing suffix, insertion reserves all required node storage and checks all existing path counters that must increment. This keeps allocation/counter failure from exposing a partially counted key path.
+
+### Trie complexity and verification
+
+For key length `L`, insertion, exact count, membership, and prefix count take `O(L)` time. The dense byte alphabet trades larger per-node storage for direct deterministic child lookup; this is an explicit representation choice rather than a claim of memory optimality.
+
+Deterministic tests cover empty keys, duplicate multiplicity, nested prefixes, embedded null bytes, and `0x80`/`0xFF` bytes. Fixed-seed randomized traces compare exact counts and prefix multiplicities against an independent `std::map<std::string,count>` model plus a linear prefix scan.
+
 ## Frontier
 
-Fenwick and segment trees establish mutable range-query decompositions; sparse table adds the contrasting immutable/preprocessed `O(1)` RMQ regime. Tries are next, moving Phase 4 from numeric index ranges to prefix-structured keys before advanced DSU variants close the structural-data-structure phase.
+Fenwick/segment trees, sparse-table RMQ, and the byte trie now cover mutable numeric ranges, immutable preprocessed ranges, and prefix-structured keys. Advanced DSU variants are the final ordered Phase-4 frontier before the phase sealing audit.
