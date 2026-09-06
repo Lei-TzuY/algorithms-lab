@@ -101,6 +101,24 @@ Define `dp[i][j]` as the minimum cost to transform the source prefix `source[0,i
 
 Deterministic cases cover empty and identical strings, insertion-only and erase-only paths, classic `kitten -> sitting` and `flaw -> lawn`, deterministic substitution ties, and embedded null bytes. Fixed-seed random pairs are checked against the two-row oracle, symmetry `d(a,b) = d(b,a)`, the length-gap lower bound, and the maximum-length upper bound. Random triples additionally verify the triangle inequality. Every returned script is applied to the original byte sequence and must reproduce the target exactly with a non-match operation count equal to the reported distance.
 
+## Matrix-chain interval DP
+
+A dimension vector `p` describes matrices `A_i` with shape `p[i] x p[i+1]`. Every supplied dimension must be strictly positive. Empty or one-element dimension vectors represent an empty chain, and a two-element vector represents a single matrix with multiplication cost zero.
+
+For matrix interval `[i,j]`, define `cost[i][j]` as the minimum representable number of scalar multiplications needed to evaluate `A_i ... A_j`. A leaf has cost zero. For every split `k` with `i <= k < j`, the recurrence considers
+
+`cost[i][k] + cost[k+1][j] + p[i] * p[k+1] * p[j+1]`.
+
+**Invariant.** Every full parenthesization of a non-leaf matrix interval has exactly one root split `k`. Its left and right children are smaller contiguous intervals that have already been considered when intervals are processed by increasing length. Taking the minimum over all representable root splits is therefore optimal among representable costs.
+
+All multiplication and addition used to form a candidate cost is checked in `uint64_t`. An overflowing candidate split is skipped because a different parenthesization may still have a representable optimum. A subinterval with no representable parenthesization remains unavailable rather than aborting the whole DP, because an optimal full-chain tree may never form that subinterval. The solver throws `std::overflow_error` only when the full chain itself has no representable parenthesization. Equal-cost candidates retain the leftmost split for deterministic reconstruction.
+
+The returned split records are preorder over interval nodes: each record contains the interval endpoints and its chosen split, followed by the left and right subplans. This makes the DP decision tree independently executable rather than returning only a scalar optimum.
+
+**Complexity.** There are `O(n^2)` intervals and up to `O(n)` root splits per interval, so time is `O(n^3)` and table storage is `O(n^2)`.
+
+Deterministic tests cover empty/single chains, invalid zero dimensions, the classical CLRS matrix-chain instance, deterministic equal-cost ties, representability boundaries, and the case where an intermediate split/subinterval overflows while another full-chain parenthesization remains valid. Fixed-seed small random chains are compared against exhaustive enumeration of all parenthesizations, and every returned preorder plan is replayed independently to recompute dimensions and total cost.
+
 ## Frontier
 
-This document records an **in-progress** phase, not a completeness claim. Knapsack, LIS, and edit distance are now implemented. The next ordered DP slice is interval DP, followed by tree DP.
+This document records an **in-progress** phase, not a completeness claim. Knapsack, LIS, edit distance, and interval DP are now implemented. Tree DP is the final ordered Phase-3 slice before a sealing audit and promotion to Phase 4.
