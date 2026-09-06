@@ -119,6 +119,25 @@ The returned split records are preorder over interval nodes: each record contain
 
 Deterministic tests cover empty/single chains, invalid zero dimensions, the classical CLRS matrix-chain instance, deterministic equal-cost ties, representability boundaries, and the case where an intermediate split/subinterval overflows while another full-chain parenthesization remains valid. Fixed-seed small random chains are compared against exhaustive enumeration of all parenthesizations, and every returned preorder plan is replayed independently to recompute dimensions and total cost.
 
+## Tree DP — maximum-weight independent set
+
+This slice reuses the repository's existing undirected `Graph` abstraction. Edge weights are intentionally irrelevant: a separate signed 64-bit vertex-weight vector defines the objective. The graph must be a connected, acyclic, undirected simple tree; directed graphs, disconnected graphs, cycles, self-loops, parallel edges, and mismatched weight vectors are rejected before DP.
+
+An arbitrary root orients the tree. For every vertex `v`:
+
+- `take[v] = weight[v] + sum(skip[child])`
+- `skip[v] = sum(max(take[child], skip[child]))`
+
+**Invariant.** If `v` is selected, none of its children may be selected, so each child contributes its `skip` state. If `v` is not selected, child subtrees are independent and each may take its better state. Processing vertices in reverse rooted traversal order solves every child before its parent.
+
+The empty independent set is valid, so negative vertex weights do not force a negative optimum. Reconstruction walks parent-before-child: a vertex is selected exactly when its parent is not selected and `take[v] > skip[v]`; equal states deterministically choose skip. Returned vertex IDs are normalized in increasing order. The chosen root can change which tied optimum is reconstructed but cannot change the optimum weight.
+
+State additions use checked `int64_t` arithmetic. If a state exceeds the representable range, it already describes a feasible independent set whose mathematical weight is out of range, so the solver reports `std::overflow_error` rather than silently wrapping.
+
+**Complexity.** Tree validation/rooting, bottom-up DP, and reconstruction each take `O(V + E)` time; auxiliary state is `O(V)`.
+
+Deterministic tests cover empty/single/all-negative trees, tie behavior, a known reconstructed optimum, root validation, all non-tree input classes, ignored edge weights, and overflow. Fixed-seed random trees with up to 12 vertices are checked against exhaustive subset enumeration, and every reconstructed set is independently rechecked for uniqueness, independence, and total weight.
+
 ## Frontier
 
-This document records an **in-progress** phase, not a completeness claim. Knapsack, LIS, edit distance, and interval DP are now implemented. Tree DP is the final ordered Phase-3 slice before a sealing audit and promotion to Phase 4.
+All ordered Phase-3 implementation slices are now represented: knapsack, LIS, edit distance, interval DP, and tree DP. After the exact tree-DP candidate passes integration CI on main, the next action is a Phase-3 architecture/correctness audit and seal before promotion to Phase 4.
