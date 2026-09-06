@@ -1,0 +1,64 @@
+cmake_minimum_required(VERSION 3.20)
+project(algorithms_lab VERSION 0.1.0 LANGUAGES CXX)
+
+option(ALGORITHMS_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+option(ALGORITHMS_BUILD_BENCHMARKS "Build the reproducible benchmark harness" ON)
+option(ALGORITHMS_BUILD_EXAMPLES "Build examples" ON)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+function(algorithms_enable_strict_warnings target)
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /W4 /WX)
+  else()
+    target_compile_options(${target} PRIVATE
+      -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wshadow -Werror)
+  endif()
+endfunction()
+
+function(algorithms_enable_sanitizers target)
+  if(ALGORITHMS_ENABLE_SANITIZERS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(${target} PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
+    target_link_options(${target} PRIVATE -fsanitize=address,undefined)
+  endif()
+endfunction()
+
+add_library(algorithms_lab
+  src/graphs/graph.cpp
+  src/graphs/traversal.cpp
+  src/graphs/shortest_paths.cpp)
+
+target_include_directories(algorithms_lab PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+algorithms_enable_strict_warnings(algorithms_lab)
+algorithms_enable_sanitizers(algorithms_lab)
+
+include(CTest)
+if(BUILD_TESTING)
+  add_executable(algorithms_tests
+    tests/test_main.cpp
+    tests/test_searching_sorting.cpp
+    tests/test_data_structures.cpp
+    tests/test_graphs.cpp
+    tests/test_shortest_paths.cpp)
+  target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+  target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
+  algorithms_enable_strict_warnings(algorithms_tests)
+  algorithms_enable_sanitizers(algorithms_tests)
+  add_test(NAME algorithms_tests COMMAND algorithms_tests)
+endif()
+
+if(ALGORITHMS_BUILD_BENCHMARKS)
+  add_executable(algorithms_benchmark benchmarks/benchmark_main.cpp)
+  target_link_libraries(algorithms_benchmark PRIVATE algorithms_lab)
+  algorithms_enable_strict_warnings(algorithms_benchmark)
+  algorithms_enable_sanitizers(algorithms_benchmark)
+endif()
+
+if(ALGORITHMS_BUILD_EXAMPLES)
+  add_executable(graph_search_demo examples/graph_search_demo.cpp)
+  target_link_libraries(graph_search_demo PRIVATE algorithms_lab)
+  algorithms_enable_strict_warnings(graph_search_demo)
+  algorithms_enable_sanitizers(graph_search_demo)
+endif()
