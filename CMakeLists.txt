@@ -63,7 +63,8 @@ if(BUILD_TESTING)
     tests/test_rollback_dsu.cpp
     tests/test_kmp.cpp
     tests/test_z_function.cpp
-    tests/test_rolling_hash.cpp)
+    tests/test_rolling_hash.cpp
+    tests/test_suffix_array.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)

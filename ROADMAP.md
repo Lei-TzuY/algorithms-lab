@@ -32,12 +32,12 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Byte trie with multiset prefix counts and randomized map/prefix-scan differential verification
 - [x] Rollback DSU with reversible snapshots and randomized rebuilt-graph differential verification
 
-## Phase 5 — string algorithms — IN PROGRESS
+## Phase 5 — string algorithms — IMPLEMENTATION COMPLETE; SEALING AUDIT PENDING
 
 - [x] KMP with explicit prefix/failure state, overlap-aware all-match search, and naïve differential verification
 - [x] Z-function with a rightmost half-open Z-box and naïve LCP differential verification
 - [x] Rolling hash with double modular substring fingerprints and direct-polynomial differential verification
-- [ ] Suffix array and related structures
+- [x] Suffix array with prefix-doubling order, inverse rank, Kasai LCP, and naïve suffix/LCP differential verification
 
 ## Phase 6 — advanced graph/offline algorithms
 
