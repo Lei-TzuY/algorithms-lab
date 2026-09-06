@@ -24,9 +24,9 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Interval DP: matrix-chain multiplication with reconstructable split plans and exhaustive small-instance verification
 - [x] Tree DP: maximum-weight independent set with take/skip reconstruction and exhaustive small-tree verification
 
-## Phase 4 — range-query and structural data structures — ACTIVE FRONTIER
+## Phase 4 — range-query and structural data structures — IN PROGRESS
 
-- [ ] Fenwick tree
+- [x] Fenwick tree with transactional checked updates and randomized naïve-array differential verification
 - [ ] Segment tree
 - [ ] Sparse table
 - [ ] Tries
