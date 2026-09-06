@@ -27,7 +27,7 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 ## Phase 4 — range-query and structural data structures — IN PROGRESS
 
 - [x] Fenwick tree with transactional checked updates and randomized naïve-array differential verification
-- [ ] Segment tree
+- [x] Segment tree with transactional point assignment and Fenwick/naïve cross-structure differential verification
 - [ ] Sparse table
 - [ ] Tries
 - [ ] Advanced DSU variants

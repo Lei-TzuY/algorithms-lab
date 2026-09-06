@@ -34,8 +34,9 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 ### Phase 4 — range-query and structural data structures — in progress
 
 - Fenwick tree with first-principles binary-indexed decomposition, zero-based point updates, half-open prefix/range queries, checked arithmetic, transactional overflow behavior, and randomized naïve-array differential verification.
+- Segment tree with bottom-up explicit interval hierarchy, point assignment, half-open range sums, transactional ancestor-path recomputation, checked node/query arithmetic, and randomized Fenwick/naïve cross-structure verification.
 
-Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), and the active Phase-4 range-structure notes in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
+Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), and Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
 ## Repository layout
 
@@ -96,8 +97,9 @@ Do not compare timings across machines or build modes without controlling the en
 - Matrix-chain costs are represented in `uint64_t`; overflowing parenthesizations are excluded while representable alternatives remain eligible.
 - Tree DP accepts only connected acyclic undirected simple graphs; edge weights are irrelevant to its vertex-weight objective.
 - Fenwick internal buckets and returned sums use checked `int64_t`; updates that would make an internal bucket unrepresentable are rejected transactionally.
+- Segment-tree internal nodes and returned sums use checked `int64_t`; construction/assignment rejects any unrepresentable node summary transactionally.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1–3 are sealed. Phase 4 is active with Fenwick tree as its first range-query foundation; the next ordered frontier is **segment tree**, followed by sparse table, tries, and advanced DSU variants. The repository does not claim completeness.
+Phases 1–3 are sealed. Phase 4 now contains a mutable range-query comparison between Fenwick and segment trees. The next ordered frontier is **sparse table**, introducing immutable preprocessing/query tradeoffs before tries and advanced DSU variants. The repository does not claim completeness.

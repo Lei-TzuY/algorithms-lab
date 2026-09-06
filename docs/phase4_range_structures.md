@@ -31,6 +31,32 @@ Deterministic tests cover empty/bounds behavior, mixed positive and negative upd
 
 Fixed-seed randomized traces compare point updates, prefix sums, and range sums against a naïve array model. This makes the oracle structurally independent from the binary-indexed decomposition.
 
+## Segment tree
+
+The segment tree rounds the logical length up to a power-of-two leaf base and stores a complete bottom-up binary hierarchy. Unused leaves are zero padding. Public ranges remain zero-based and half-open.
+
+**Node invariant.** Every internal node stores the exact sum of its two child intervals. Therefore each node is an explicit reusable summary of one hierarchical interval, unlike Fenwick's overlapping prefix-oriented buckets.
+
+Construction places logical values at leaves and computes parents bottom-up. `assign(index, value)` replaces one leaf and recomputes exactly its ancestor path. Before changing any stored node, the implementation precomputes every new ancestor value with checked arithmetic; if one would be unrepresentable, the assignment throws and the original tree remains unchanged.
+
+A range query walks the two boundary leaves upward. Whenever a boundary is the outer child of its parent, that canonical node belongs wholly to the query and is collected. These selected nodes are disjoint and exactly cover the requested interval.
+
+### Segment-tree arithmetic semantics
+
+Every node sum must be representable in `int64_t`; construction or assignment rejects states violating that invariant even if cancellation outside that node could make the full-array sum representable. This is a deliberate representation contract: a node that cannot store its own interval summary would break future arbitrary subrange queries.
+
+As with Fenwick queries, selected canonical nodes can have mixed signs. Query aggregation alternates opposite-sign terms so representable exact results are not rejected merely because a fixed traversal order would transiently overflow. If the requested mathematical range sum itself is outside `int64_t`, the query reports `std::overflow_error`.
+
+### Segment-tree complexity and verification
+
+Construction is `O(n)` after power-of-two padding; point assignment and range sum are `O(log n)`; storage is `O(n)`. Deterministic tests cover all subranges of a known sequence, zero initialization, bounds, layout-size rejection, build-time node overflow, transactional positive/negative assignment overflow, transient query aggregation, and unrepresentable query results.
+
+Fixed-seed randomized traces maintain three independent views simultaneously: the segment tree, the existing Fenwick tree, and a naïve array. Point assignments are translated into Fenwick deltas, and every sampled/final subrange must agree across all three representations.
+
+## Comparison boundary
+
+Fenwick trees are compact and naturally express invertible prefix aggregates with point deltas. Segment trees spend a larger constant-factor hierarchy to make arbitrary canonical intervals explicit and are the structural foundation for later non-prefix monoids, richer queries, and lazy propagation. This checkpoint intentionally stops at point assignment + range sum; adding lazy range updates is a future architectural extension, not a near-duplicate API added for count.
+
 ## Frontier
 
-Fenwick tree is the first Phase-4 slice. Segment tree is next so the repository can compare a compact prefix-oriented binary decomposition with an explicit hierarchical range structure rather than merely accumulating unrelated data-structure names.
+Fenwick tree and segment tree establish the mutable range-query comparison. Sparse table is next to introduce the contrasting immutable/preprocessed query regime before Phase 4 moves into tries and advanced DSU variants.
