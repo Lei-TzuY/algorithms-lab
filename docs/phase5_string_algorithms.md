@@ -70,8 +70,12 @@ This checkpoint deliberately uses `std::sort` for rank-pair ordering because com
 
 Deterministic tests cover empty/singleton inputs, `banana`, all-equal suffix nesting, embedded null bytes, and unsigned high-bit ordering. Five hundred fixed-seed arbitrary-byte strings up to length 60 are compared against an independent raw-suffix lexicographic sort and direct adjacent LCP scan. Additional invariants require the order to be a permutation, `rank[order[k]] == k`, every adjacent suffix pair to be strictly increasing, and every reported LCP to equal a byte-by-byte direct count.
 
-## Scope boundary and frontier
+## Sealing audit and bounded scope
 
-KMP supplies deterministic exact matching, Z-function supplies deterministic prefix-LCP reuse, rolling hash supplies collision-prone O(1) substring candidate fingerprints, and the suffix array supplies deterministic global suffix ordering with adjacent LCP state. Their primary verification oracles remain structurally independent.
+KMP supplies deterministic exact matching through failure-chain state; Z-function supplies deterministic prefix-LCP reuse through a rightmost match box; rolling hash supplies collision-prone O(1) substring candidate fingerprints; suffix array supplies deterministic global suffix ordering with inverse rank and adjacent LCP state. These are complementary execution models rather than duplicate APIs.
 
-All ordered Phase-5 implementation slices are now represented. The next action is an architecture/correctness sealing audit after the exact suffix-array candidate and merged-main CI are clean; Phase 6 must not be promoted before that audit.
+The sealing audit found no unresolved correctness or integration blocker after the exact candidates and merged-main GCC Release, Clang Release, and GCC ASan+UBSan gates passed. Primary verification remains structurally independent: KMP uses quadratic-border and naïve-substring oracles, Z uses direct LCP scans, rolling hash uses direct polynomial evaluation, and suffix array uses raw suffix ordering plus direct LCP scans. Arbitrary-byte semantics are consistent across the phase, with explicit unsigned-byte ordering where lexical order matters.
+
+Phase 5 is a deliberately bounded learning checkpoint, not a claim that all string algorithms are implemented. Aho-Corasick, suffix trees, suffix automata, palindromic structures, compressed indexes, and other families remain future work only when a later architectural need justifies them. Rolling-hash equality remains non-cryptographic and collision-prone; no later integration may treat it as proof of byte equality.
+
+Phase 5 is therefore sealed. Phase 6 becomes the active frontier, beginning with max flow / min cut.

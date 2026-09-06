@@ -39,14 +39,14 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - Byte trie with arbitrary-byte keys, duplicate/empty-key multiplicity, exact and prefix counts, and randomized map/prefix-scan differential verification.
 - Rollback DSU with union-by-size reversible snapshots, no path compression, and randomized rebuilt-graph differential verification.
 
-### Phase 5 — string algorithms — implementation complete; sealing audit pending
+### Phase 5 — string algorithms — sealed
 
 - KMP with explicit prefix/failure state, overlap-aware all-occurrence search, byte-oriented semantics, and randomized naïve differential verification.
 - Z-function with explicit `z[0] = n`, rightmost half-open prefix-match-box reuse, arbitrary-byte semantics, and randomized naïve LCP differential verification.
 - Double-modular rolling hash with immutable substring fingerprints, arbitrary-byte semantics, O(1) extraction, direct-polynomial randomized verification, and explicit collision/non-cryptographic limits.
 - Suffix array with prefix doubling, inverse suffix ranks, Kasai adjacent-LCP reconstruction, unsigned-byte ordering, and randomized raw-suffix/LCP differential verification.
 
-Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), and the active string-algorithm notes in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
+Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), and Phase 5 in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
 ## Repository layout
 
@@ -119,4 +119,4 @@ Do not compare timings across machines or build modes without controlling the en
 
 ## Current frontier
 
-Phases 1–4 are sealed. Phase 5 implementation is complete but not yet sealed; its architecture/correctness audit is the next gate. Phase 6 is not promoted until the suffix-array candidate and merged-main CI pass and that audit is clean. The repository does not claim completeness.
+Phases 1–5 are sealed. Phase 6 is the active frontier, beginning with **max flow / min cut**; later ordered slices are bipartite matching, lowest common ancestor, and offline algorithms. The repository does not claim completeness.
