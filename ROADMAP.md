@@ -91,4 +91,4 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 ## Phase 16 — streaming and sublinear state — ACTIVE FRONTIER
 
-- [ ] Misra-Gries heavy hitters with one-pass `O(k)` state, an executable cancellation witness, deterministic additive frequency-error guarantees, exhaustive bounded-stream verification, and exact-frequency differential checks
+- [x] Misra-Gries heavy hitters with one-pass `O(k)` state, an executable cancellation witness, deterministic additive frequency-error guarantees, exhaustive bounded-stream verification, and exact-frequency differential checks
