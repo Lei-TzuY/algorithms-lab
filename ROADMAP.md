@@ -79,4 +79,4 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 ## Phase 13 — amortized self-adjusting data structures — ACTIVE FRONTIER
 
-- [ ] Splay-tree ordered set with zig/zig-zig/zig-zag rotations, access-to-root behavior, insertion/erasure, explicit structural invariants, randomized `std::set` differential verification, and an honest amortized-vs-worst-case complexity boundary
+- [x] Splay-tree ordered set with zig/zig-zig/zig-zag rotations, access-to-root behavior, insertion/erasure, explicit structural invariants, randomized `std::set` differential verification, and an honest amortized-vs-worst-case complexity boundary
