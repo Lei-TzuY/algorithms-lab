@@ -30,4 +30,4 @@ The fixed modulus/primitive-root fact is a mathematical parameter assumption of 
 
 ## Frontier
 
-This completes the first ordered Phase-8 slice. Phase 8 remains active. The next roadmap frontier is exact bounded integer convolution using multiple NTT-friendly primes plus CRT, with an explicit coefficient/reconstruction bound rather than an unqualified exactness claim.
+The fixed-field NTT slice and the bounded exact two-prime CRT convolution slice are complete; the exactness argument and second-prime boundary are documented in [`phase8_exact_convolution.md`](phase8_exact_convolution.md). Phase 8 remains active for one selected polynomial extension chosen for integration and learning value rather than breadth farming.
