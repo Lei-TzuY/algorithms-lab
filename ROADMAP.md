@@ -42,7 +42,7 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 ## Phase 6 — advanced graph/offline algorithms — ACTIVE FRONTIER
 
 - [x] Max flow / min cut: Dinic flow, per-edge witness, residual source-side cut, Edmonds-Karp + exhaustive-cut differential verification
-- [ ] Bipartite matching
+- [x] Bipartite matching: Hopcroft-Karp matching witness, König minimum vertex cover, exhaustive + Dinic reduction verification
 - [ ] Lowest common ancestor
 - [ ] Offline algorithms
 

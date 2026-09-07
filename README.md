@@ -50,7 +50,9 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 
 - Dinic max flow on directed multigraphs with explicit residual pairs, checked `int64_t` capacity arithmetic, per-original-edge realized flow, and residual source-side min-cut witness.
 - Max-flow/min-cut equality is executable evidence: the returned cut capacity must equal the returned flow value before the result is exposed.
-- Fixed-seed randomized graphs are checked against an independent Edmonds-Karp oracle and exhaustive cut enumeration, then replayed for capacity and conservation invariants.
+- Fixed-seed randomized flow graphs are checked against an independent Edmonds-Karp oracle and exhaustive cut enumeration, then replayed for capacity and conservation invariants.
+- Hopcroft-Karp maximum bipartite matching returns reciprocal partner state plus a König minimum-vertex-cover witness.
+- Four hundred fixed-seed bipartite multigraphs are checked against an exhaustive matching oracle and a unit-capacity reduction through the Phase-6 Dinic implementation; matching and cover witnesses are replayed independently.
 
 Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), Phase 5 in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md), and the active Phase 6 proof obligations in [`docs/phase6_advanced_graph_offline.md`](docs/phase6_advanced_graph_offline.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
@@ -123,8 +125,10 @@ Do not compare timings across machines or build modes without controlling the en
 - Suffix-array ordering uses unsigned byte values, excludes a synthetic empty suffix, and the prefix-doubling implementation intentionally claims `O(n log^2 n)` rather than radix/counting-sort complexity it does not implement.
 - Max flow is defined on directed capacity edges with non-negative `int64_t` capacities; parallel and antiparallel edges are independent, self-loops return canonical zero flow, and an unrepresentable total flow is rejected rather than wrapped.
 - Dinic claims the general `O(V^2 E)` bound; the blocking-flow DFS is recursive and can use `O(V)` call stack on a deep level graph.
+- Bipartite matching uses explicit left/right vertex domains, accepts parallel edges, returns a König minimum-vertex-cover certificate, and claims the standard Hopcroft-Karp `O(E sqrt(V))` bound; its augmenting DFS can use `O(V)` call stack.
+- The Dinic reduction in bipartite tests is cross-layer integration evidence, not the primary matching oracle; exhaustive matching remains structurally independent from Hopcroft-Karp.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1–5 are sealed. Phase 6 is active: max flow / min cut is the first executable slice, followed by bipartite matching, lowest common ancestor, and offline algorithms. The repository does not claim completeness.
+Phases 1–5 are sealed. Phase 6 is active: max flow / min cut and bipartite matching are executable and integrated; lowest common ancestor is the next ordered slice, followed by offline algorithms. The repository does not claim completeness.

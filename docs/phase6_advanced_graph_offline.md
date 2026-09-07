@@ -33,11 +33,9 @@ When no residual s-t path remains, the implementation performs one final residua
 
 The implementation recomputes that cut capacity with checked arithmetic and requires it to equal the flow value before returning. This internal consistency check is not used as the primary test oracle.
 
-## Validation and representability
+### Max-flow validation and verification
 
 Out-of-range endpoints throw `std::out_of_range`; negative capacities and `source == sink` throw `std::invalid_argument`. Flow values and cut capacities are `int64_t`. If independent representable edge capacities admit a total s-t flow larger than `INT64_MAX`, checked accumulation throws `std::overflow_error` rather than wrapping.
-
-## Independent verification
 
 Deterministic tests cover the classic six-vertex network with max flow 23; parallel, antiparallel, self-loop, zero-capacity, and disconnected behavior; input validation; and total-flow overflow.
 
@@ -45,6 +43,40 @@ Fixed-seed randomized verification generates 300 directed multigraphs with 2–8
 
 The Edmonds-Karp and exhaustive-cut oracles do not reuse Dinic's level graph, current-arc cursor, residual adjacency representation, or blocking-flow recurrence.
 
+## Bipartite matching — Hopcroft-Karp and König certificate
+
+A bipartite instance has explicit left vertices `0..L-1`, right vertices `0..R-1`, and `BipartiteEdge {left,right}` edges. Endpoint validation is strict. Parallel edges are accepted and preserve first-seen adjacency order; they do not create extra matching capacity because each vertex may participate in at most one matched pair.
+
+`hopcroft_karp` maintains reciprocal left/right match arrays. Each phase performs a multi-source BFS from every unmatched left vertex to find the shortest augmenting-path length, then DFS augments only through alternating edges that respect those BFS layers. All augmentations in one phase therefore have minimum current length. Once no augmenting path exists, the matching is maximum.
+
+The implementation claims the standard Hopcroft-Karp bound `O(E sqrt(V))`, where `E` includes parallel input edges and `V = L + R`. The matching state and adjacency storage are `O(V + E)`. The augmenting DFS is recursive and can use `O(V)` call stack on a long alternating path.
+
+### Matching witness invariants
+
+`BipartiteMatchingResult` exposes:
+
+- the maximum cardinality,
+- `left_match[left]` and `right_match[right]` as reciprocal optional partners,
+- a left/right minimum-vertex-cover membership vector.
+
+Every reported matched pair must correspond to an input edge, no left or right vertex can have two partners, and the number of reciprocal pairs equals `cardinality`.
+
+### König minimum-vertex-cover certificate
+
+After matching is maximum, alternating reachability starts from every unmatched left vertex. Traversal follows unmatched edges from left to right and matched edges from right back to left. Let the reachable sets be `Z_L` and `Z_R`. The returned cover is
+
+`(Left \ Z_L) union Z_R`.
+
+Every input edge is incident to that cover. For a maximum bipartite matching, König's theorem gives a minimum vertex cover of exactly the same cardinality, so the implementation returns a second concrete witness for the optimum rather than only a matching count.
+
+### Independent and cross-layer verification
+
+Deterministic tests cover empty partitions, a graph that requires reassignment along an augmenting path, parallel edges, partial matchings, and invalid endpoints.
+
+Four hundred fixed-seed random bipartite multigraphs use at most six vertices per partition. Every Hopcroft-Karp cardinality is compared with an independent exhaustive recursive matching oracle. The same instance is also reduced to the already-implemented max-flow subsystem using unit-capacity `source -> left -> right -> sink` edges; Dinic's flow value must equal the matching cardinality.
+
+The returned matching is replayed for reciprocal uniqueness and edge membership. The returned König cover is checked against every input edge and its size must equal the matching cardinality. The exhaustive matcher is the primary independent optimum oracle; the Dinic reduction is cross-layer integration evidence, not a circular production dependency.
+
 ## Frontier
 
-This checkpoint establishes max-flow/min-cut residual semantics and theorem-level witnesses. The next ordered Phase-6 slice is bipartite matching, which should integrate with this capability rather than merely add an unrelated matcher implementation.
+Max flow / min cut and bipartite matching now form an integrated Phase-6 graph-optimization layer with independent theorem witnesses. The next ordered slice is lowest common ancestor; offline algorithms remain after LCA. Phase 6 is not sealed yet.
