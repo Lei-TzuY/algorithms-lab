@@ -57,7 +57,8 @@ add_library(algorithms_lab
   src/number_theory/modular.cpp
   src/polynomials/number_theoretic_transform.cpp
   src/polynomials/formal_power_series.cpp
-  src/streaming/misra_gries.cpp)
+  src/streaming/misra_gries.cpp
+  src/strings/bwt_index.cpp)
 
 target_include_directories(algorithms_lab PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 algorithms_enable_strict_warnings(algorithms_lab)
@@ -90,6 +91,7 @@ if(BUILD_TESTING)
     tests/test_z_function.cpp
     tests/test_rolling_hash.cpp
     tests/test_suffix_array.cpp
+    tests/test_bwt_index.cpp
     tests/test_max_flow.cpp
     tests/test_min_cost_flow.cpp
     tests/test_min_cost_circulation.cpp
