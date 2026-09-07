@@ -94,4 +94,4 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 ## Phase 17 — packed static rank/select indexing — ACTIVE FRONTIER
 
-- [ ] Immutable packed bit-vector with exact half-open `rank0/rank1`, deterministic `select0/select1`, explicit packed-storage accounting, word-boundary adversarial cases, and randomized naïve differential verification
+- [x] Immutable packed bit-vector with exact half-open `rank0/rank1`, deterministic `select0/select1`, explicit packed-storage accounting, word-boundary adversarial cases, and randomized naïve differential verification
