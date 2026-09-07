@@ -48,4 +48,4 @@ These tests are executable evidence, not a proof of the universal competitive th
 
 ## Frontier
 
-This slice is intended to establish the Phase-15 hypothesis: online decisions, offline comparison, replayable action traces, and an honest competitive-analysis boundary. A later architecture audit should seal the phase unless another online problem introduces a genuinely different guarantee mechanism; adding replacement-policy variants merely to increase algorithm count is not sufficient.
+Phase 15 is sealed after its exact implementation and merged-main CI gates. Its architectural boundary is prefix-only online decisions, explicit offline comparison, replayable action traces, and a theorem-derived competitive guarantee whose universal proof is kept distinct from finite executable evidence. The sealing audit found no second paging-policy slice that would add a different reasoning model; FIFO/randomized/cache-policy variants remain out of scope until a future integration need justifies them. Phase 16 promotes streaming/sublinear state with deterministic frequency-error guarantees rather than farming replacement-policy breadth.
