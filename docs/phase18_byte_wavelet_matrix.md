@@ -59,12 +59,15 @@ A fixed-seed randomized suite builds 400 byte sequences of length 0..768 and
 executes 80 query rounds per sequence. `access` is checked directly; rank uses a
 linear scan; select uses an independent linear occurrence scan; range quantiles
 use independently sorted copies of the requested slice. The focused candidate
-passes strict GCC, strict Clang, and actual ASan+UBSan builds.
+passes strict GCC, strict Clang, and actual ASan+UBSan builds. Exact pull-request
+and merged-main CI also pass GCC release, Clang release, and GCC ASan+UBSan.
 
 ## Frontier
 
-Phase 18 implementation is bounded to the byte wavelet-matrix indexing model.
-It does not claim an FM-index or compressed full-text index. A later phase may
-compose this static sequence substrate with the sealed suffix/BWT-related string
-capabilities, but only after Phase 18 passes full repository integration and its
-own sealing audit.
+Phase 18 is SEALED. The byte wavelet matrix is now a reusable static sequence
+substrate rather than an active source of wavelet variants. Phase 19 promotes to
+exact BWT backward-search text indexing by composing the sealed Phase-5 suffix
+array ordering with Phase-18 occurrence counts. The conceptual sentinel stays
+outside the byte alphabet so every byte value remains legal input; the first
+text-index implementation keeps full suffix-row positions and therefore does not
+claim succinct FM-index storage.
