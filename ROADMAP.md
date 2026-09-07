@@ -85,6 +85,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Persistent segment tree with immutable branching versions, `O(log n)` path-copy point assignment, structural sharing evidence, transactional failed-update behavior, checked `int64_t` range sums, and randomized version-DAG differential verification
 
-## Phase 15 — online algorithms and competitive analysis — ACTIVE FRONTIER
+## Phase 15 — online algorithms and competitive analysis — SEALED
 
 - [x] Deterministic LRU paging with replayable hit/fault/eviction trace, independent exact offline optimum on bounded sequences, and an explicit theorem-derived competitive-ratio boundary
+
+## Phase 16 — streaming and sublinear state — ACTIVE FRONTIER
+
+- [ ] Misra-Gries heavy hitters with one-pass `O(k)` state, an executable cancellation witness, deterministic additive frequency-error guarantees, exhaustive bounded-stream verification, and exact-frequency differential checks
