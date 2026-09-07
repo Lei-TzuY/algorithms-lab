@@ -100,6 +100,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Immutable byte wavelet matrix built from eight Phase-17 packed rank/select levels, with exact `access`, prefix/range `rank`, global `select`, range `kth_smallest`, explicit storage accounting, and independent naïve differential verification
 
-## Phase 19 — exact BWT backward-search text indexing — ACTIVE FRONTIER
+## Phase 19 — exact BWT backward-search text indexing — SEALED
 
 - [x] Exact byte-string substring count/locate via conceptual-sentinel BWT backward search, reusing Phase-5 suffix-array order and Phase-18 wavelet-matrix occurrence counts, with arbitrary-byte support and independent direct-scan verification
+
+## Phase 20 — sampled BWT locate space/time tradeoff — ACTIVE FRONTIER
+
+- [ ] Replace the full suffix-row position table with packed sampled-row membership plus periodic suffix-position samples, reconstructing exact locate positions by bounded LF walks with explicit sample-rate/storage/query-cost evidence
