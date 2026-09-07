@@ -75,4 +75,4 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 ## Phase 12 — approximation algorithms and executable quality guarantees — ACTIVE FRONTIER
 
-- [ ] Deterministic 2-approximation for minimum vertex cover via maximal matching, with mandatory self-loop vertices, replayable matching/cover witness, exhaustive small-graph optimum checks, and explicit ratio validation
+- [x] Deterministic 2-approximation for minimum vertex cover via maximal matching, with mandatory self-loop vertices, replayable matching/cover witness, exhaustive small-graph optimum checks, and explicit ratio validation
