@@ -42,6 +42,14 @@ Three hundred fixed-seed random DAG networks use 2–5 vertices, at most seven e
 
 Test-side witness replay also independently checks the returned flow/cut/cost identities and evaluates the returned residual-potential inequalities for every forward or reverse residual direction implied by the reported edge flows.
 
+## Rectangular assignment via Hungarian augmentations
+
+The second slice adds `hungarian_min_assignment(rows, columns, cost_matrix)` for a complete rectangular cost matrix with `rows <= columns`. Every row is assigned to one distinct column and the returned `column_for_row` witness is deterministic under ties. Empty row sets return an empty zero-cost assignment; non-empty requests require at least as many columns as rows and an exact row-major matrix shape.
+
+The implementation uses the rectangular shortest-augmenting-path form of the Hungarian algorithm. Row and column potentials maintain non-negative reduced slacks on the current alternating-tree frontier. Each outer iteration augments the matching by one row; with `R` rows and `C` columns the implementation runs in `O(R^2 C)` time and uses `O(R + C)` auxiliary state beyond the input/result. Potential, slack, reduced-cost, and replayed total-cost arithmetic is checked `int64_t`; an unrepresentable intermediate fails closed with `std::overflow_error`.
+
+Deterministic tests cover rectangular matrices, negative costs, equal-cost tie behavior, malformed shapes, infeasible `rows > columns`, and adversarial arithmetic. Five hundred fixed-seed random matrices use 1–4 rows, `rows`–5 columns, and costs in `[-20, 20]`. The primary oracle exhaustively enumerates every injective row-to-column assignment and compares the exact minimum cost. As cross-layer integration evidence, every same random matrix is independently reduced to the first Phase-9 min-cost-max-flow API and must produce the same optimum. The flow reduction is deliberately not the primary oracle.
+
 ## Frontier
 
-This completes the first ordered Phase-9 slice. Phase 9 remains active. The next roadmap frontier is the assignment problem via Hungarian algorithm, with a min-cost-flow reduction used as cross-implementation integration evidence rather than as the primary oracle.
+This completes the first two ordered Phase-9 slices. Phase 9 remains active. The next roadmap frontier is lower-bounded / demand min-cost circulation with an explicit feasibility transformation and an independent small-instance oracle.
