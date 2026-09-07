@@ -69,6 +69,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Maximum-cardinality matching in arbitrary undirected graphs via Edmonds blossom, with exhaustive small-graph verification and Hopcroft-Karp equality on bipartite instances
 
 
-## Phase 11 — randomized algorithms and probabilistic contracts — ACTIVE FRONTIER
+## Phase 11 — randomized algorithms and probabilistic contracts — SEALED
 
 - [x] Karger-style randomized contraction for undirected global minimum cut with explicit seed/trial semantics, replayable cut witness, exhaustive small-graph optimum checks, and no unsupported finite-trial exactness claim
+
+## Phase 12 — approximation algorithms and executable quality guarantees — ACTIVE FRONTIER
+
+- [ ] Deterministic 2-approximation for minimum vertex cover via maximal matching, with mandatory self-loop vertices, replayable matching/cover witness, exhaustive small-graph optimum checks, and explicit ratio validation
