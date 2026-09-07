@@ -83,4 +83,4 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 ## Phase 14 — persistent and versioned data structures — ACTIVE FRONTIER
 
-- [ ] Persistent segment tree with immutable branching versions, `O(log n)` path-copy point assignment, structural sharing evidence, transactional failed-update behavior, checked `int64_t` range sums, and randomized version-DAG differential verification
+- [x] Persistent segment tree with immutable branching versions, `O(log n)` path-copy point assignment, structural sharing evidence, transactional failed-update behavior, checked `int64_t` range sums, and randomized version-DAG differential verification
