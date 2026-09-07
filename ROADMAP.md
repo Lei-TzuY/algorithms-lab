@@ -92,6 +92,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Misra-Gries heavy hitters with one-pass `O(k)` state, an executable cancellation witness, deterministic additive frequency-error guarantees, exhaustive bounded-stream verification, and exact-frequency differential checks
 
-## Phase 17 — packed static rank/select indexing — ACTIVE FRONTIER
+## Phase 17 — packed static rank/select indexing — SEALED
 
 - [x] Immutable packed bit-vector with exact half-open `rank0/rank1`, deterministic `select0/select1`, explicit packed-storage accounting, word-boundary adversarial cases, and randomized naïve differential verification
+
+## Phase 18 — byte wavelet matrix static sequence indexing — ACTIVE FRONTIER
+
+- [ ] Immutable byte wavelet matrix built from eight Phase-17 packed rank/select levels, with exact `access`, prefix/range `rank`, global `select`, range `kth_smallest`, explicit storage accounting, and independent naïve differential verification
