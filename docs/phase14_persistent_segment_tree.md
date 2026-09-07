@@ -49,4 +49,4 @@ Focused GCC and Clang builds use the repository strict warning policy. The same 
 
 ## Frontier
 
-This slice establishes the Phase-14 hypothesis: correctness includes historical immutability, branchable versions, structural sharing, and atomic version publication. A later architecture audit should decide whether another persistence paradigm creates a genuinely new boundary before sealing the phase; merely adding more persistent containers is not sufficient.
+Phase 14 is sealed after the exact implementation and merged-main CI gates. Its architectural boundary is historical immutability plus branchable versions, `O(log n)` path-copy structural sharing, checked sums, and atomic version publication. The sealing audit found no second persistence slice that would add a distinct correctness model; persistent tries/Fenwick variants, lazy persistent range updates, hash-consing, and equal-version deduplication remain out of scope until a future integration need justifies them. Phase 15 promotes online algorithms and competitive analysis rather than farming persistent-container variants.

@@ -81,6 +81,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Splay-tree ordered set with zig/zig-zig/zig-zag rotations, access-to-root behavior, insertion/erasure, explicit structural invariants, randomized `std::set` differential verification, and an honest amortized-vs-worst-case complexity boundary
 
-## Phase 14 — persistent and versioned data structures — ACTIVE FRONTIER
+## Phase 14 — persistent and versioned data structures — SEALED
 
 - [x] Persistent segment tree with immutable branching versions, `O(log n)` path-copy point assignment, structural sharing evidence, transactional failed-update behavior, checked `int64_t` range sums, and randomized version-DAG differential verification
+
+## Phase 15 — online algorithms and competitive analysis — ACTIVE FRONTIER
+
+- [ ] Deterministic LRU paging with replayable hit/fault/eviction trace, independent exact offline optimum on bounded sequences, and an explicit theorem-derived competitive-ratio boundary
