@@ -48,6 +48,6 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 ## Phase 7 — selected advanced foundations — ACTIVE FRONTIER
 
-- [ ] Computational geometry foundations: exact bounded-integer predicates, segment intersection, and convex hull
+- [x] Computational geometry foundations: exact bounded-integer predicates, segment intersection, and convex hull
 - [ ] Number theory
 - [ ] Selected advanced algorithms based on learning value

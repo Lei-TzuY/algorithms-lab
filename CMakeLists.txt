@@ -31,6 +31,7 @@ add_library(algorithms_lab
   src/dynamic_programming/longest_increasing_subsequence.cpp
   src/dynamic_programming/matrix_chain.cpp
   src/dynamic_programming/tree_independent_set.cpp
+  src/geometry/geometry2d.cpp
   src/greedy/interval_scheduling.cpp
   src/graphs/graph.cpp
   src/graphs/traversal.cpp
@@ -72,7 +73,8 @@ if(BUILD_TESTING)
     tests/test_max_flow.cpp
     tests/test_bipartite_matching.cpp
     tests/test_lowest_common_ancestor.cpp
-    tests/test_offline_dynamic_connectivity.cpp)
+    tests/test_offline_dynamic_connectivity.cpp
+    tests/test_geometry2d.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)
