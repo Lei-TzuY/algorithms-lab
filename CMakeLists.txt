@@ -40,6 +40,7 @@ add_library(algorithms_lab
   src/graphs/strongly_connected_components.cpp
   src/graphs/max_flow.cpp
   src/graphs/min_cost_flow.cpp
+  src/graphs/min_cost_circulation.cpp
   src/graphs/bipartite_matching.cpp
   src/graphs/lowest_common_ancestor.cpp
   src/graphs/heavy_light_decomposition.cpp
@@ -78,6 +79,7 @@ if(BUILD_TESTING)
     tests/test_suffix_array.cpp
     tests/test_max_flow.cpp
     tests/test_min_cost_flow.cpp
+    tests/test_min_cost_circulation.cpp
     tests/test_hungarian_assignment.cpp
     tests/test_bipartite_matching.cpp
     tests/test_lowest_common_ancestor.cpp
