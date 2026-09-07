@@ -67,7 +67,16 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - Heavy-light decomposition integrates the existing strict-tree `Graph` surface with the Phase-4 checked `SegmentTree` for point assignment, inclusive path sums, and rooted-subtree sums.
 - Three hundred fixed-seed random trees execute 120 mixed HLD operations each against independent BFS/parent-array naïve oracles.
 
-Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), Phase 5 in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md), Phase 6 in [`docs/phase6_advanced_graph_offline.md`](docs/phase6_advanced_graph_offline.md) plus its [`sealing audit`](docs/phase6_sealing_audit.md), and Phase 7 in [`docs/phase7_advanced_foundations.md`](docs/phase7_advanced_foundations.md), [`docs/phase7_number_theory.md`](docs/phase7_number_theory.md), [`docs/phase7_heavy_light_decomposition.md`](docs/phase7_heavy_light_decomposition.md), plus the [`Phase-7 sealing audit`](docs/phase7_sealing_audit.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
+### Phase 8 — algebraic transforms and polynomial algorithms — sealed
+
+- Iterative radix-2 NTT over `998244353` with fixed primitive root `3`, explicit `2^23` transform-order boundary, forward/inverse transforms, and modular polynomial convolution.
+- Transform round trips cover every power-of-two size through 4096; 600 fixed-seed random polynomial pairs are checked exactly against an independent `O(nm)` modular-convolution oracle.
+- Exact signed `int64_t` convolution reuses one parameterized NTT engine over `998244353` and `1004535809`, then performs centered two-prime CRT reconstruction only when a conservative coefficient bound proves uniqueness.
+- Five hundred fixed-seed signed polynomial pairs are compared with an independent exact `O(nm)` oracle; unproven cancellation-heavy inputs fail closed instead of being mislabeled exact.
+- Formal power series inversion over `998244353` uses Newton doubling and delegates both polynomial products to the NTT convolution substrate.
+- Four hundred fixed-seed random series are checked against an independent `O(n^2)` coefficient recurrence; the `2^22` public prefix bound is derived from the existing `2^23` NTT transform limit.
+
+Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), Phase 5 in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md), Phase 6 in [`docs/phase6_advanced_graph_offline.md`](docs/phase6_advanced_graph_offline.md) plus its [`sealing audit`](docs/phase6_sealing_audit.md), Phase 7 in [`docs/phase7_advanced_foundations.md`](docs/phase7_advanced_foundations.md), [`docs/phase7_number_theory.md`](docs/phase7_number_theory.md), [`docs/phase7_heavy_light_decomposition.md`](docs/phase7_heavy_light_decomposition.md), plus the [`Phase-7 sealing audit`](docs/phase7_sealing_audit.md), and Phase 8 in [`docs/phase8_algebraic_transforms.md`](docs/phase8_algebraic_transforms.md), [`docs/phase8_exact_convolution.md`](docs/phase8_exact_convolution.md), [`docs/phase8_formal_power_series.md`](docs/phase8_formal_power_series.md), plus the [`Phase-8 sealing audit`](docs/phase8_sealing_audit.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
 ## Repository layout
 
@@ -76,6 +85,7 @@ include/algorithms/       public APIs and template implementations
 src/dynamic_programming/  dynamic-programming implementations
 src/greedy/               greedy algorithm implementations
 src/graphs/               graph/traversal/path/structure implementations
+src/polynomials/          transform and polynomial-algebra implementations
 tests/                    deterministic, adversarial, randomized, differential tests
 benchmarks/               fixed-seed micro-benchmark harness
 examples/                 small usage examples
@@ -145,8 +155,11 @@ Do not compare timings across machines or build modes without controlling the en
 - Geometry predicates are exact only inside the documented coordinate domain `[-1e9, 1e9]`; larger coordinates are rejected rather than evaluated with overflow or epsilon arithmetic.
 - Number-theory modular arithmetic is first-principles and overflow-safe across `uint64_t`; deterministic primality relies on the documented seven-witness theorem and is not presented as a cryptographic primitive.
 - Heavy-light decomposition accepts only a non-empty connected acyclic undirected simple graph and inherits the checked `int64_t` representability/transactional-update boundary of the Phase-4 `SegmentTree`.
+- NTT polynomial arithmetic is deliberately fixed to `998244353` with primitive root `3`; the root fact is a mathematical parameter assumption, non-empty transforms must be powers of two, and the largest transform order is `2^23`.
+- Exact integer convolution uses a second NTT prime and centered CRT only when a conservative input-derived bound proves every coefficient lies in the unique reconstruction interval; otherwise it rejects rather than aliasing modulo the CRT product.
+- Formal power series inversion is defined over `998244353`; a non-zero constant coefficient is required, and the requested prefix is capped at `2^22` so every Newton-step convolution remains within the existing `2^23` NTT boundary.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1–7 are sealed. Phase 8 is active: algebraic transforms and polynomial algorithms. The first ordered slice is radix-2 NTT and polynomial convolution over modulus `998244353`, with transform round-trip checks and independent naïve-convolution differential verification. The repository does not claim completeness.
+Phases 1–8 are sealed. Phase 9 is active: weighted combinatorial optimization. The first ordered slice is minimum-cost maximum flow with signed edge costs, explicit flow/cost certificates, checked arithmetic, a documented negative-cycle contract, and exhaustive small-network differential verification. The repository does not claim completeness.

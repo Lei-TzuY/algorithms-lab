@@ -30,4 +30,4 @@ The fixed modulus/primitive-root fact is a mathematical parameter assumption of 
 
 ## Frontier
 
-All three ordered Phase-8 implementation slices are now represented: fixed-field NTT/convolution, bounded exact two-prime CRT convolution, and formal power series inversion through Newton doubling. Phase 8 is implementation complete but not sealed; the integrated checkpoint still requires an architecture/integration audit before promotion.
+This transform/convolution slice is sealed as part of the integrated Phase-8 checkpoint. The cross-slice architecture, evidence boundaries, and remaining maintainability debt are recorded in [`phase8_sealing_audit.md`](phase8_sealing_audit.md). The promoted frontier is Phase 9 weighted combinatorial optimization.
