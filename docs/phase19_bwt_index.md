@@ -70,6 +70,8 @@ The randomized differential corpus uses 400 fixed-seed arbitrary-byte texts with
 
 An additional exhaustive formulation check was performed over every length-0..6 string on a three-symbol alphabet and every pattern of length at most three; conceptual-sentinel backward search matched direct scanning in every case.
 
-## Frontier
+## Sealed boundary
 
-Phase 19 implementation is complete pending merged-main CI and a sealing audit. Further work should not market this structure as a succinct FM-index unless suffix-row sampling/storage is actually changed and the new space/time tradeoff is verified.
+Phase 19 is sealed after exact merged-main verification. The capability delivered here is the BWT/LF search model itself plus exact locate using a deliberately retained full row-position table. More pattern-query wrappers would not add architectural depth.
+
+The next frontier changes the representation rather than the API surface: Phase 20 replaces the full row-position table with packed sampled-row membership and periodic suffix-position samples. Exact positions are then reconstructed by bounded LF walks, making the locate space/time tradeoff executable and measurable without pretending the Phase-19 structure was already succinct.
