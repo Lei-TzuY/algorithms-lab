@@ -96,6 +96,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Immutable packed bit-vector with exact half-open `rank0/rank1`, deterministic `select0/select1`, explicit packed-storage accounting, word-boundary adversarial cases, and randomized naïve differential verification
 
-## Phase 18 — byte wavelet matrix static sequence indexing — ACTIVE FRONTIER
+## Phase 18 — byte wavelet matrix static sequence indexing — SEALED
 
 - [x] Immutable byte wavelet matrix built from eight Phase-17 packed rank/select levels, with exact `access`, prefix/range `rank`, global `select`, range `kth_smallest`, explicit storage accounting, and independent naïve differential verification
+
+## Phase 19 — exact BWT backward-search text indexing — ACTIVE FRONTIER
+
+- [ ] Exact byte-string substring count/locate via conceptual-sentinel BWT backward search, reusing Phase-5 suffix-array order and Phase-18 wavelet-matrix occurrence counts, with arbitrary-byte support and independent direct-scan verification
