@@ -35,4 +35,4 @@ A separate 5,000-round fixed-seed segment sample checks endpoint reversal and se
 
 ## Frontier
 
-This is the first executable Phase-7 slice. Computational-geometry foundations on the roadmap are complete at this bounded exact-predicate/hull scope; Phase 7 remains active. Number theory is the next ordered frontier.
+The bounded exact-predicate/hull slice passed its candidate and merged-main gates and is sealed as part of Phase 7. The phase-wide architecture/integration decision and promotion rationale are recorded in [`phase7_sealing_audit.md`](phase7_sealing_audit.md).

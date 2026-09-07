@@ -41,4 +41,4 @@ Focused pre-upload checks passed under GCC and Clang with the repository strict-
 
 ## Frontier
 
-Computational geometry, uint64 number-theory foundations, and this Graph-to-SegmentTree HLD integration now cover all ordered Phase-7 implementation entries. Phase 7 is implementation complete but not sealed. The required next step is an architecture/integration audit followed by merged-main evidence; only a clean audit may seal the phase and choose the next architectural frontier.
+The Graph-to-SegmentTree HLD integration passed its candidate and merged-main gates and is sealed as the final ordered Phase-7 implementation slice. The phase-wide architecture/integration decision and promotion rationale are recorded in [`phase7_sealing_audit.md`](phase7_sealing_audit.md).
