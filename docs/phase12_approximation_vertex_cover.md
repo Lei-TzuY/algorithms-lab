@@ -56,4 +56,4 @@ This corpus verifies the implementation against exact small instances. It is not
 
 ## Frontier
 
-This slice establishes the Phase-12 quality-guarantee discipline: the algorithm returns a feasible witness, the approximation factor has an explicit proof obligation, and small exact instances independently validate both feasibility and the claimed bound. Phase 12 remains active until architecture audit determines whether another genuinely different approximation guarantee is worth adding.
+This slice establishes the Phase-12 quality-guarantee discipline: the algorithm returns a feasible witness, the approximation factor has an explicit proof obligation, and small exact instances independently validate both feasibility and the claimed bound. The Phase-12 architecture audit found this coherent slice sufficient without farming naming-adjacent approximation variants. Phase 12 is sealed; the active frontier moves to Phase 13 amortized self-adjusting data structures.
