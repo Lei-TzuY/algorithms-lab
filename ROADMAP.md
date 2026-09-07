@@ -56,4 +56,4 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Radix-2 NTT and polynomial convolution over `998244353` with transform round-trip and naïve-convolution differential verification
 - [x] Exact bounded integer convolution via multiple NTT primes + CRT with an explicit coefficient/representability bound
-- [ ] Selected polynomial extension based on integration and learning value
+- [x] Formal power series inverse via Newton doubling over `998244353` with independent recurrence verification

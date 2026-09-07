@@ -51,4 +51,4 @@ Focused GCC, Clang, and GCC ASan+UBSan builds use the repository strict-warning 
 
 ## Frontier
 
-This completes the second ordered Phase-8 slice. Phase 8 remains active; the next step is one selected polynomial extension that builds on the transform/convolution substrate without broadening into an unbounded algorithm catalog.
+The exact two-prime CRT slice is complete and now feeds the same Phase-8 polynomial substrate as the fixed-field transform. Formal power series inversion is the final ordered implementation slice; once its integrated main checkpoint is green, Phase 8 requires a sealing audit rather than further breadth farming.

@@ -44,7 +44,8 @@ add_library(algorithms_lab
   src/graphs/heavy_light_decomposition.cpp
   src/graphs/offline_dynamic_connectivity.cpp
   src/number_theory/modular.cpp
-  src/polynomials/number_theoretic_transform.cpp)
+  src/polynomials/number_theoretic_transform.cpp
+  src/polynomials/formal_power_series.cpp)
 
 target_include_directories(algorithms_lab PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 algorithms_enable_strict_warnings(algorithms_lab)
@@ -81,7 +82,8 @@ if(BUILD_TESTING)
     tests/test_geometry2d.cpp
     tests/test_number_theory.cpp
     tests/test_number_theoretic_transform.cpp
-    tests/test_exact_convolution.cpp)
+    tests/test_exact_convolution.cpp
+    tests/test_formal_power_series.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)
