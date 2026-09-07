@@ -55,9 +55,13 @@ implementation-dependent spare capacity.
 - every random vector checks every rank endpoint and every valid one/zero select
   against independent linear scans;
 - logical payload accounting and total one/zero counts are checked exactly;
-- strict GCC, strict Clang, and ASan+UBSan focused builds pass.
+- strict GCC, strict Clang, and ASan+UBSan focused builds pass;
+- exact merged-main CI passed GCC release, Clang release, and GCC ASan+UBSan.
 
 ## Frontier
 
-Phase 17 implementation is complete; phase-level integration and sealing audit is
-the next gate before any further promotion.
+Phase 17 is SEALED. The packed binary rank/select primitive is now an integration
+substrate rather than an active source of near-duplicate variants. The next
+frontier is a byte wavelet matrix that composes eight of these indexes into a
+general static sequence index with access, rank, select, and range-quantile
+queries.
