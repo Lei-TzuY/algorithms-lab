@@ -54,7 +54,8 @@ add_library(algorithms_lab
   src/optimization/hungarian_assignment.cpp
   src/number_theory/modular.cpp
   src/polynomials/number_theoretic_transform.cpp
-  src/polynomials/formal_power_series.cpp)
+  src/polynomials/formal_power_series.cpp
+  src/streaming/misra_gries.cpp)
 
 target_include_directories(algorithms_lab PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 algorithms_enable_strict_warnings(algorithms_lab)
@@ -101,7 +102,8 @@ if(BUILD_TESTING)
     tests/test_number_theoretic_transform.cpp
     tests/test_exact_convolution.cpp
     tests/test_formal_power_series.cpp
-    tests/test_vertex_cover_approximation.cpp)
+    tests/test_vertex_cover_approximation.cpp
+    tests/test_misra_gries.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)
