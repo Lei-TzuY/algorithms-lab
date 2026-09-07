@@ -66,4 +66,4 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 ## Phase 10 — general graph matching — ACTIVE FRONTIER
 
-- [ ] Maximum-cardinality matching in arbitrary undirected graphs via Edmonds blossom, with exhaustive small-graph verification and Hopcroft-Karp equality on bipartite instances
+- [x] Maximum-cardinality matching in arbitrary undirected graphs via Edmonds blossom, with exhaustive small-graph verification and Hopcroft-Karp equality on bipartite instances
