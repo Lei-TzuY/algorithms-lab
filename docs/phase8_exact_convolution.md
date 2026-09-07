@@ -51,4 +51,4 @@ Focused GCC, Clang, and GCC ASan+UBSan builds use the repository strict-warning 
 
 ## Frontier
 
-The exact two-prime CRT slice is complete and now feeds the same Phase-8 polynomial substrate as the fixed-field transform. Formal power series inversion is the final ordered implementation slice; once its integrated main checkpoint is green, Phase 8 requires a sealing audit rather than further breadth farming.
+This exact-convolution slice is sealed as part of the integrated Phase-8 checkpoint. Its fail-closed exactness boundary and relationship to the fixed-field transform are reviewed in [`phase8_sealing_audit.md`](phase8_sealing_audit.md). The promoted frontier is Phase 9 weighted combinatorial optimization.

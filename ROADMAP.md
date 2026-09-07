@@ -52,8 +52,14 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Number theory foundations: Euclidean GCD, overflow-safe modular arithmetic, deterministic uint64 primality
 - [x] Selected advanced integration: heavy-light decomposition over `Graph` + Phase-4 `SegmentTree` with mutable path/subtree sums
 
-## Phase 8 — algebraic transforms and polynomial algorithms — ACTIVE FRONTIER
+## Phase 8 — algebraic transforms and polynomial algorithms — SEALED
 
 - [x] Radix-2 NTT and polynomial convolution over `998244353` with transform round-trip and naïve-convolution differential verification
 - [x] Exact bounded integer convolution via multiple NTT primes + CRT with an explicit coefficient/representability bound
 - [x] Formal power series inverse via Newton doubling over `998244353` with independent recurrence verification
+
+## Phase 9 — weighted combinatorial optimization — ACTIVE FRONTIER
+
+- [ ] Minimum-cost maximum flow with signed costs, checked flow/cost certificates, residual-potential optimality evidence, and exhaustive small-flow differential verification
+- [ ] Assignment problem via Hungarian algorithm with exhaustive small-instance verification and a min-cost-flow reduction as cross-implementation integration evidence
+- [ ] Lower-bounded / demand min-cost circulation with explicit feasibility transformation and independent small-instance verification

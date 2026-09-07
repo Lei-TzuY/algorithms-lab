@@ -46,4 +46,4 @@ Focused GCC, Clang, and GCC ASan+UBSan builds under the repository strict-warnin
 
 ## Frontier
 
-This completes the third ordered Phase-8 implementation slice. Phase 8 is implementation complete but not yet sealed; the next action after integrated-main CI is an architecture/integration audit, not another polynomial micro-feature.
+This formal-power-series slice is sealed as part of the integrated Phase-8 checkpoint. Its Newton invariant, transform-size boundary, and oracle independence are reviewed in [`phase8_sealing_audit.md`](phase8_sealing_audit.md). The promoted frontier is Phase 9 weighted combinatorial optimization.
