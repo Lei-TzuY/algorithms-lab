@@ -77,6 +77,29 @@ Four hundred fixed-seed random bipartite multigraphs use at most six vertices pe
 
 The returned matching is replayed for reciprocal uniqueness and edge membership. The returned König cover is checked against every input edge and its size must equal the matching cardinality. The exhaustive matcher is the primary independent optimum oracle; the Dinic reduction is cross-layer integration evidence, not a circular production dependency.
 
+## Lowest common ancestor — validated binary lifting
+
+`LowestCommonAncestor` builds an immutable rooted-tree index over the existing undirected `Graph`. Construction rejects directed graphs, self-loops, parallel edges, cycles, disconnected input, and an invalid root before any query state is exposed. Edge weights are intentionally ignored because the current query surface is structural and reports distance in edges.
+
+The constructor performs one rooted traversal to establish `parent[v]` and `depth[v]`, then builds a binary-lifting table where `up[k][v]` is the `2^k`-th ancestor of `v`; the root is its own stored ancestor. Preprocessing uses `O(V log V)` time and state.
+
+`lca(u,v)` first lifts the deeper vertex to equal depth, then tests ancestor jumps from the largest power of two downward until both vertices have the same parent. `kth_ancestor(v,k)` decomposes `k` into binary jumps and returns `nullopt` when `k > depth[v]`. `distance_edges(u,v)` uses the rooted depths and their LCA to return the unique tree-path length.
+
+### LCA invariants and complexity
+
+- Parent invariant: every non-root vertex has exactly one parent discovered through the validated tree traversal; the root is its own table parent.
+- Depth invariant: `depth[child] = depth[parent] + 1`.
+- Jump invariant: after preprocessing, `up[k][v]` is the ancestor reached by exactly `2^k` parent steps unless the root is reached first, in which case it remains the root.
+- LCA invariant: after equalizing depths, simultaneous unequal jumps preserve the true LCA strictly above both current vertices; their final parents are therefore the lowest common ancestor.
+
+Each `lca` and `kth_ancestor` query is `O(log V)`; `depth` is `O(1)`; edge distance is `O(log V)` because it performs one LCA query. Construction is iterative, while queries perform no recursion.
+
+### LCA independent verification
+
+Deterministic tests cover sibling, cross-subtree, ancestor/descendant, root, edge-distance, k-th ancestor, and out-of-range query behavior. Separate invalid-input regressions reject directed graphs, self-loops, parallel edges, cycles, disconnected graphs, and an invalid root.
+
+Five hundred fixed-seed random trees contain 1–80 vertices and choose a random root. Each tree executes 100 random query rounds. Production LCA, depths, edge distances, and k-th ancestors are compared with an independent BFS-rooted parent array plus naïve one-step parent climbing. The oracle does not use the binary-lifting table or any production jump recurrence.
+
 ## Frontier
 
-Max flow / min cut and bipartite matching now form an integrated Phase-6 graph-optimization layer with independent theorem witnesses. The next ordered slice is lowest common ancestor; offline algorithms remain after LCA. Phase 6 is not sealed yet.
+Max flow / min cut, bipartite matching, and LCA now cover residual optimization, matching/cover duality, and repeated rooted-tree queries. The remaining ordered Phase-6 frontier is offline algorithms; Phase 6 is not sealed yet.

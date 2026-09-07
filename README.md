@@ -53,6 +53,8 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - Fixed-seed randomized flow graphs are checked against an independent Edmonds-Karp oracle and exhaustive cut enumeration, then replayed for capacity and conservation invariants.
 - Hopcroft-Karp maximum bipartite matching returns reciprocal partner state plus a König minimum-vertex-cover witness.
 - Four hundred fixed-seed bipartite multigraphs are checked against an exhaustive matching oracle and a unit-capacity reduction through the Phase-6 Dinic implementation; matching and cover witnesses are replayed independently.
+- Binary-lifting LCA indexes a strictly validated rooted tree and exposes LCA, edge-distance, depth, and k-th-ancestor queries without retaining mutable graph state.
+- Five hundred fixed-seed random trees execute 100 query rounds each against an independent BFS parent array and naïve parent-climb oracle.
 
 Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), Phase 5 in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md), and the active Phase 6 proof obligations in [`docs/phase6_advanced_graph_offline.md`](docs/phase6_advanced_graph_offline.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
@@ -127,8 +129,9 @@ Do not compare timings across machines or build modes without controlling the en
 - Dinic claims the general `O(V^2 E)` bound; the blocking-flow DFS is recursive and can use `O(V)` call stack on a deep level graph.
 - Bipartite matching uses explicit left/right vertex domains, accepts parallel edges, returns a König minimum-vertex-cover certificate, and claims the standard Hopcroft-Karp `O(E sqrt(V))` bound; its augmenting DFS can use `O(V)` call stack.
 - The Dinic reduction in bipartite tests is cross-layer integration evidence, not the primary matching oracle; exhaustive matching remains structurally independent from Hopcroft-Karp.
+- LCA construction accepts only a non-empty connected acyclic undirected simple graph with a valid root; edge weights are ignored, preprocessing is `O(V log V)`, and LCA/k-th-ancestor queries are `O(log V)`.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1–5 are sealed. Phase 6 is active: max flow / min cut and bipartite matching are executable and integrated; lowest common ancestor is the next ordered slice, followed by offline algorithms. The repository does not claim completeness.
+Phases 1–5 are sealed. Phase 6 is active: max flow / min cut, bipartite matching, and LCA are executable; offline algorithms are the remaining ordered Phase-6 frontier. The repository does not claim completeness.

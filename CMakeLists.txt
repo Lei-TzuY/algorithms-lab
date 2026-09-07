@@ -38,7 +38,8 @@ add_library(algorithms_lab
   src/graphs/minimum_spanning_tree.cpp
   src/graphs/strongly_connected_components.cpp
   src/graphs/max_flow.cpp
-  src/graphs/bipartite_matching.cpp)
+  src/graphs/bipartite_matching.cpp
+  src/graphs/lowest_common_ancestor.cpp)
 
 target_include_directories(algorithms_lab PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 algorithms_enable_strict_warnings(algorithms_lab)
@@ -68,7 +69,8 @@ if(BUILD_TESTING)
     tests/test_rolling_hash.cpp
     tests/test_suffix_array.cpp
     tests/test_max_flow.cpp
-    tests/test_bipartite_matching.cpp)
+    tests/test_bipartite_matching.cpp
+    tests/test_lowest_common_ancestor.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)
