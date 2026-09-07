@@ -54,4 +54,4 @@ The independent exact oracle exhaustively enumerates anchored bipartitions for s
 
 ## Frontier
 
-Karger contraction establishes the Phase-11 contract discipline: randomness is externally seedable, trial budgets are explicit, witnesses are replayable, and probabilistic output is not mislabeled exact. Phase 11 remains active after this slice; a later architecture audit should decide whether another genuinely distinct randomized paradigm is worth adding before sealing the phase.
+Karger contraction establishes the Phase-11 contract discipline: randomness is externally seedable, trial budgets are explicit, witnesses are replayable, and probabilistic output is not mislabeled exact. The Phase-11 architecture audit found this single coherent slice sufficient to establish the intended probabilistic-contract boundary without farming lower-value randomized variants. Phase 11 is sealed; the active frontier moves to Phase 12 approximation algorithms and executable quality guarantees.
