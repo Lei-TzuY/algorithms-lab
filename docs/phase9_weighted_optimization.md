@@ -62,6 +62,10 @@ The cycle-cancelling phase is intentionally documented as pseudo-polynomial rath
 
 Deterministic tests cover lower bounds, non-zero demands, infeasibility, negative two-edge cycles, negative self-loops, empty instances, extreme fixed self-loop capacity, exact representability of total cost `INT64_MIN`, and overflow rejection. Three hundred fixed-seed random instances use 1–4 vertices and at most six edges with tiny integral bounds/costs. The primary oracle enumerates every bounded edge-flow assignment, filters by the exact demand equations, and selects the minimum total cost. The oracle does not use max flow, residual graphs, Bellman-Ford, or cycle cancellation.
 
-## Frontier
+## Sealed boundary and next frontier
 
-All three ordered Phase-9 implementation slices are now present. Phase 9 remains **implementation complete / sealing audit pending** until this circulation slice passes exact PR CI, merged-main CI, and the phase-level architecture/integration audit. No further weighted-optimization variant should be added before that gate.
+Phase 9 is **SEALED**. All three ordered slices are merged and verified on exact `main`: minimum-cost maximum flow, rectangular Hungarian assignment, and lower-bounded / demand minimum-cost circulation.
+
+The phase-level audit found no correctness, oracle-independence, or complexity-claim blocker. The differing negative-cycle contracts are intentional: the successive-shortest-path max-flow slice is restricted to a globally cycle-feasible input domain, while circulation explicitly optimizes general feasible bounded flows by cancelling negative residual cycles.
+
+No further weighted-flow or assignment variants are implied by this seal. The next promoted frontier is Phase 10 general graph matching, beginning with maximum-cardinality matching in arbitrary undirected graphs via Edmonds blossom.
