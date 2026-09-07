@@ -58,7 +58,16 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - Offline dynamic connectivity compiles add/remove/query operations into edge-active intervals over a segment tree of time and evaluates them through the Phase-4 rollback DSU.
 - Five hundred fixed-seed dynamic-connectivity traces of 120 operations are checked against an independent active-edge multiset that rebuilds adjacency and runs BFS for every query.
 
-Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), Phase 5 in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md), and Phase 6 in [`docs/phase6_advanced_graph_offline.md`](docs/phase6_advanced_graph_offline.md) plus the [`Phase-6 sealing audit`](docs/phase6_sealing_audit.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
+### Phase 7 — selected advanced foundations — sealed
+
+- Exact bounded-integer 2D orientation, on-segment/intersection predicates, and deterministic Andrew monotone-chain convex hull.
+- Convex hull is checked on 500 fixed-seed point multisets against an independent Jarvis-march oracle; segment predicates receive separate symmetry/adversarial coverage.
+- Euclidean GCD, overflow-safe `uint64_t` modular multiplication/exponentiation, and deterministic Miller-Rabin classification over the unsigned 64-bit domain.
+- Number-theory tests include full-width known-answer vectors plus 5,000 GCD, 5,000 modular-arithmetic, and 20,000 small-range primality differential cases; the fixed Miller-Rabin witness theorem remains an explicitly external theorem rather than a test-derived claim.
+- Heavy-light decomposition integrates the existing strict-tree `Graph` surface with the Phase-4 checked `SegmentTree` for point assignment, inclusive path sums, and rooted-subtree sums.
+- Three hundred fixed-seed random trees execute 120 mixed HLD operations each against independent BFS/parent-array naïve oracles.
+
+Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), Phase 5 in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md), Phase 6 in [`docs/phase6_advanced_graph_offline.md`](docs/phase6_advanced_graph_offline.md) plus its [`sealing audit`](docs/phase6_sealing_audit.md), and Phase 7 in [`docs/phase7_advanced_foundations.md`](docs/phase7_advanced_foundations.md), [`docs/phase7_number_theory.md`](docs/phase7_number_theory.md), [`docs/phase7_heavy_light_decomposition.md`](docs/phase7_heavy_light_decomposition.md), plus the [`Phase-7 sealing audit`](docs/phase7_sealing_audit.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
 ## Repository layout
 
@@ -133,8 +142,11 @@ Do not compare timings across machines or build modes without controlling the en
 - The Dinic reduction in bipartite tests is cross-layer integration evidence, not the primary matching oracle; exhaustive matching remains structurally independent from Hopcroft-Karp.
 - LCA construction accepts only a non-empty connected acyclic undirected simple graph with a valid root; edge weights are ignored, preprocessing is `O(V log V)`, and LCA/k-th-ancestor queries are `O(log V)`.
 - Offline dynamic connectivity uses undirected multiedge semantics; inactive removal is rejected, self-loops are temporally balanced but connectivity-neutral, and the reused rollback DSU has no path compression. Ordered-map pairing is `O(T log D)` and temporal DSU work is `O((A log T + Q) log V)`.
+- Geometry predicates are exact only inside the documented coordinate domain `[-1e9, 1e9]`; larger coordinates are rejected rather than evaluated with overflow or epsilon arithmetic.
+- Number-theory modular arithmetic is first-principles and overflow-safe across `uint64_t`; deterministic primality relies on the documented seven-witness theorem and is not presented as a cryptographic primitive.
+- Heavy-light decomposition accepts only a non-empty connected acyclic undirected simple graph and inherits the checked `int64_t` representability/transactional-update boundary of the Phase-4 `SegmentTree`.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1–6 are sealed. Phase 7 is active. The first ordered slice is computational-geometry foundations with exact bounded-integer orientation/segment predicates and deterministic convex hull construction; number theory follows after that slice reaches a verified checkpoint. The repository does not claim completeness.
+Phases 1–7 are sealed. Phase 8 is active: algebraic transforms and polynomial algorithms. The first ordered slice is radix-2 NTT and polynomial convolution over modulus `998244353`, with transform round-trip checks and independent naïve-convolution differential verification. The repository does not claim completeness.

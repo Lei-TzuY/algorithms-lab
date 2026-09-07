@@ -38,4 +38,4 @@ The small-range oracles and known-answer vectors exercise the implementation ind
 
 ## Frontier
 
-This completes the ordered Phase-7 number-theory foundations slice. Phase 7 remains active; the remaining roadmap entry is a selected advanced algorithm chosen for integration and learning value rather than breadth farming.
+The unsigned-64-bit arithmetic/primality slice passed its candidate and merged-main gates and is sealed as part of Phase 7. The phase-wide architecture/integration decision and promotion rationale are recorded in [`phase7_sealing_audit.md`](phase7_sealing_audit.md).
