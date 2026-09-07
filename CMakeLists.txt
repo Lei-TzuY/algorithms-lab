@@ -27,6 +27,7 @@ endfunction()
 
 add_library(algorithms_lab
   src/approximation/vertex_cover.cpp
+  src/data_structures/packed_rank_select.cpp
   src/data_structures/persistent_segment_tree.cpp
   src/data_structures/splay_set.cpp
   src/dynamic_programming/edit_distance.cpp
@@ -82,6 +83,7 @@ if(BUILD_TESTING)
     tests/test_rollback_dsu.cpp
     tests/test_splay_set.cpp
     tests/test_persistent_segment_tree.cpp
+    tests/test_packed_rank_select.cpp
     tests/test_kmp.cpp
     tests/test_z_function.cpp
     tests/test_rolling_hash.cpp
