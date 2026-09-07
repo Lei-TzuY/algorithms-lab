@@ -43,7 +43,7 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Max flow / min cut: Dinic flow, per-edge witness, residual source-side cut, Edmonds-Karp + exhaustive-cut differential verification
 - [x] Bipartite matching: Hopcroft-Karp matching witness, König minimum vertex cover, exhaustive + Dinic reduction verification
-- [ ] Lowest common ancestor
+- [x] Lowest common ancestor: strict rooted-tree validation, binary lifting, distance/k-th ancestor queries, naïve differential verification
 - [ ] Offline algorithms
 
 ## Phase 7 — selected advanced foundations
