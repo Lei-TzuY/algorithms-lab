@@ -30,4 +30,4 @@ The fixed modulus/primitive-root fact is a mathematical parameter assumption of 
 
 ## Frontier
 
-The fixed-field NTT slice and the bounded exact two-prime CRT convolution slice are complete; the exactness argument and second-prime boundary are documented in [`phase8_exact_convolution.md`](phase8_exact_convolution.md). Phase 8 remains active for one selected polynomial extension chosen for integration and learning value rather than breadth farming.
+All three ordered Phase-8 implementation slices are now represented: fixed-field NTT/convolution, bounded exact two-prime CRT convolution, and formal power series inversion through Newton doubling. Phase 8 is implementation complete but not sealed; the integrated checkpoint still requires an architecture/integration audit before promotion.
