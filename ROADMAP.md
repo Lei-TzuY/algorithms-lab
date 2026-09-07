@@ -58,8 +58,12 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Exact bounded integer convolution via multiple NTT primes + CRT with an explicit coefficient/representability bound
 - [x] Formal power series inverse via Newton doubling over `998244353` with independent recurrence verification
 
-## Phase 9 — weighted combinatorial optimization — ACTIVE FRONTIER
+## Phase 9 — weighted combinatorial optimization — SEALED
 
 - [x] Minimum-cost maximum flow with signed costs, checked flow/cost certificates, residual-potential optimality evidence, and exhaustive small-flow differential verification
 - [x] Assignment problem via Hungarian algorithm with exhaustive small-instance verification and a min-cost-flow reduction as cross-implementation integration evidence
 - [x] Lower-bounded / demand min-cost circulation with explicit feasibility transformation and independent small-instance verification
+
+## Phase 10 — general graph matching — ACTIVE FRONTIER
+
+- [ ] Maximum-cardinality matching in arbitrary undirected graphs via Edmonds blossom, with exhaustive small-graph verification and Hopcroft-Karp equality on bipartite instances
