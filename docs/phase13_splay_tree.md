@@ -52,6 +52,8 @@ The differential test executes 20,000 fixed-seed mixed insert/erase/contains ope
 
 Focused GCC and Clang builds use the repository strict warning policy. The same suite is also run under AddressSanitizer + UndefinedBehaviorSanitizer with leak detection enabled. Repository-wide integration remains the GitHub Actions gate before merge.
 
-## Frontier
+## Sealed boundary
 
-This slice establishes the Phase-13 boundary: correctness is not only key membership/order, but also mutation-driven structural behavior and an explicit separation between individual worst-case cost and theorem-derived amortized cost. A later architecture audit should decide whether another amortized structure introduces a genuinely different accounting method before sealing the phase; breadth alone is not sufficient.
+Phase 13 is sealed after the splay-tree slice reached merged `main` with the full GCC/Clang/ASan+UBSan matrix green. The phase goal was not to enumerate amortized structures; it was to make mutation-driven self-adjustment and the distinction between individual worst-case cost and theorem-derived amortized cost explicit and executable. Adding another structure solely for name coverage would not establish a comparably new correctness boundary.
+
+The next frontier therefore moves to persistence/versioning, where the central proof obligation changes from amortized restructuring to immutable historical versions, structural sharing, and transactional version creation.
