@@ -77,6 +77,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Deterministic 2-approximation for minimum vertex cover via maximal matching, with mandatory self-loop vertices, replayable matching/cover witness, exhaustive small-graph optimum checks, and explicit ratio validation
 
-## Phase 13 — amortized self-adjusting data structures — ACTIVE FRONTIER
+## Phase 13 — amortized self-adjusting data structures — SEALED
 
 - [x] Splay-tree ordered set with zig/zig-zig/zig-zag rotations, access-to-root behavior, insertion/erasure, explicit structural invariants, randomized `std::set` differential verification, and an honest amortized-vs-worst-case complexity boundary
+
+## Phase 14 — persistent and versioned data structures — ACTIVE FRONTIER
+
+- [ ] Persistent segment tree with immutable branching versions, `O(log n)` path-copy point assignment, structural sharing evidence, transactional failed-update behavior, checked `int64_t` range sums, and randomized version-DAG differential verification
