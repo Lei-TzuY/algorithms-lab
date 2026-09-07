@@ -98,4 +98,4 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 ## Phase 18 — byte wavelet matrix static sequence indexing — ACTIVE FRONTIER
 
-- [ ] Immutable byte wavelet matrix built from eight Phase-17 packed rank/select levels, with exact `access`, prefix/range `rank`, global `select`, range `kth_smallest`, explicit storage accounting, and independent naïve differential verification
+- [x] Immutable byte wavelet matrix built from eight Phase-17 packed rank/select levels, with exact `access`, prefix/range `rank`, global `select`, range `kth_smallest`, explicit storage accounting, and independent naïve differential verification
