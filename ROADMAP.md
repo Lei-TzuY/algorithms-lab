@@ -46,8 +46,8 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Lowest common ancestor: strict rooted-tree validation, binary lifting, distance/k-th ancestor queries, naïve differential verification
 - [x] Offline dynamic connectivity: edge-active intervals, segment tree over time, rollback DSU, naïve temporal differential verification
 
-## Phase 7 — selected advanced foundations — ACTIVE FRONTIER
+## Phase 7 — selected advanced foundations — IMPLEMENTATION COMPLETE; SEALING AUDIT PENDING
 
 - [x] Computational geometry foundations: exact bounded-integer predicates, segment intersection, and convex hull
 - [x] Number theory foundations: Euclidean GCD, overflow-safe modular arithmetic, deterministic uint64 primality
-- [ ] Selected advanced algorithm based on integration and learning value
+- [x] Selected advanced integration: heavy-light decomposition over `Graph` + Phase-4 `SegmentTree` with mutable path/subtree sums
