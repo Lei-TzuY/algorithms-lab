@@ -64,6 +64,11 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Assignment problem via Hungarian algorithm with exhaustive small-instance verification and a min-cost-flow reduction as cross-implementation integration evidence
 - [x] Lower-bounded / demand min-cost circulation with explicit feasibility transformation and independent small-instance verification
 
-## Phase 10 — general graph matching — ACTIVE FRONTIER
+## Phase 10 — general graph matching — SEALED
 
 - [x] Maximum-cardinality matching in arbitrary undirected graphs via Edmonds blossom, with exhaustive small-graph verification and Hopcroft-Karp equality on bipartite instances
+
+
+## Phase 11 — randomized algorithms and probabilistic contracts — ACTIVE FRONTIER
+
+- [ ] Karger-style randomized contraction for undirected global minimum cut with explicit seed/trial semantics, replayable cut witness, exhaustive small-graph optimum checks, and no unsupported finite-trial exactness claim

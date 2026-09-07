@@ -51,4 +51,4 @@ As cross-phase integration evidence, five hundred fixed-seed bipartite graphs ar
 
 ## Frontier
 
-This slice is the only committed Phase-10 hypothesis. After exact PR CI and merged-main CI, Phase 10 should receive an architecture/sealing audit before any weighted-blossom or related matching variant is considered.
+Phase 10 is sealed after exact PR CI, merged-main CI, and the phase-level architecture/integration audit. Weighted blossom is intentionally not appended as a same-phase variant: it changes the objective and would open a separate weighted-matching optimization subsystem rather than deepen the completed cardinality frontier. The next promoted frontier is Phase 11 randomized algorithms and probabilistic contracts, beginning with Karger-style undirected global minimum cut.
