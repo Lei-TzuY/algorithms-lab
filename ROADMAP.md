@@ -71,4 +71,4 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 ## Phase 11 — randomized algorithms and probabilistic contracts — ACTIVE FRONTIER
 
-- [ ] Karger-style randomized contraction for undirected global minimum cut with explicit seed/trial semantics, replayable cut witness, exhaustive small-graph optimum checks, and no unsupported finite-trial exactness claim
+- [x] Karger-style randomized contraction for undirected global minimum cut with explicit seed/trial semantics, replayable cut witness, exhaustive small-graph optimum checks, and no unsupported finite-trial exactness claim
