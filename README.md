@@ -46,7 +46,7 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - Double-modular rolling hash with immutable substring fingerprints, arbitrary-byte semantics, O(1) extraction, direct-polynomial randomized verification, and explicit collision/non-cryptographic limits.
 - Suffix array with prefix doubling, inverse suffix ranks, Kasai adjacent-LCP reconstruction, unsigned-byte ordering, and randomized raw-suffix/LCP differential verification.
 
-### Phase 6 — advanced graph/offline algorithms — active
+### Phase 6 — advanced graph/offline algorithms — sealed
 
 - Dinic max flow on directed multigraphs with explicit residual pairs, checked `int64_t` capacity arithmetic, per-original-edge realized flow, and residual source-side min-cut witness.
 - Max-flow/min-cut equality is executable evidence: the returned cut capacity must equal the returned flow value before the result is exposed.
@@ -55,8 +55,10 @@ This repository is **not** a LeetCode dump, competitive-programming archive, or 
 - Four hundred fixed-seed bipartite multigraphs are checked against an exhaustive matching oracle and a unit-capacity reduction through the Phase-6 Dinic implementation; matching and cover witnesses are replayed independently.
 - Binary-lifting LCA indexes a strictly validated rooted tree and exposes LCA, edge-distance, depth, and k-th-ancestor queries without retaining mutable graph state.
 - Five hundred fixed-seed random trees execute 100 query rounds each against an independent BFS parent array and naïve parent-climb oracle.
+- Offline dynamic connectivity compiles add/remove/query operations into edge-active intervals over a segment tree of time and evaluates them through the Phase-4 rollback DSU.
+- Five hundred fixed-seed dynamic-connectivity traces of 120 operations are checked against an independent active-edge multiset that rebuilds adjacency and runs BFS for every query.
 
-Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), Phase 5 in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md), and the active Phase 6 proof obligations in [`docs/phase6_advanced_graph_offline.md`](docs/phase6_advanced_graph_offline.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
+Correctness notes for Phase 1 live in [`docs/invariants.md`](docs/invariants.md), Phase 2 in [`docs/phase2_greedy_graph_structure.md`](docs/phase2_greedy_graph_structure.md), Phase 3 in [`docs/phase3_dynamic_programming.md`](docs/phase3_dynamic_programming.md), Phase 4 in [`docs/phase4_range_structures.md`](docs/phase4_range_structures.md), Phase 5 in [`docs/phase5_string_algorithms.md`](docs/phase5_string_algorithms.md), and Phase 6 in [`docs/phase6_advanced_graph_offline.md`](docs/phase6_advanced_graph_offline.md) plus the [`Phase-6 sealing audit`](docs/phase6_sealing_audit.md). The ordered sequence is in [`ROADMAP.md`](ROADMAP.md).
 
 ## Repository layout
 
@@ -130,8 +132,9 @@ Do not compare timings across machines or build modes without controlling the en
 - Bipartite matching uses explicit left/right vertex domains, accepts parallel edges, returns a König minimum-vertex-cover certificate, and claims the standard Hopcroft-Karp `O(E sqrt(V))` bound; its augmenting DFS can use `O(V)` call stack.
 - The Dinic reduction in bipartite tests is cross-layer integration evidence, not the primary matching oracle; exhaustive matching remains structurally independent from Hopcroft-Karp.
 - LCA construction accepts only a non-empty connected acyclic undirected simple graph with a valid root; edge weights are ignored, preprocessing is `O(V log V)`, and LCA/k-th-ancestor queries are `O(log V)`.
+- Offline dynamic connectivity uses undirected multiedge semantics; inactive removal is rejected, self-loops are temporally balanced but connectivity-neutral, and the reused rollback DSU has no path compression. Ordered-map pairing is `O(T log D)` and temporal DSU work is `O((A log T + Q) log V)`.
 - Graph vertex IDs are dense integers in `[0, V)`.
 
 ## Current frontier
 
-Phases 1–5 are sealed. Phase 6 is active: max flow / min cut, bipartite matching, and LCA are executable; offline algorithms are the remaining ordered Phase-6 frontier. The repository does not claim completeness.
+Phases 1–6 are sealed. Phase 7 is active. The first ordered slice is computational-geometry foundations with exact bounded-integer orientation/segment predicates and deterministic convex hull construction; number theory follows after that slice reaches a verified checkpoint. The repository does not claim completeness.

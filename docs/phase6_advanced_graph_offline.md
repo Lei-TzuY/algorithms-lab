@@ -64,6 +64,8 @@ The rollback DSU intentionally has no path compression. With union by size, its 
 
 Detailed temporal semantics and verification obligations live in [`phase6_offline_dynamic_connectivity.md`](phase6_offline_dynamic_connectivity.md). Deterministic regressions cover add/remove timelines, duplicate copies, self-loops, invalid endpoints/kinds, and inactive removal. Five hundred fixed-seed traces of 120 operations over 1–10 vertices are compared with an independent active-edge multiset that rebuilds an ordinary adjacency list and runs BFS for every query.
 
-## Frontier
+## Sealed checkpoint
 
-Max flow / min cut, bipartite matching, LCA, and offline dynamic connectivity now cover all ordered Phase-6 implementation slices. Phase 6 is **implementation complete but not sealed**. The required next action after the offline candidate and its merged-main CI are green is an architecture/integration audit; only a clean audit may seal Phase 6 and promote Phase 7.
+All four ordered Phase-6 implementation slices are integrated on main and passed the three-job CI matrix at checkpoint `b0c5659f08f0938e986ddf3a907ff17fcfad05a8`. The architecture/integration review is recorded in [`phase6_sealing_audit.md`](phase6_sealing_audit.md).
+
+The audit found no correctness, architecture, cross-layer-integration, oracle-independence, validation, or complexity-claim blocker. Phase 6 is therefore sealed. Phase 7 is the active frontier; computational-geometry foundations are first.

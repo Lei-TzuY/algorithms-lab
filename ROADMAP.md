@@ -39,15 +39,15 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 - [x] Rolling hash with double modular substring fingerprints and direct-polynomial differential verification
 - [x] Suffix array with prefix-doubling order, inverse rank, Kasai LCP, and naïve suffix/LCP differential verification
 
-## Phase 6 — advanced graph/offline algorithms — IMPLEMENTATION COMPLETE; SEALING AUDIT PENDING
+## Phase 6 — advanced graph/offline algorithms — SEALED
 
 - [x] Max flow / min cut: Dinic flow, per-edge witness, residual source-side cut, Edmonds-Karp + exhaustive-cut differential verification
 - [x] Bipartite matching: Hopcroft-Karp matching witness, König minimum vertex cover, exhaustive + Dinic reduction verification
 - [x] Lowest common ancestor: strict rooted-tree validation, binary lifting, distance/k-th ancestor queries, naïve differential verification
 - [x] Offline dynamic connectivity: edge-active intervals, segment tree over time, rollback DSU, naïve temporal differential verification
 
-## Phase 7 — selected advanced foundations
+## Phase 7 — selected advanced foundations — ACTIVE FRONTIER
 
-- [ ] Computational geometry
+- [ ] Computational geometry foundations: exact bounded-integer predicates, segment intersection, and convex hull
 - [ ] Number theory
 - [ ] Selected advanced algorithms based on learning value
