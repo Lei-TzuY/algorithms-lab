@@ -49,5 +49,5 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 ## Phase 7 — selected advanced foundations — ACTIVE FRONTIER
 
 - [x] Computational geometry foundations: exact bounded-integer predicates, segment intersection, and convex hull
-- [ ] Number theory
-- [ ] Selected advanced algorithms based on learning value
+- [x] Number theory foundations: Euclidean GCD, overflow-safe modular arithmetic, deterministic uint64 primality
+- [ ] Selected advanced algorithm based on integration and learning value
