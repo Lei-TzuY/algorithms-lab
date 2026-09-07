@@ -73,6 +73,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Karger-style randomized contraction for undirected global minimum cut with explicit seed/trial semantics, replayable cut witness, exhaustive small-graph optimum checks, and no unsupported finite-trial exactness claim
 
-## Phase 12 — approximation algorithms and executable quality guarantees — ACTIVE FRONTIER
+## Phase 12 — approximation algorithms and executable quality guarantees — SEALED
 
 - [x] Deterministic 2-approximation for minimum vertex cover via maximal matching, with mandatory self-loop vertices, replayable matching/cover witness, exhaustive small-graph optimum checks, and explicit ratio validation
+
+## Phase 13 — amortized self-adjusting data structures — ACTIVE FRONTIER
+
+- [ ] Splay-tree ordered set with zig/zig-zig/zig-zag rotations, access-to-root behavior, insertion/erasure, explicit structural invariants, randomized `std::set` differential verification, and an honest amortized-vs-worst-case complexity boundary
