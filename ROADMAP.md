@@ -102,4 +102,4 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 ## Phase 19 — exact BWT backward-search text indexing — ACTIVE FRONTIER
 
-- [ ] Exact byte-string substring count/locate via conceptual-sentinel BWT backward search, reusing Phase-5 suffix-array order and Phase-18 wavelet-matrix occurrence counts, with arbitrary-byte support and independent direct-scan verification
+- [x] Exact byte-string substring count/locate via conceptual-sentinel BWT backward search, reusing Phase-5 suffix-array order and Phase-18 wavelet-matrix occurrence counts, with arbitrary-byte support and independent direct-scan verification
