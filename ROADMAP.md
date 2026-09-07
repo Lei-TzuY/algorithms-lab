@@ -87,4 +87,4 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 ## Phase 15 — online algorithms and competitive analysis — ACTIVE FRONTIER
 
-- [ ] Deterministic LRU paging with replayable hit/fault/eviction trace, independent exact offline optimum on bounded sequences, and an explicit theorem-derived competitive-ratio boundary
+- [x] Deterministic LRU paging with replayable hit/fault/eviction trace, independent exact offline optimum on bounded sequences, and an explicit theorem-derived competitive-ratio boundary
