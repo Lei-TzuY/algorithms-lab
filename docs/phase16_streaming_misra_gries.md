@@ -68,5 +68,8 @@ overflow checks reject unrepresentable state instead of wrapping.
 
 ## Frontier
 
-Phase 16 implementation is complete; phase-level sealing/integration audit is the
-next gate before any further promotion.
+Phase 16 is SEALED after exact merged-main GCC, Clang, and ASan+UBSan integration
+passed. The next promoted frontier is a packed immutable rank/select bit-vector
+index. That frontier adds a word-level static query model rather than another
+streaming estimator, and it will make only the storage/query guarantees actually
+implemented rather than borrowing a theoretical succinctness claim.
