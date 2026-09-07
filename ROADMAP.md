@@ -62,4 +62,4 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Minimum-cost maximum flow with signed costs, checked flow/cost certificates, residual-potential optimality evidence, and exhaustive small-flow differential verification
 - [x] Assignment problem via Hungarian algorithm with exhaustive small-instance verification and a min-cost-flow reduction as cross-implementation integration evidence
-- [ ] Lower-bounded / demand min-cost circulation with explicit feasibility transformation and independent small-instance verification
+- [x] Lower-bounded / demand min-cost circulation with explicit feasibility transformation and independent small-instance verification

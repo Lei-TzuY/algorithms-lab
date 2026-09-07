@@ -50,6 +50,18 @@ The implementation uses the rectangular shortest-augmenting-path form of the Hun
 
 Deterministic tests cover rectangular matrices, negative costs, equal-cost tie behavior, malformed shapes, infeasible `rows > columns`, and adversarial arithmetic. Five hundred fixed-seed random matrices use 1–4 rows, `rows`–5 columns, and costs in `[-20, 20]`. The primary oracle exhaustively enumerates every injective row-to-column assignment and compares the exact minimum cost. As cross-layer integration evidence, every same random matrix is independently reduced to the first Phase-9 min-cost-max-flow API and must produce the same optimum. The flow reduction is deliberately not the primary oracle.
 
+## Lower-bounded / demand min-cost circulation
+
+The third slice adds `min_cost_circulation(vertex_count, edges, demand)`. Every edge has integral lower/upper capacity bounds and signed cost; `demand[v]` is the required net inflow minus net outflow at vertex `v`. Feasibility is a first-class result: the API returns `std::nullopt` when no bounded flow can satisfy all vertex demands.
+
+The solver first fixes every lower bound, adjusts the remaining per-vertex balance, and reduces feasibility to a super-source/super-sink network over residual `upper-lower` capacities. The repository's Phase-6 Dinic implementation must saturate the complete auxiliary demand before the original-edge flow is accepted. This is an actual cross-phase reuse rather than a second private max-flow implementation.
+
+Unlike the first Phase-9 min-cost-max-flow slice, feasible circulation may legitimately benefit from negative-cost residual cycles. Therefore this implementation does **not** impose the earlier no-negative-cycle input restriction. Starting from the feasible bounded circulation, it repeatedly finds a negative residual cycle with all-vertex Bellman-Ford and augments the cycle by its bottleneck residual capacity. When no negative cycle remains, the final Bellman-Ford distances are returned as a feasible residual potential and every positive-residual arc is independently checked to have non-negative reduced cost.
+
+The cycle-cancelling phase is intentionally documented as pseudo-polynomial rather than strongly polynomial. With `K` cycle cancellations its cost is `O(KVE)` after the Dinic feasibility transformation; each cancellation changes an integral edge flow by at least one unit. This bounded educational implementation favors an explicit optimality proof obligation over hiding a stronger complexity claim.
+
+Deterministic tests cover lower bounds, non-zero demands, infeasibility, negative two-edge cycles, negative self-loops, empty instances, extreme fixed self-loop capacity, exact representability of total cost `INT64_MIN`, and overflow rejection. Three hundred fixed-seed random instances use 1–4 vertices and at most six edges with tiny integral bounds/costs. The primary oracle enumerates every bounded edge-flow assignment, filters by the exact demand equations, and selects the minimum total cost. The oracle does not use max flow, residual graphs, Bellman-Ford, or cycle cancellation.
+
 ## Frontier
 
-This completes the first two ordered Phase-9 slices. Phase 9 remains active. The next roadmap frontier is lower-bounded / demand min-cost circulation with an explicit feasibility transformation and an independent small-instance oracle.
+All three ordered Phase-9 implementation slices are now present. Phase 9 remains **implementation complete / sealing audit pending** until this circulation slice passes exact PR CI, merged-main CI, and the phase-level architecture/integration audit. No further weighted-optimization variant should be added before that gate.
