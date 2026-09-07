@@ -44,6 +44,7 @@ add_library(algorithms_lab
   src/graphs/lowest_common_ancestor.cpp
   src/graphs/heavy_light_decomposition.cpp
   src/graphs/offline_dynamic_connectivity.cpp
+  src/optimization/hungarian_assignment.cpp
   src/number_theory/modular.cpp
   src/polynomials/number_theoretic_transform.cpp
   src/polynomials/formal_power_series.cpp)
@@ -77,6 +78,7 @@ if(BUILD_TESTING)
     tests/test_suffix_array.cpp
     tests/test_max_flow.cpp
     tests/test_min_cost_flow.cpp
+    tests/test_hungarian_assignment.cpp
     tests/test_bipartite_matching.cpp
     tests/test_lowest_common_ancestor.cpp
     tests/test_heavy_light_decomposition.cpp
