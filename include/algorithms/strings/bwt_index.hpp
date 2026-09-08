@@ -1,7 +1,7 @@
 #pragma once
 
-#include "algorithms/data_structures/byte_wavelet_matrix.hpp"
 #include "algorithms/data_structures/packed_rank_select.hpp"
+#include "algorithms/data_structures/run_length_byte_rank.hpp"
 
 #include <array>
 #include <cstddef>
@@ -31,6 +31,12 @@ class BwtByteIndex {
   [[nodiscard]] std::size_t sampled_position_payload_bytes() const noexcept;
   [[nodiscard]] std::size_t sampled_locate_payload_bytes() const noexcept;
   [[nodiscard]] std::size_t max_lf_steps_per_locate() const noexcept;
+
+  // BWT occurrence diagnostics. Payload is the logical bytes occupied by the
+  // run arrays and symbol-run index entries only; vector/allocator overhead
+  // and spare capacity are intentionally excluded.
+  [[nodiscard]] std::size_t bwt_run_count() const noexcept;
+  [[nodiscard]] std::size_t bwt_occurrence_payload_bytes() const noexcept;
 
   // Exact substring search over arbitrary bytes. The empty pattern matches
   // every boundary position 0..text_size(), matching the repository's KMP
@@ -73,7 +79,7 @@ class BwtByteIndex {
   std::array<std::size_t, 256U> cumulative_{};
   algorithms::data_structures::PackedRankSelectBitVector sampled_rows_;
   std::vector<std::size_t> sampled_positions_;
-  algorithms::data_structures::ByteWaveletMatrix bwt_;
+  algorithms::data_structures::RunLengthByteRankIndex bwt_;
 };
 
 }  // namespace algorithms::strings
