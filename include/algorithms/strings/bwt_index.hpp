@@ -57,6 +57,14 @@ class BwtByteIndex {
   [[nodiscard]] std::optional<std::size_t> locate_one_toehold(
       std::string_view pattern) const;
 
+  // Enumerate the complete exact match set without consulting Phase-20
+  // periodic locate samples. Every matched BWT row is LF-walked until it
+  // reaches either the conceptual sentinel or a Phase-22 run-boundary sample.
+  // The result is sorted by text position. This intentionally trades slower
+  // worst-case query time for O(R) resident run-boundary sampling state.
+  [[nodiscard]] std::vector<std::size_t> locate_run_sampled(
+      std::string_view pattern) const;
+
  private:
   struct SearchRange {
     std::size_t begin;
