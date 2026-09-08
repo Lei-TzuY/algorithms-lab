@@ -12,6 +12,8 @@
 
 namespace algorithms::strings {
 
+class BidirectionalBwtByteIndex;
+
 struct MemoizedRunSampledLocateResult {
   std::vector<std::size_t> positions;
   std::size_t seeded_row_count = 0U;
@@ -82,6 +84,8 @@ class BwtByteIndex {
       std::string_view pattern) const;
 
  private:
+  friend class BidirectionalBwtByteIndex;
+
   struct SearchRange {
     std::size_t begin;
     std::size_t end;
@@ -130,6 +134,58 @@ class BwtByteIndex {
   std::vector<std::size_t> run_toehold_sample_rows_;
   std::vector<std::size_t> run_toehold_sample_positions_;
   algorithms::data_structures::RunLengthByteRankIndex bwt_;
+};
+
+class BidirectionalBwtState {
+ public:
+  [[nodiscard]] std::size_t forward_begin() const noexcept;
+  [[nodiscard]] std::size_t forward_end() const noexcept;
+  [[nodiscard]] std::size_t reverse_begin() const noexcept;
+  [[nodiscard]] std::size_t reverse_end() const noexcept;
+  [[nodiscard]] std::size_t match_count() const noexcept;
+
+ private:
+  friend class BidirectionalBwtByteIndex;
+
+  BidirectionalBwtState(std::size_t forward_begin, std::size_t forward_end,
+                        std::size_t reverse_begin,
+                        std::size_t reverse_end) noexcept;
+
+  std::size_t forward_begin_ = 0U;
+  std::size_t forward_end_ = 0U;
+  std::size_t reverse_begin_ = 0U;
+  std::size_t reverse_end_ = 0U;
+};
+
+// Exact bidirectional substring-search state over arbitrary bytes. A state is
+// tied to the index that produced it; passing a state from another index is
+// outside the API contract. The empty state represents the empty pattern and
+// therefore has n+1 conceptual suffix rows in both directions.
+class BidirectionalBwtByteIndex {
+ public:
+  explicit BidirectionalBwtByteIndex(std::string_view text);
+
+  [[nodiscard]] std::size_t text_size() const noexcept;
+  [[nodiscard]] std::size_t row_count() const noexcept;
+  [[nodiscard]] BidirectionalBwtState empty_state() const noexcept;
+
+  [[nodiscard]] BidirectionalBwtState extend_left(
+      const BidirectionalBwtState& state, std::uint8_t value) const;
+  [[nodiscard]] BidirectionalBwtState extend_right(
+      const BidirectionalBwtState& state, std::uint8_t value) const;
+
+ private:
+  void validate_state(const BidirectionalBwtState& state) const;
+  [[nodiscard]] std::size_t extension_offset(
+      const BwtByteIndex& index, BwtByteIndex::SearchRange range,
+      std::uint8_t value) const;
+  [[nodiscard]] static BwtByteIndex::SearchRange project_peer_interval(
+      BwtByteIndex::SearchRange peer, std::size_t offset,
+      std::size_t match_count);
+
+  std::size_t text_size_ = 0U;
+  BwtByteIndex forward_;
+  BwtByteIndex reverse_;
 };
 
 }  // namespace algorithms::strings
