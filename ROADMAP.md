@@ -108,6 +108,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Replace the full suffix-row position table with packed sampled-row membership plus periodic suffix-position samples, reconstructing exact locate positions by bounded LF walks with explicit sample-rate/storage/query-cost evidence
 
-## Phase 21 — run-length BWT occurrence representation — ACTIVE FRONTIER
+## Phase 21 — run-length BWT occurrence representation — SEALED
 
-- [ ] Replace the resident full BWT byte wavelet occurrence structure with a run-length byte rank/access index, preserving exact count/locate semantics while exposing BWT run-count/storage/query-cost evidence and making no universal compression claim
+- [x] Replace the resident full BWT byte wavelet occurrence structure with a run-length byte rank/access index, preserving exact count/locate semantics while exposing BWT run-count/storage/query-cost evidence and making no universal compression claim
+
+## Phase 22 — run-aware BWT toehold locating — ACTIVE FRONTIER
+
+- [ ] Maintain one exact suffix-position toehold through backward search using BWT run-boundary suffix samples, so a non-empty matched interval can return one exact occurrence from `O(R)` run-aware sampling state without reintroducing a full suffix-row position table; preserve arbitrary-byte/conceptual-sentinel semantics and verify every returned witness against direct scan
