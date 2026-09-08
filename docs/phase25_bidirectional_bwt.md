@@ -79,8 +79,8 @@ Coverage includes:
 - all 256 single-byte extensions; and
 - randomized mixed left/right extension sequences over full-byte texts.
 
-The focused candidate passes strict GCC, strict Clang, and ASan+UBSan. Full repository CI remains the integration gate before the phase can be sealed.
+The implementation merged as `main@8b0b9618ee1e53b47b36ef47e3ac6149d223902d`. Post-merge CI run `34181328896` completed successfully on GCC release, Clang release, and GCC ASan+UBSan. The independent Phase-25 sealing audit found no correctness or integration blocker.
 
 ## Status
 
-Implementation candidate complete; Phase 25 remains active until exact remote CI, merge, merged-main CI, and the sealing audit all succeed.
+**SEALED.** Exact paired-interval extension, arbitrary-byte semantics, conceptual-sentinel ordering, absent-state continuation, and the conservative complexity boundary are verified. The next frontier is bounded-substitution approximate matching built on this exact bidirectional state; Phase 25 itself does not claim approximate matching.
