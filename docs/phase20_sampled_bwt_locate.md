@@ -72,4 +72,6 @@ Focused pre-upload verification passed under repository strict warnings with GCC
 
 ## Phase boundary
 
-This slice completes the Phase-20 representation hypothesis only after exact PR CI and merged-main CI pass. A phase-level architecture audit must then decide whether another compressed-text-index representation adds substantial depth or whether the repository has reached a mature checkpoint; low-value query wrappers are explicitly out of scope.
+Phase 20 is sealed after PR #57 reached `main@bebf1543db4c56cce7b9f155bd91beaed7b8f8a0` and merged-main CI run `34172494194` completed successfully under GCC release, Clang release, and GCC ASan+UBSan.
+
+The architecture audit rejects more wrappers around the same backward-search interval. The next substantial representation frontier is the other resident side of the index: Phase 21 will investigate a run-length byte rank/access representation for BWT occurrence queries. It must preserve exact count/locate semantics while exposing run count, logical payload, and query-cost evidence, and it must explicitly avoid any claim that run-length storage is universally smaller on non-repetitive inputs.
