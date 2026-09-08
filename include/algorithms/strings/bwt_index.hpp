@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -21,6 +22,17 @@ struct HammingBwtSearchResult {
   std::size_t pruned_empty_transitions = 0U;
   std::size_t terminal_states = 0U;
   std::size_t peak_frontier_size = 0U;
+};
+
+struct BwtTextReconstructionResult {
+  std::string text;
+  std::size_t lf_steps = 0U;
+};
+
+struct BwtTextExtractionResult {
+  std::string bytes;
+  std::size_t lf_steps = 0U;
+  std::size_t reconstructed_bytes = 0U;
 };
 
 struct MemoizedRunSampledLocateResult {
@@ -41,6 +53,18 @@ class BwtByteIndex {
 
   [[nodiscard]] std::size_t text_size() const noexcept;
   [[nodiscard]] std::size_t row_count() const noexcept;
+
+  // Reconstruct the exact constructor text from resident BWT/LF state.
+  // No retained source-text copy is consulted. The baseline performs exactly
+  // text_size() LF steps and allocates O(text_size()) result storage.
+  [[nodiscard]] BwtTextReconstructionResult reconstruct_text() const;
+
+  // Return constructor-text bytes in the validated half-open range [begin,end).
+  // This first baseline reconstructs the full text before slicing, so the
+  // diagnostics intentionally expose O(text_size()) query work even for a
+  // short range.
+  [[nodiscard]] BwtTextExtractionResult extract_text(std::size_t begin,
+                                                      std::size_t end) const;
 
   // Locate sampling diagnostics. The row-membership payload is the logical
   // packed-bit/rank payload only; sample-position bytes are the stored
