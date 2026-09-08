@@ -74,4 +74,6 @@ Randomized equality is implementation evidence. The exactness argument comes fro
 
 ## Phase status
 
-The Phase-23 implementation is complete on the feature branch; sealing still requires exact candidate CI, integration into `main`, merged-main CI, and a final architecture audit. The audit must decide whether another run-aware locating layer adds a genuinely new representation/query model rather than merely optimizing this intentionally simple LF-walk tradeoff.
+Phase 23 is **SEALED** after the implementation reached `main@03181d5d949c3f8b0a7fa9a085c1fc8c7c40f6a0` and merged-main CI run `34177039499` passed GCC release, Clang release, and GCC ASan+UBSan. The final architecture audit is recorded in `docs/phase23_sealing_audit.md`.
+
+The next frontier is Phase 24 query-local memoized run-sampled locating: preserve the same `O(R)` resident run-boundary samples, spend `O(n)` query workspace to memoize resolved conceptual rows, and bound newly traversed LF rows to at most `n+1` per query. This is an explicit time/query-memory tradeoff, not an r-index or compressed-construction claim.
