@@ -1,7 +1,11 @@
 #include "algorithms/strings/bwt_index.hpp"
 
+#include <algorithm>
+#include <limits>
 #include <stdexcept>
 #include <string>
+#include <utility>
+#include <vector>
 
 namespace algorithms::strings {
 namespace {
@@ -150,6 +154,125 @@ BidirectionalBwtState BidirectionalBwtByteIndex::extend_right(
       project_peer_interval(forward_range, offset, match_count);
   return BidirectionalBwtState{next_forward.begin, next_forward.end,
                                next_reverse.begin, next_reverse.end};
+}
+
+namespace {
+
+void checked_increment(std::size_t& value, const char* message) {
+  if (value == std::numeric_limits<std::size_t>::max()) {
+    throw std::length_error(message);
+  }
+  ++value;
+}
+
+struct HammingSearchNode {
+  BidirectionalBwtState state;
+  std::size_t mismatches;
+};
+
+struct HammingExtensionStep {
+  std::size_t pattern_index;
+  bool extend_left;
+};
+
+}  // namespace
+
+HammingBwtSearchResult BidirectionalBwtByteIndex::locate_hamming(
+    std::string_view pattern, std::size_t max_substitutions) const {
+  HammingBwtSearchResult result;
+  if (pattern.empty()) {
+    result.positions.reserve(row_count());
+    for (std::size_t position = 0U; position < row_count(); ++position) {
+      result.positions.push_back(position);
+    }
+    result.terminal_states = 1U;
+    result.peak_frontier_size = 1U;
+    return result;
+  }
+  if (pattern.size() > text_size_) {
+    result.peak_frontier_size = 1U;
+    return result;
+  }
+
+  const std::size_t effective_budget =
+      std::min(max_substitutions, pattern.size());
+  const std::size_t center = pattern.size() / 2U;
+  std::vector<HammingExtensionStep> steps;
+  steps.reserve(pattern.size());
+  steps.push_back(HammingExtensionStep{center, false});
+  for (std::size_t distance = 1U; steps.size() < pattern.size(); ++distance) {
+    if (distance <= center) {
+      steps.push_back(HammingExtensionStep{center - distance, true});
+    }
+    if (distance < pattern.size() - center) {
+      steps.push_back(HammingExtensionStep{center + distance, false});
+    }
+  }
+
+  std::vector<HammingSearchNode> frontier;
+  frontier.push_back(HammingSearchNode{empty_state(), 0U});
+  result.peak_frontier_size = 1U;
+
+  for (const HammingExtensionStep step : steps) {
+    std::vector<HammingSearchNode> next;
+    for (const HammingSearchNode& node : frontier) {
+      checked_increment(result.expanded_states,
+                        "Hamming BWT expanded-state count overflow");
+      const std::uint8_t expected = static_cast<std::uint8_t>(
+          static_cast<unsigned char>(pattern[step.pattern_index]));
+
+      const auto attempt = [&](std::uint8_t value,
+                               std::size_t added_mismatches) {
+        checked_increment(result.transitions_considered,
+                          "Hamming BWT transition count overflow");
+        const BidirectionalBwtState candidate =
+            step.extend_left ? extend_left(node.state, value)
+                             : extend_right(node.state, value);
+        if (candidate.match_count() == 0U) {
+          checked_increment(result.pruned_empty_transitions,
+                            "Hamming BWT prune count overflow");
+          return;
+        }
+        next.push_back(
+            HammingSearchNode{candidate, node.mismatches + added_mismatches});
+      };
+
+      attempt(expected, 0U);
+      if (node.mismatches < effective_budget) {
+        for (std::size_t symbol = 0U; symbol < 256U; ++symbol) {
+          const auto value = static_cast<std::uint8_t>(symbol);
+          if (value != expected) {
+            attempt(value, 1U);
+          }
+        }
+      }
+    }
+    frontier = std::move(next);
+    result.peak_frontier_size =
+        std::max(result.peak_frontier_size, frontier.size());
+    if (frontier.empty()) {
+      break;
+    }
+  }
+
+  result.terminal_states = frontier.size();
+  for (const HammingSearchNode& node : frontier) {
+    for (std::size_t row = node.state.forward_begin();
+         row < node.state.forward_end(); ++row) {
+      const std::size_t position = forward_.resolve_row_position(row);
+      if (position >= text_size_ || pattern.size() > text_size_ - position) {
+        throw std::logic_error(
+            "Hamming BWT terminal suffix-position invariant violated");
+      }
+      result.positions.push_back(position);
+    }
+  }
+  std::sort(result.positions.begin(), result.positions.end());
+  if (std::adjacent_find(result.positions.begin(), result.positions.end()) !=
+      result.positions.end()) {
+    throw std::logic_error("Hamming BWT terminal intervals overlap");
+  }
+  return result;
 }
 
 } // namespace algorithms::strings

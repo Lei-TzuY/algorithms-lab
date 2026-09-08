@@ -14,6 +14,15 @@ namespace algorithms::strings {
 
 class BidirectionalBwtByteIndex;
 
+struct HammingBwtSearchResult {
+  std::vector<std::size_t> positions;
+  std::size_t expanded_states = 0U;
+  std::size_t transitions_considered = 0U;
+  std::size_t pruned_empty_transitions = 0U;
+  std::size_t terminal_states = 0U;
+  std::size_t peak_frontier_size = 0U;
+};
+
 struct MemoizedRunSampledLocateResult {
   std::vector<std::size_t> positions;
   std::size_t seeded_row_count = 0U;
@@ -173,6 +182,14 @@ class BidirectionalBwtByteIndex {
       const BidirectionalBwtState& state, std::uint8_t value) const;
   [[nodiscard]] BidirectionalBwtState extend_right(
       const BidirectionalBwtState& state, std::uint8_t value) const;
+
+  // Exact fixed-length Hamming-distance search. Only substitutions are
+  // permitted; insertion/deletion edit distance is outside this API. The
+  // deterministic center-out search reuses both bidirectional extension
+  // directions and exposes search/pruning diagnostics rather than hiding the
+  // potentially exponential branch frontier.
+  [[nodiscard]] HammingBwtSearchResult locate_hamming(
+      std::string_view pattern, std::size_t max_substitutions) const;
 
  private:
   void validate_state(const BidirectionalBwtState& state) const;
