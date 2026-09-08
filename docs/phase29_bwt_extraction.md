@@ -37,8 +37,10 @@ Deterministic tests cover empty text, `banana`, empty/full/interior half-open sl
 
 A fixed-seed randomized differential corpus constructs 400 arbitrary-byte texts of length `0..128`. Every full reconstruction is compared byte-for-byte with the constructor input, and 40 independently chosen valid slices per text are compared with direct `std::string::substr`. Every successful call also checks the baseline accounting identity `lf_steps == reconstructed_bytes == text_size()`.
 
-An algorithm-focused pre-upload prototype exercised the same LF reconstruction recurrence under strict GCC, strict Clang, and real GCC ASan+UBSan on an earlier sealed BWT occurrence backend. Exact current-backend integration remains gated by the repository's full three-job remote CI; the prototype is not presented as a substitute for that gate.
+The exact candidate reached PR #75 with full GCC release, Clang release, and GCC ASan+UBSan CI success. After squash merge as `main@e6ae62b5e10d84c3daff58b91608d245fa1ed025`, exact merged-main CI run `34188386490` also completed successfully.
 
 ## Phase boundary
 
-This implementation establishes only reconstruction/extraction substrate. It does not implement exact seed-and-verify approximate search. Phase 29 remains active until exact candidate CI, clean integration, merged-main CI, and a post-merge sealing audit succeed.
+Phase 29 is sealed. The correctness substrate now exists: exact bytes can be reconstructed and sliced from resident BWT/LF state without retaining the source string, with the intentionally linear baseline cost exposed rather than hidden.
+
+A faster compressed random-access extraction structure would be a different performance hypothesis, not a missing correctness obligation for this phase. Phase 30 instead uses the new substrate in a different architecture: exact `k+1`-seed candidate generation through the BWT followed by exact bounded edit-distance verification on reconstructed text, with explicit candidate-sensitive cost and cross-checks against the sealed Phase-27 state-expansion solver.
