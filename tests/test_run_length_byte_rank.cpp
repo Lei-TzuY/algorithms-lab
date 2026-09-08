@@ -2,6 +2,7 @@
 #include "test_framework.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <random>
@@ -48,6 +49,8 @@ TEST_CASE(run_length_byte_rank_empty_and_deterministic_runs) {
   REQUIRE_THROWS_AS(empty_index.access(0U), std::out_of_range);
   REQUIRE_THROWS_AS(empty_index.rank(std::uint8_t{0}, 1U),
                     std::out_of_range);
+  REQUIRE_THROWS_AS(empty_index.select(std::uint8_t{0}, 0U),
+                    std::out_of_range);
 
   const std::vector<std::uint8_t> values{1U, 1U, 1U, 2U, 2U, 1U, 255U,
                                          255U};
@@ -75,6 +78,15 @@ TEST_CASE(run_length_byte_rank_empty_and_deterministic_runs) {
                     std::out_of_range);
   REQUIRE_THROWS_AS(index.rank(std::uint8_t{1}, 0U, values.size() + 1U),
                     std::out_of_range);
+
+  REQUIRE_EQ(index.select(std::uint8_t{1}, 0U), std::size_t{0});
+  REQUIRE_EQ(index.select(std::uint8_t{1}, 1U), std::size_t{1});
+  REQUIRE_EQ(index.select(std::uint8_t{1}, 2U), std::size_t{2});
+  REQUIRE_EQ(index.select(std::uint8_t{1}, 3U), std::size_t{5});
+  REQUIRE_EQ(index.select(std::uint8_t{2}, 0U), std::size_t{3});
+  REQUIRE_EQ(index.select(std::uint8_t{255}, 1U), std::size_t{7});
+  REQUIRE_THROWS_AS(index.select(std::uint8_t{1}, 4U), std::out_of_range);
+  REQUIRE_THROWS_AS(index.select(std::uint8_t{42}, 0U), std::out_of_range);
 }
 
 TEST_CASE(run_length_byte_rank_randomized_differential_against_naive_sequence) {
@@ -99,8 +111,13 @@ TEST_CASE(run_length_byte_rank_randomized_differential_against_naive_sequence) {
                    (std::size_t{3} * sizeof(std::size_t) +
                     sizeof(std::uint8_t)));
 
+    std::array<std::size_t, 256U> seen{};
     for (std::size_t position = 0U; position < values.size(); ++position) {
-      REQUIRE_EQ(index.access(position), values[position]);
+      const std::uint8_t value = values[position];
+      REQUIRE_EQ(index.access(position), value);
+      const std::size_t symbol = static_cast<std::size_t>(value);
+      REQUIRE_EQ(index.select(value, seen[symbol]), position);
+      ++seen[symbol];
     }
 
     std::uniform_int_distribution<std::size_t> endpoint_dist(0U, length);
