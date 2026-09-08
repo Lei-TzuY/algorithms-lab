@@ -164,6 +164,14 @@ std::size_t BwtByteIndex::max_lf_steps_per_locate() const noexcept {
   return locate_sample_rate_ - 1U;
 }
 
+std::size_t BwtByteIndex::bwt_run_count() const noexcept {
+  return bwt_.run_count();
+}
+
+std::size_t BwtByteIndex::bwt_occurrence_payload_bytes() const noexcept {
+  return bwt_.logical_payload_bytes();
+}
+
 std::size_t BwtByteIndex::occurrence(std::uint8_t value,
                                      std::size_t row_end) const {
   if (row_end > row_count()) {
