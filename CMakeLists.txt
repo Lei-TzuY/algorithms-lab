@@ -97,6 +97,7 @@ if(BUILD_TESTING)
     tests/test_suffix_array.cpp
     tests/test_bwt_index.cpp
     tests/test_bwt_bidirectional.cpp
+    tests/test_bwt_hamming.cpp
     tests/test_bwt_run_length_occurrence.cpp
     tests/test_bwt_toehold.cpp
     tests/test_bwt_run_sampled_locate.cpp
