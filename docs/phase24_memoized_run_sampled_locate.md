@@ -104,4 +104,6 @@ Randomized equality is implementation evidence. The exactness and traversal boun
 
 ## Phase status
 
-The Phase-24 implementation is complete on the feature branch. Sealing still requires exact candidate CI, integration into `main`, merged-main CI, and a final architecture audit before any further BWT-locate frontier is promoted.
+Phase 24 is **SEALED** after the implementation reached `main@f0c40c1ec242c6eba86e4acfce8535cb4ec8233b` and merged-main CI run `34179454882` passed GCC release, Clang release, and GCC ASan+UBSan. The final architecture audit is recorded in `docs/phase24_sealing_audit.md`.
+
+The next frontier is Phase 25 bidirectional BWT interval search: maintain paired exact intervals for a pattern and its reversal so the represented pattern can be extended on either the left or the right. That is a new query model rather than another memoization variant; it must preserve arbitrary-byte semantics, expose exact interval cardinality, and be verified against independent direct scan without claiming compressed-optimal bidirectional-index bounds.
