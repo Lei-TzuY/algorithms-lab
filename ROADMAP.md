@@ -104,6 +104,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Exact byte-string substring count/locate via conceptual-sentinel BWT backward search, reusing Phase-5 suffix-array order and Phase-18 wavelet-matrix occurrence counts, with arbitrary-byte support and independent direct-scan verification
 
-## Phase 20 — sampled BWT locate space/time tradeoff — ACTIVE FRONTIER
+## Phase 20 — sampled BWT locate space/time tradeoff — SEALED
 
-- [ ] Replace the full suffix-row position table with packed sampled-row membership plus periodic suffix-position samples, reconstructing exact locate positions by bounded LF walks with explicit sample-rate/storage/query-cost evidence
+- [x] Replace the full suffix-row position table with packed sampled-row membership plus periodic suffix-position samples, reconstructing exact locate positions by bounded LF walks with explicit sample-rate/storage/query-cost evidence
+
+## Phase 21 — run-length BWT occurrence representation — ACTIVE FRONTIER
+
+- [ ] Replace the resident full BWT byte wavelet occurrence structure with a run-length byte rank/access index, preserving exact count/locate semantics while exposing BWT run-count/storage/query-cost evidence and making no universal compression claim
