@@ -13,14 +13,14 @@ namespace {
 
 std::size_t checked_add(std::size_t lhs, std::size_t rhs) {
   if (rhs > std::numeric_limits<std::size_t>::max() - lhs) {
-    throw std::length_error("BWT sampled-locate payload size overflow");
+    throw std::length_error("BWT payload size overflow");
   }
   return lhs + rhs;
 }
 
 std::size_t checked_mul(std::size_t lhs, std::size_t rhs) {
   if (lhs != 0U && rhs > std::numeric_limits<std::size_t>::max() / lhs) {
-    throw std::length_error("BWT sampled-locate payload size overflow");
+    throw std::length_error("BWT payload size overflow");
   }
   return lhs * rhs;
 }
@@ -37,13 +37,34 @@ BwtByteIndex::BwtByteIndex(BuildState state)
       sentinel_row_(state.sentinel_row),
       sampled_position_payload_bytes_(state.sampled_position_payload_bytes),
       sampled_locate_payload_bytes_(state.sampled_locate_payload_bytes),
+      run_toehold_sample_payload_bytes_(
+          state.run_toehold_sample_payload_bytes),
       cumulative_(state.cumulative),
       sampled_rows_(std::span<const std::uint8_t>{state.sampled_rows}),
       sampled_positions_(std::move(state.sampled_positions)),
+      run_toehold_sample_rows_(std::move(state.run_toehold_sample_rows)),
+      run_toehold_sample_positions_(
+          std::move(state.run_toehold_sample_positions)),
       bwt_(std::span<const std::uint8_t>{state.bwt_bytes}) {
   if (sampled_rows_.size() != row_count() ||
       sampled_rows_.one_count() != sampled_positions_.size()) {
     throw std::logic_error("BWT sampled-row cardinality invariant violated");
+  }
+  if (run_toehold_sample_rows_.size() !=
+      run_toehold_sample_positions_.size()) {
+    throw std::logic_error("BWT run-toehold sample cardinality invariant violated");
+  }
+  for (std::size_t index = 0U; index < run_toehold_sample_rows_.size();
+       ++index) {
+    const std::size_t row = run_toehold_sample_rows_[index];
+    const std::size_t position = run_toehold_sample_positions_[index];
+    if (row >= row_count() || row == sentinel_row_ || position == 0U ||
+        position > text_size_) {
+      throw std::logic_error("BWT run-toehold sample invariant violated");
+    }
+    if (index > 0U && run_toehold_sample_rows_[index - 1U] >= row) {
+      throw std::logic_error("BWT run-toehold sample rows not increasing");
+    }
   }
 }
 
@@ -123,6 +144,40 @@ BwtByteIndex::BuildState BwtByteIndex::build(
     throw std::logic_error("BWT sampled-locate requires at least one sample");
   }
 
+  const auto full_bwt_byte = [&](std::size_t row) -> std::uint8_t {
+    if (row >= row_positions.size() || row == state.sentinel_row) {
+      throw std::logic_error("BWT run-toehold byte-row invariant violated");
+    }
+    const std::size_t suffix_position = row_positions[row];
+    if (suffix_position == 0U || suffix_position > size) {
+      throw std::logic_error("BWT run-toehold suffix-position invariant violated");
+    }
+    return static_cast<std::uint8_t>(
+        static_cast<unsigned char>(text[suffix_position - 1U]));
+  };
+
+  for (std::size_t row = 0U; row < row_positions.size(); ++row) {
+    if (row == state.sentinel_row) {
+      continue;
+    }
+    const std::uint8_t value = full_bwt_byte(row);
+    const bool starts_run =
+        row == 0U || row - 1U == state.sentinel_row ||
+        full_bwt_byte(row - 1U) != value;
+    const bool ends_run =
+        row + 1U == row_positions.size() ||
+        row + 1U == state.sentinel_row || full_bwt_byte(row + 1U) != value;
+    if (starts_run || ends_run) {
+      state.run_toehold_sample_rows.push_back(row);
+      state.run_toehold_sample_positions.push_back(row_positions[row]);
+    }
+  }
+
+  if (state.run_toehold_sample_rows.size() !=
+      state.run_toehold_sample_positions.size()) {
+    throw std::logic_error("BWT run-toehold build cardinality invariant violated");
+  }
+
   const algorithms::data_structures::PackedRankSelectBitVector sampled_rows(
       std::span<const std::uint8_t>{state.sampled_rows});
   if (sampled_rows.one_count() != state.sampled_positions.size()) {
@@ -133,6 +188,12 @@ BwtByteIndex::BuildState BwtByteIndex::build(
       checked_mul(state.sampled_positions.size(), sizeof(std::size_t));
   state.sampled_locate_payload_bytes = checked_add(
       sampled_rows.logical_payload_bytes(), state.sampled_position_payload_bytes);
+  const std::size_t run_sample_rows_bytes = checked_mul(
+      state.run_toehold_sample_rows.size(), sizeof(std::size_t));
+  const std::size_t run_sample_positions_bytes = checked_mul(
+      state.run_toehold_sample_positions.size(), sizeof(std::size_t));
+  state.run_toehold_sample_payload_bytes =
+      checked_add(run_sample_rows_bytes, run_sample_positions_bytes);
   return state;
 }
 
@@ -172,6 +233,14 @@ std::size_t BwtByteIndex::bwt_occurrence_payload_bytes() const noexcept {
   return bwt_.logical_payload_bytes();
 }
 
+std::size_t BwtByteIndex::run_toehold_sample_count() const noexcept {
+  return run_toehold_sample_rows_.size();
+}
+
+std::size_t BwtByteIndex::run_toehold_sample_payload_bytes() const noexcept {
+  return run_toehold_sample_payload_bytes_;
+}
+
 std::size_t BwtByteIndex::occurrence(std::uint8_t value,
                                      std::size_t row_end) const {
   if (row_end > row_count()) {
@@ -185,6 +254,43 @@ std::size_t BwtByteIndex::occurrence(std::uint8_t value,
   return bwt_.rank(value, compressed_end);
 }
 
+std::uint8_t BwtByteIndex::bwt_byte_at_row(std::size_t row) const {
+  if (row >= row_count() || row == sentinel_row_) {
+    throw std::logic_error("BWT byte-row invariant violated");
+  }
+  std::size_t compressed_row = row;
+  if (sentinel_row_ < row) {
+    --compressed_row;
+  }
+  return bwt_.access(compressed_row);
+}
+
+std::size_t BwtByteIndex::full_row_for_byte_occurrence(
+    std::uint8_t value, std::size_t ordinal) const {
+  const std::size_t compressed_row = bwt_.select(value, ordinal);
+  const std::size_t full_row =
+      compressed_row + (compressed_row >= sentinel_row_ ? 1U : 0U);
+  if (full_row >= row_count() || full_row == sentinel_row_) {
+    throw std::logic_error("BWT selected byte-row invariant violated");
+  }
+  return full_row;
+}
+
+std::size_t BwtByteIndex::run_toehold_sample_position(
+    std::size_t row) const {
+  const auto sample = std::lower_bound(run_toehold_sample_rows_.begin(),
+                                       run_toehold_sample_rows_.end(), row);
+  if (sample == run_toehold_sample_rows_.end() || *sample != row) {
+    throw std::logic_error("BWT run-toehold boundary sample missing");
+  }
+  const std::size_t ordinal = static_cast<std::size_t>(
+      std::distance(run_toehold_sample_rows_.begin(), sample));
+  if (ordinal >= run_toehold_sample_positions_.size()) {
+    throw std::logic_error("BWT run-toehold sample ordinal invariant violated");
+  }
+  return run_toehold_sample_positions_[ordinal];
+}
+
 std::size_t BwtByteIndex::lf(std::size_t row) const {
   if (row >= row_count()) {
     throw std::logic_error("BWT LF source row invariant violated");
@@ -193,11 +299,7 @@ std::size_t BwtByteIndex::lf(std::size_t row) const {
     return 0U;
   }
 
-  std::size_t compressed_row = row;
-  if (sentinel_row_ < row) {
-    --compressed_row;
-  }
-  const std::uint8_t value = bwt_.access(compressed_row);
+  const std::uint8_t value = bwt_byte_at_row(row);
   const std::size_t base = cumulative_[static_cast<std::size_t>(value)];
   const std::size_t before = occurrence(value, row);
   if (base > row_count() - before) {
@@ -236,27 +338,34 @@ std::size_t BwtByteIndex::resolve_row_position(std::size_t row) const {
   return sample_position + steps;
 }
 
+BwtByteIndex::SearchRange BwtByteIndex::extend(SearchRange range,
+                                               std::uint8_t value) const {
+  if (range.begin > range.end || range.end > row_count()) {
+    throw std::logic_error("BWT index search range invariant violated");
+  }
+  const std::size_t base = cumulative_[static_cast<std::size_t>(value)];
+  const std::size_t begin_occurrence = occurrence(value, range.begin);
+  const std::size_t end_occurrence = occurrence(value, range.end);
+  if (base > row_count() - begin_occurrence ||
+      base > row_count() - end_occurrence) {
+    throw std::logic_error("BWT index LF-mapping invariant violated");
+  }
+
+  const std::size_t next_begin = base + begin_occurrence;
+  const std::size_t next_end = base + end_occurrence;
+  if (next_begin > next_end || next_end > row_count()) {
+    throw std::logic_error("BWT index backward-search interval invalid");
+  }
+  return SearchRange{next_begin, next_end};
+}
+
 BwtByteIndex::SearchRange BwtByteIndex::backward_search(
     std::string_view pattern) const {
   SearchRange range{0U, row_count()};
   for (std::size_t remaining = pattern.size(); remaining > 0U; --remaining) {
     const std::uint8_t value = static_cast<std::uint8_t>(
         static_cast<unsigned char>(pattern[remaining - 1U]));
-    const std::size_t base = cumulative_[static_cast<std::size_t>(value)];
-    const std::size_t begin_occurrence = occurrence(value, range.begin);
-    const std::size_t end_occurrence = occurrence(value, range.end);
-
-    if (base > row_count() - begin_occurrence ||
-        base > row_count() - end_occurrence) {
-      throw std::logic_error("BWT index LF-mapping invariant violated");
-    }
-
-    const std::size_t next_begin = base + begin_occurrence;
-    const std::size_t next_end = base + end_occurrence;
-    if (next_begin > next_end || next_end > row_count()) {
-      throw std::logic_error("BWT index backward-search interval invalid");
-    }
-    range = SearchRange{next_begin, next_end};
+    range = extend(range, value);
     if (range.begin == range.end) {
       break;
     }
@@ -278,6 +387,74 @@ std::vector<std::size_t> BwtByteIndex::locate(std::string_view pattern) const {
   }
   std::sort(positions.begin(), positions.end());
   return positions;
+}
+
+std::optional<std::size_t> BwtByteIndex::locate_one_toehold(
+    std::string_view pattern) const {
+  if (pattern.empty()) {
+    return std::size_t{0};
+  }
+
+  SearchRange range{0U, row_count()};
+  std::size_t toehold_row = 0U;
+  std::size_t toehold_position = text_size_;
+
+  for (std::size_t remaining = pattern.size(); remaining > 0U; --remaining) {
+    if (toehold_row < range.begin || toehold_row >= range.end) {
+      throw std::logic_error("BWT run-toehold interval invariant violated");
+    }
+
+    const std::uint8_t value = static_cast<std::uint8_t>(
+        static_cast<unsigned char>(pattern[remaining - 1U]));
+    const SearchRange next = extend(range, value);
+    if (next.begin == next.end) {
+      return std::nullopt;
+    }
+
+    if (toehold_row != sentinel_row_ &&
+        bwt_byte_at_row(toehold_row) == value) {
+      if (toehold_position == 0U) {
+        throw std::logic_error("BWT run-toehold zero-position byte row");
+      }
+      toehold_row = lf(toehold_row);
+      --toehold_position;
+    } else {
+      const std::size_t through_toehold = occurrence(value, toehold_row + 1U);
+      const std::size_t through_range = occurrence(value, range.end);
+      std::size_t boundary_row = 0U;
+
+      if (through_range > through_toehold) {
+        boundary_row =
+            full_row_for_byte_occurrence(value, through_toehold);
+      } else {
+        const std::size_t before_toehold = occurrence(value, toehold_row);
+        const std::size_t before_range = occurrence(value, range.begin);
+        if (before_toehold <= before_range) {
+          throw std::logic_error("BWT run-toehold side invariant violated");
+        }
+        boundary_row =
+            full_row_for_byte_occurrence(value, before_toehold - 1U);
+      }
+
+      if (boundary_row < range.begin || boundary_row >= range.end) {
+        throw std::logic_error("BWT run-toehold boundary outside interval");
+      }
+      const std::size_t boundary_position =
+          run_toehold_sample_position(boundary_row);
+      if (boundary_position == 0U) {
+        throw std::logic_error("BWT run-toehold sampled sentinel position");
+      }
+      toehold_row = lf(boundary_row);
+      toehold_position = boundary_position - 1U;
+    }
+
+    if (toehold_row < next.begin || toehold_row >= next.end) {
+      throw std::logic_error("BWT run-toehold extension invariant violated");
+    }
+    range = next;
+  }
+
+  return toehold_position;
 }
 
 }  // namespace algorithms::strings
