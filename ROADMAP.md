@@ -118,7 +118,7 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 ## Phase 23 — run-boundary-sampled full BWT locating — SEALED
 
-- [x] Enumerate every occurrence in an exact backward-search interval without consulting the Phase-20 periodic suffix samples: resolve each matched BWT row by LF-walking until reaching either the conceptual-sentinel row or a Phase-22 run-boundary suffix sample, reconstruct the exact suffix position modulo `n+1`, preserve arbitrary-byte semantics, expose the intentionally slower worst-case LF-walk bound, and verify complete sorted locate output against independent direct scan. This is an `O(R)` resident-sampling tradeoff, not a claim of r-index-optimal locate bounds.
+- [x] Enumerate every occurrence in an exact backward-search interval without consulting the Phase-20 periodic suffix samples: resolve each matched BWT row by LF-walking until reaching either the conceptual sentinel or a Phase-22 run-boundary suffix sample, reconstruct the exact suffix position modulo `n+1`, preserve arbitrary-byte semantics, expose the intentionally slower worst-case LF-walk bound, and verify complete sorted locate output against independent direct scan. This is an `O(R)` resident-sampling tradeoff, not a claim of r-index-optimal locate bounds.
 
 ## Phase 24 — query-local memoized run-sampled BWT locating — SEALED
 
@@ -136,6 +136,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Exact substring start-position search under a bounded byte-oriented Levenshtein budget, extending the sealed BWT state machine with substitution, insertion, and deletion transitions. Production retains deterministic replayable state/branch diagnostics, deduplicates dominated equivalent search states without direct scanning, reconstructs exact start-position witnesses through the sealed BWT locate machinery, and makes the exponential-in-budget baseline cost explicit. Verification compares against an independent direct dynamic-programming substring oracle. No seed-and-extend, affine-gap, probabilistic, or polynomial-time approximate-index claim is implied.
 
-## Phase 28 — bounded affine-gap approximate BWT search — ACTIVE FRONTIER
+## Phase 28 — bounded affine-gap approximate BWT search — SEALED
 
-- [ ] Exact substring start-position search under a bounded byte-oriented affine-gap score, extending the sealed Phase-27 state machine with explicit gap-open versus gap-extend memory for insertion and deletion runs. Production must preserve deterministic replayable diagnostics, exact BWT-only witness reconstruction, domination keyed on the full scoring state, and explicit exponential baseline cost. Verification must compare against an independent affine-gap dynamic-programming substring oracle. No seed-and-extend, probabilistic, polynomial-time approximate-index, or asymptotically optimal compressed-search claim is implied.
+- [x] Exact substring start-position search under a bounded byte-oriented affine-gap score, extending the sealed Phase-27 state machine with explicit gap-open versus gap-extend memory for insertion and deletion runs. Production preserves deterministic replayable diagnostics, exact BWT-only witness reconstruction, domination keyed on the full scoring state, and explicit exponential baseline cost. Verification compares against an independent affine-gap dynamic-programming substring oracle, with `{1,1,1}` scoring cross-checked against sealed Phase 27. No seed-and-extend, probabilistic, polynomial-time approximate-index, or asymptotically optimal compressed-search claim is implied.
+
+## Phase 29 — BWT text reconstruction and bounded extraction substrate — ACTIVE FRONTIER
+
+- [ ] Reconstruct exact source bytes from the conceptual-sentinel BWT/LF state without retaining a separate source-text copy, then expose validated half-open bounded extraction over arbitrary bytes with deterministic LF-step diagnostics. Verification must compare full reconstruction and randomized slices against the constructor input while keeping resident state on the sealed BWT representation. The baseline may use linear reconstruction/query workspace and must make that cost explicit; this is a correctness substrate for future exact seed-and-verify search, not a compressed-optimal extraction, seed-and-extend, or universal performance claim.
