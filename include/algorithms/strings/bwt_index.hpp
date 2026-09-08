@@ -1,6 +1,7 @@
 #pragma once
 
 #include "algorithms/data_structures/byte_wavelet_matrix.hpp"
+#include "algorithms/data_structures/packed_rank_select.hpp"
 
 #include <array>
 #include <cstddef>
@@ -12,10 +13,24 @@ namespace algorithms::strings {
 
 class BwtByteIndex {
  public:
-  explicit BwtByteIndex(std::string_view text);
+  static constexpr std::size_t kDefaultLocateSampleRate = 32U;
+
+  explicit BwtByteIndex(
+      std::string_view text,
+      std::size_t locate_sample_rate = kDefaultLocateSampleRate);
 
   [[nodiscard]] std::size_t text_size() const noexcept;
   [[nodiscard]] std::size_t row_count() const noexcept;
+
+  // Locate sampling diagnostics. The row-membership payload is the logical
+  // packed-bit/rank payload only; sample-position bytes are the stored
+  // size_t values only. Allocator/vector object overhead is excluded.
+  [[nodiscard]] std::size_t locate_sample_rate() const noexcept;
+  [[nodiscard]] std::size_t sampled_row_count() const noexcept;
+  [[nodiscard]] std::size_t sampled_membership_payload_bytes() const noexcept;
+  [[nodiscard]] std::size_t sampled_position_payload_bytes() const noexcept;
+  [[nodiscard]] std::size_t sampled_locate_payload_bytes() const noexcept;
+  [[nodiscard]] std::size_t max_lf_steps_per_locate() const noexcept;
 
   // Exact substring search over arbitrary bytes. The empty pattern matches
   // every boundary position 0..text_size(), matching the repository's KMP
@@ -31,22 +46,33 @@ class BwtByteIndex {
 
   struct BuildState {
     std::size_t text_size = 0U;
+    std::size_t locate_sample_rate = 0U;
     std::size_t sentinel_row = 0U;
+    std::size_t sampled_position_payload_bytes = 0U;
+    std::size_t sampled_locate_payload_bytes = 0U;
     std::array<std::size_t, 256U> cumulative{};
-    std::vector<std::size_t> row_positions;
+    std::vector<std::uint8_t> sampled_rows;
+    std::vector<std::size_t> sampled_positions;
     std::vector<std::uint8_t> bwt_bytes;
   };
 
   explicit BwtByteIndex(BuildState state);
-  [[nodiscard]] static BuildState build(std::string_view text);
+  [[nodiscard]] static BuildState build(std::string_view text,
+                                        std::size_t locate_sample_rate);
   [[nodiscard]] SearchRange backward_search(std::string_view pattern) const;
   [[nodiscard]] std::size_t occurrence(std::uint8_t value,
                                        std::size_t row_end) const;
+  [[nodiscard]] std::size_t lf(std::size_t row) const;
+  [[nodiscard]] std::size_t resolve_row_position(std::size_t row) const;
 
   std::size_t text_size_ = 0U;
+  std::size_t locate_sample_rate_ = 0U;
   std::size_t sentinel_row_ = 0U;
+  std::size_t sampled_position_payload_bytes_ = 0U;
+  std::size_t sampled_locate_payload_bytes_ = 0U;
   std::array<std::size_t, 256U> cumulative_{};
-  std::vector<std::size_t> row_positions_;
+  algorithms::data_structures::PackedRankSelectBitVector sampled_rows_;
+  std::vector<std::size_t> sampled_positions_;
   algorithms::data_structures::ByteWaveletMatrix bwt_;
 };
 
