@@ -40,8 +40,8 @@ The primary oracle is an independent direct scan over every fixed-length text wi
 
 Coverage includes budget zero, budget at least pattern length, empty text/pattern, patterns longer than text, overlapping occurrences, arbitrary bytes including `0x00`/`0xFF`, deterministic diagnostics replay, and fixed-seed randomized full-byte differential cases.
 
-Focused state-machine verification passed strict GCC, strict Clang, and actual ASan+UBSan using an independent exact suffix/BWT stub. Full repository CI on the current sealed BWT implementation remains the integration gate.
+Focused state-machine verification passed strict GCC, strict Clang, and actual ASan+UBSan using an independent exact suffix/BWT stub. Exact remote PR CI and the merged-main GCC/Clang/ASan+UBSan matrix also passed on the current run-length BWT and sampled-locate backend.
 
 ## Status
 
-Implementation candidate complete; Phase 26 remains active until exact remote CI, merge, merged-main CI, and an independent sealing audit succeed.
+Phase 26 is sealed. The bounded-substitution state machine, exact locate reconstruction, deterministic diagnostics, direct-scan differential oracle, and explicit exponential-in-budget/alphabet boundary are integrated on verified `main`. Further Hamming scheduling/branch-order variants are intentionally out of scope; the next architectural frontier is bounded edit-distance search with insertion/deletion state semantics.
