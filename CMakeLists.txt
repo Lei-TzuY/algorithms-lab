@@ -62,6 +62,7 @@ add_library(algorithms_lab
   src/strings/bwt_index.cpp
   src/strings/bwt_bidirectional.cpp
   src/strings/bwt_edit_distance.cpp
+  src/strings/bwt_affine_gap.cpp
   src/strings/bwt_run_sampled_locate.cpp)
 
 target_include_directories(algorithms_lab PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -100,6 +101,7 @@ if(BUILD_TESTING)
     tests/test_bwt_bidirectional.cpp
     tests/test_bwt_hamming.cpp
     tests/test_bwt_edit_distance.cpp
+    tests/test_bwt_affine_gap.cpp
     tests/test_bwt_run_length_occurrence.cpp
     tests/test_bwt_toehold.cpp
     tests/test_bwt_run_sampled_locate.cpp
