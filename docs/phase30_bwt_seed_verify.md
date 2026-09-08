@@ -48,3 +48,9 @@ Algorithm-focused pre-upload verification also exercised 5,000 random small case
 ## Phase boundary
 
 Phase 30 is an architecture comparison, not another scoring variant: sealed Phase 27 performs exact edit-state expansion entirely inside the bidirectional BWT, while Phase 30 performs exact BWT seed filtering plus one exact text reconstruction and polynomial candidate verification. The two implementations share the result contract but have materially different cost surfaces and failure modes.
+
+## Sealed checkpoint
+
+Phase 30 is sealed after PR #77 merged as `main@0eeeb0100608e1da7bd09c07840bcd91cd7fa021` and exact merged-main CI run `34191341084` completed successfully on GCC release, Clang release, and GCC ASan+UBSan. The implementation evidence and proof boundary above remain unchanged: exact seeds are completeness-preserving rather than heuristic, final membership is decided by exact DP, and repetitive inputs may still produce linear candidate sets.
+
+The remaining architectural cost is explicit rather than a Phase-30 correctness blocker: once any candidate exists, verification reconstructs all `n` source bytes even if only a short candidate window is required. Phase 31 therefore promotes bounded local extraction from the existing periodic suffix-position samples before changing seed-and-verify itself.
