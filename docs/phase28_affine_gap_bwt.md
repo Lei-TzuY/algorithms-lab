@@ -42,4 +42,6 @@ Deterministic cases cover insertion/deletion gap runs, explicit gap switching, e
 
 ## Status
 
-Implementation candidate prepared. Phase 28 remains active until exact remote full-repository CI, clean integration, merged-main CI, and an independent sealing audit all succeed.
+SEALED after PR #73 reached `main@b24ff6f3d9a6350423b24ec2b37cac7ca872487a` and exact merged-main CI run `34186632542` completed successfully on GCC release, Clang release, and GCC ASan+UBSan. The post-merge audit found no unresolved scoring-state, witness-reconstruction, oracle-independence, or complexity-claim blocker.
+
+The next frontier is not another edit-cost variant. Phase 29 builds exact BWT text reconstruction and validated bounded extraction without retaining a source-text fallback, creating the substrate required before a future exact seed-and-verify architecture can be claimed honestly.
