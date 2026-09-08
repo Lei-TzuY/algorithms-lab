@@ -14,6 +14,7 @@
 namespace algorithms::strings {
 
 class BidirectionalBwtByteIndex;
+class BwtPeriodicSampleTextExtractor;
 
 struct HammingBwtSearchResult {
   std::vector<std::size_t> positions;
@@ -33,6 +34,11 @@ struct BwtTextExtractionResult {
   std::string bytes;
   std::size_t lf_steps = 0U;
   std::size_t reconstructed_bytes = 0U;
+};
+
+struct SampledBwtTextExtractionResult {
+  std::string bytes;
+  std::size_t lf_steps = 0U;
 };
 
 struct MemoizedRunSampledLocateResult {
@@ -118,6 +124,7 @@ class BwtByteIndex {
 
  private:
   friend class BidirectionalBwtByteIndex;
+  friend class BwtPeriodicSampleTextExtractor;
 
   struct SearchRange {
     std::size_t begin;
@@ -167,6 +174,28 @@ class BwtByteIndex {
   std::vector<std::size_t> run_toehold_sample_rows_;
   std::vector<std::size_t> run_toehold_sample_positions_;
   algorithms::data_structures::RunLengthByteRankIndex bwt_;
+};
+
+// Re-index the sealed Phase-20 periodic suffix-position samples by suffix
+// position so a short source range can be reconstructed from a nearby sample.
+// The extractor borrows the index: the referenced BwtByteIndex must outlive it.
+class BwtPeriodicSampleTextExtractor {
+ public:
+  explicit BwtPeriodicSampleTextExtractor(const BwtByteIndex& index);
+
+  [[nodiscard]] std::size_t sample_count() const noexcept;
+  [[nodiscard]] std::size_t inverse_sample_payload_bytes() const noexcept;
+
+  // Exact constructor-text bytes in [begin,end), without reconstructing the
+  // complete source. A non-empty range performs at most
+  // (end-begin)+locate_sample_rate()-1 LF transitions.
+  [[nodiscard]] SampledBwtTextExtractionResult extract(
+      std::size_t begin, std::size_t end) const;
+
+ private:
+  const BwtByteIndex* index_ = nullptr;
+  std::vector<std::size_t> sample_rows_by_position_;
+  std::size_t inverse_sample_payload_bytes_ = 0U;
 };
 
 class BidirectionalBwtState {
