@@ -98,6 +98,7 @@ if(BUILD_TESTING)
     tests/test_bwt_run_length_occurrence.cpp
     tests/test_bwt_toehold.cpp
     tests/test_bwt_run_sampled_locate.cpp
+    tests/test_bwt_memoized_run_sampled_locate.cpp
     tests/test_max_flow.cpp
     tests/test_min_cost_flow.cpp
     tests/test_min_cost_circulation.cpp
