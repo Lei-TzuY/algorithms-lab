@@ -12,6 +12,14 @@
 
 namespace algorithms::strings {
 
+struct MemoizedRunSampledLocateResult {
+  std::vector<std::size_t> positions;
+  std::size_t seeded_row_count = 0U;
+  std::size_t lf_steps = 0U;
+  std::size_t memoized_row_count = 0U;
+  std::size_t matched_row_cache_hits = 0U;
+};
+
 class BwtByteIndex {
  public:
   static constexpr std::size_t kDefaultLocateSampleRate = 32U;
@@ -63,6 +71,14 @@ class BwtByteIndex {
   // The result is sorted by text position. This intentionally trades slower
   // worst-case query time for O(R) resident run-boundary sampling state.
   [[nodiscard]] std::vector<std::size_t> locate_run_sampled(
+      std::string_view pattern) const;
+
+  // Enumerate the same complete exact match set while memoizing conceptual-row
+  // suffix positions only for this query. The cache is seeded exclusively by
+  // the conceptual sentinel plus Phase-22 run-boundary samples; Phase-20
+  // periodic locate samples are not consulted. Each newly traversed LF source
+  // row is filled into the query cache when its path reaches a known row.
+  [[nodiscard]] MemoizedRunSampledLocateResult locate_run_sampled_memoized(
       std::string_view pattern) const;
 
  private:
