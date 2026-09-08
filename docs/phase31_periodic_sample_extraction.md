@@ -80,7 +80,7 @@ Deterministic coverage checks:
 
 Randomized differential verification builds an independent source string, constructs the BWT index and companion extractor, and compares every returned byte string directly with `std::string::substr`. The test also checks the LF-step inequality above and sample-count/payload invariants across varied text lengths and locate sample rates. It does not reconstruct expected bytes through BWT/LF logic.
 
-A separate algorithm-level property simulation was used while designing the slice to exercise random byte strings, sample rates, and ranges before repository integration. The authoritative integration evidence remains the repository's strict GCC, strict Clang, and ASan+UBSan CI on the exact candidate and merged `main`.
+A separate algorithm-level property simulation was used while designing the slice to exercise random byte strings, sample rates, and ranges before repository integration. The authoritative integration evidence is the repository's strict GCC, strict Clang, and ASan+UBSan CI on merged `main@9d56d8613467e8279312beb499b9d15237750325`; run `34193363155` completed successfully in all three jobs.
 
 ## Complexity and claim boundary
 
@@ -90,4 +90,4 @@ This is a bounded local-extraction improvement over Phase 29's unconditional `n`
 
 ## Phase boundary
 
-Phase 31 changes the extraction substrate only. It deliberately does not modify Phase-30 seed-and-verify search in the same PR. After exact candidate CI, merged-main CI, and a clean Phase-31 audit, the repository may separately evaluate whether bounded candidate windows should replace Phase-30's one full reconstruction.
+Phase 31 is sealed after exact production integration, independent direct-substring verification, and green merged-main GCC/Clang/ASan+UBSan CI. The next frontier is a separate cross-layer Phase 32: preserve the sealed Phase-30 seed-completeness and exact verification semantics while replacing its unconditional one-full-text reconstruction with exact candidate-local windows from `BwtPeriodicSampleTextExtractor`. That promotion must expose local-extraction work and retain an explicit non-universal-speedup boundary.
