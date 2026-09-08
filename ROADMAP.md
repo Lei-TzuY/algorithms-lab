@@ -112,6 +112,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Replace the resident full BWT byte wavelet occurrence structure with a run-length byte rank/access index, preserving exact count/locate semantics while exposing BWT run-count/storage/query-cost evidence and making no universal compression claim
 
-## Phase 22 — run-aware BWT toehold locating — ACTIVE FRONTIER
+## Phase 22 — run-aware BWT toehold locating — SEALED
 
-- [ ] Maintain one exact suffix-position toehold through backward search using BWT run-boundary suffix samples, so a non-empty matched interval can return one exact occurrence from `O(R)` run-aware sampling state without reintroducing a full suffix-row position table; preserve arbitrary-byte/conceptual-sentinel semantics and verify every returned witness against direct scan
+- [x] Maintain one exact suffix-position toehold through backward search using BWT run-boundary suffix samples, so a non-empty matched interval can return one exact occurrence from `O(R)` run-aware sampling state without reintroducing a full suffix-row position table; preserve arbitrary-byte/conceptual-sentinel semantics and verify every returned witness against direct scan
+
+## Phase 23 — run-boundary-sampled full BWT locating — ACTIVE FRONTIER
+
+- [ ] Enumerate every occurrence in an exact backward-search interval without consulting the Phase-20 periodic suffix samples: resolve each matched BWT row by LF-walking until reaching either the conceptual-sentinel row or a Phase-22 run-boundary suffix sample, reconstruct the exact suffix position modulo `n+1`, preserve arbitrary-byte semantics, expose the intentionally slower worst-case LF-walk bound, and verify complete sorted locate output against independent direct scan. This is an `O(R)` resident-sampling tradeoff, not a claim of r-index-optimal locate bounds.

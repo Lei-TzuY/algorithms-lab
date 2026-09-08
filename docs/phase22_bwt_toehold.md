@@ -15,7 +15,7 @@ For the next left-extension byte `c`:
 1. Compute the exact next FM interval with the same cumulative-count/rank recurrence used by ordinary backward search.
 2. If full-BWT row `p` carries byte `c`, LF-map `p`. Since a byte row cannot be the conceptual-sentinel row, `SA[p] > 0`; the new witness is `(LF(p), SA[p]-1)`.
 3. Otherwise, if the next interval is non-empty, choose the first `c` row after `p` inside the old interval when one exists; otherwise choose the last `c` row before `p` inside that interval.
-4. Because `p` itself is not a `c` row and the selected row is the nearest `c` on that side, the selected row is a **full conceptual-BWT byte-run boundary**.
+4. Because `p` itself is not a `c` row and the selected row is the **nearest** `c` on that side, the selected row is a full conceptual-BWT byte-run boundary.
 5. Phase 22 stores `SA` at every such byte-run start/end. Restore the selected boundary's suffix position from that sample and LF-map it to obtain the next interval's exact toehold.
 
 Every production fallback checks that the selected row lies inside the old interval, has a boundary sample, has positive suffix position, and maps inside the newly computed interval. Missing samples or violated interval relations are internal logic errors rather than silent fallback to a full suffix-row table.
@@ -65,8 +65,10 @@ A separate pre-upload theorem prototype additionally exercised 2000 random texts
 
 The randomized corpus is implementation evidence. The `O(R)` sample bound and one-toehold-per-extension guarantee follow from the full-BWT nearest-occurrence/run-boundary argument above; they are not inferred from the test corpus.
 
-## Claim boundary
+## Claim boundary and seal
 
-This phase is not a full r-index. It does not implement locate-all from `O(R)` samples, suffix-array run samples sufficient for arbitrary occurrence enumeration, predecessor structures with published r-index bounds, or a compressed construction algorithm. The existing exact full locate path still keeps Phase-20 periodic samples.
+Phase 22 is **SEALED** after implementation commit `15d081235c1176e82dd3efb0cbd17b978cf0127d` reached `main` and merged-main CI run `34175758276` completed successfully on GCC release, Clang release, and GCC ASan+UBSan. The phase-level architecture audit is recorded separately in `docs/phase22_sealing_audit.md`.
 
-Phase 22 is implementation-complete only after exact PR CI and merged-main CI pass. A later architecture audit must decide whether full run-aware locate-all would add a sufficiently different correctness/storage model to justify another phase; wrappers around `locate_one_toehold` do not.
+This phase is not a full r-index. It does not implement locate-all from `O(R)` samples, suffix-array run samples sufficient for published r-index locate bounds, predecessor/phi structures, or a compressed construction algorithm. The existing exact full `locate()` still keeps Phase-20 periodic samples.
+
+The next frontier is deliberately different rather than a wrapper around `locate_one_toehold`: enumerate a complete match interval while resolving every BWT row from only the Phase-22 run-boundary samples (plus the conceptual sentinel as an implicit sample), accepting a slower worst-case LF walk in exchange for removing the Phase-20 periodic-sample dependency from that full-locate path. No r-index-optimal time claim is implied.
