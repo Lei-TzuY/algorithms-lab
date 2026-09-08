@@ -61,6 +61,7 @@ add_library(algorithms_lab
   src/streaming/misra_gries.cpp
   src/strings/bwt_index.cpp
   src/strings/bwt_text_extraction.cpp
+  src/strings/bwt_seed_verify.cpp
   src/strings/bwt_bidirectional.cpp
   src/strings/bwt_edit_distance.cpp
   src/strings/bwt_affine_gap.cpp
@@ -100,6 +101,7 @@ if(BUILD_TESTING)
     tests/test_suffix_array.cpp
     tests/test_bwt_index.cpp
     tests/test_bwt_text_extraction.cpp
+    tests/test_bwt_seed_verify.cpp
     tests/test_bwt_bidirectional.cpp
     tests/test_bwt_hamming.cpp
     tests/test_bwt_edit_distance.cpp
