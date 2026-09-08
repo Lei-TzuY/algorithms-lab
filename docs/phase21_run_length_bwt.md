@@ -53,8 +53,12 @@ Correctness is checked at two independent layers:
 
 The repetitive case verifies that the reported run payload is smaller than a `ByteWaveletMatrix` built over the same all-equal BWT byte sequence. This is representative compression evidence only. On non-repetitive data `R` can approach `n` and this implementation can use more memory than the wavelet representation; no universal compression claim is made.
 
-Focused pre-upload verification passed under GCC and Clang strict warnings and under a real GCC ASan+UBSan build for both the standalone run-rank index and a BWT integration harness. Full repository CI remains the integration gate.
+Focused pre-upload verification passed under GCC and Clang strict warnings and under a real GCC ASan+UBSan build for both the standalone run-rank index and a BWT integration harness. Exact PR CI and merged-main CI subsequently passed in all three repository jobs.
 
 ## Phase boundary
 
-This slice completes the Phase-21 occurrence-representation hypothesis only after exact PR CI and merged-main CI pass. A phase-level architecture audit must then decide whether another text-index representation adds substantial depth; query aliases, additional wrappers, or RLE variants without a new representation/correctness tradeoff are out of scope.
+Phase 21 is sealed at `main@5576e045068c739e0e4b8c0cca2ec307cf7e15b1` after merged-main CI run `34174427111` completed successfully under GCC release, Clang release, and GCC ASan+UBSan.
+
+The occurrence-representation hypothesis is complete: exact BWT semantics are preserved, run-dependent complexity/storage claims are explicit, independent rank/access verification remains active, and repetitive-input evidence is not generalized into a universal compression claim. Additional RLE wrappers or container variants would not add a new correctness/storage model.
+
+The promoted frontier is Phase 22 run-aware BWT toehold locating. That phase must introduce a new run-boundary suffix-position sampling invariant and return a directly verifiable exact occurrence from a non-empty backward-search interval without restoring the full suffix-row position table. It must treat the conceptual sentinel explicitly, expose run-aware sample storage, and keep direct-scan query verification independent from the sampling theorem.
