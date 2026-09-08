@@ -116,6 +116,10 @@ This roadmap is directional, not a completeness claim. Promotion happens only af
 
 - [x] Maintain one exact suffix-position toehold through backward search using BWT run-boundary suffix samples, so a non-empty matched interval can return one exact occurrence from `O(R)` run-aware sampling state without reintroducing a full suffix-row position table; preserve arbitrary-byte/conceptual-sentinel semantics and verify every returned witness against direct scan
 
-## Phase 23 — run-boundary-sampled full BWT locating — ACTIVE FRONTIER
+## Phase 23 — run-boundary-sampled full BWT locating — SEALED
 
 - [x] Enumerate every occurrence in an exact backward-search interval without consulting the Phase-20 periodic suffix samples: resolve each matched BWT row by LF-walking until reaching either the conceptual-sentinel row or a Phase-22 run-boundary suffix sample, reconstruct the exact suffix position modulo `n+1`, preserve arbitrary-byte semantics, expose the intentionally slower worst-case LF-walk bound, and verify complete sorted locate output against independent direct scan. This is an `O(R)` resident-sampling tradeoff, not a claim of r-index-optimal locate bounds.
+
+## Phase 24 — query-local memoized run-sampled BWT locating — ACTIVE FRONTIER
+
+- [ ] Reuse the sealed Phase-22 `O(R)` resident run-boundary suffix samples while adding only query-local `O(n)` row-position memoization: seed the conceptual sentinel and run-boundary samples, path-compress LF walks as rows are resolved, enumerate the complete exact match set, expose LF-step/cache diagnostics, prove each conceptual row is newly traversed at most once per query, and verify exact output against direct scan. The target is a conservative `O(m log R + n log R + occ log occ)` locate bound with `O(n + occ)` query workspace and no r-index or compressed-construction claim.
