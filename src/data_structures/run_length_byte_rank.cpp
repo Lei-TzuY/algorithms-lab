@@ -1,6 +1,7 @@
 #include "algorithms/data_structures/run_length_byte_rank.hpp"
 
 #include <algorithm>
+#include <iterator>
 #include <limits>
 #include <stdexcept>
 
@@ -121,6 +122,36 @@ std::size_t RunLengthByteRankIndex::rank(std::uint8_t value,
                                          std::size_t end) const {
   validate_range(begin, end);
   return rank(value, end) - rank(value, begin);
+}
+
+std::size_t RunLengthByteRankIndex::select(std::uint8_t value,
+                                           std::size_t ordinal) const {
+  const auto& indices = symbol_run_indices_[static_cast<std::size_t>(value)];
+  const auto containing_run = std::lower_bound(
+      indices.begin(), indices.end(), ordinal,
+      [this](std::size_t run_index, std::size_t target) {
+        return run_cumulative_after_[run_index] <= target;
+      });
+  if (containing_run == indices.end()) {
+    throw std::out_of_range("run-length byte-rank select ordinal out of range");
+  }
+
+  const std::size_t run_index = *containing_run;
+  const std::size_t start = run_starts_[run_index];
+  const std::size_t length = run_end(run_index) - start;
+  const std::size_t cumulative_after = run_cumulative_after_[run_index];
+  if (length > cumulative_after) {
+    throw std::logic_error("run-length byte-rank cumulative invariant violated");
+  }
+  const std::size_t before = cumulative_after - length;
+  if (ordinal < before) {
+    throw std::logic_error("run-length byte-rank select invariant violated");
+  }
+  const std::size_t offset = ordinal - before;
+  if (offset >= length) {
+    throw std::logic_error("run-length byte-rank select offset invariant violated");
+  }
+  return start + offset;
 }
 
 void RunLengthByteRankIndex::validate_range(std::size_t begin,

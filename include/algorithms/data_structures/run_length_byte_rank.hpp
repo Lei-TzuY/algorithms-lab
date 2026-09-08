@@ -19,6 +19,8 @@ class RunLengthByteRankIndex {
   [[nodiscard]] std::size_t rank(std::uint8_t value, std::size_t end) const;
   [[nodiscard]] std::size_t rank(std::uint8_t value, std::size_t begin,
                                  std::size_t end) const;
+  [[nodiscard]] std::size_t select(std::uint8_t value,
+                                   std::size_t ordinal) const;
   [[nodiscard]] std::size_t logical_payload_bytes() const noexcept;
 
  private:
