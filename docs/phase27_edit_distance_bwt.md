@@ -63,8 +63,10 @@ The primary oracle is independent dynamic programming. For every text start boun
 
 Coverage includes deterministic substitution/insertion/deletion witnesses, zero-budget equality with sealed exact search, deletion-to-empty boundary semantics, arbitrary `0x00`/`0xFF` bytes, deterministic diagnostic replay, and fixed-seed randomized differential cases.
 
-A focused state-machine harness passed strict GCC, strict Clang, and actual ASan+UBSan before remote integration. Full repository CI remains the integration gate for the sealed run-length/sampled BWT backend.
+A focused state-machine harness passed strict GCC, strict Clang, and actual ASan+UBSan before remote integration. The exact implementation PR and merged-main integration both passed the repository GCC release, Clang release, and GCC ASan+UBSan matrix.
 
 ## Status
 
-Implementation candidate prepared; Phase 27 remains active until the exact remote candidate passes full CI, merges cleanly, passes merged-main CI, and completes an independent sealing audit.
+**SEALED.** PR #71 merged as `main@ca194938af5fa05cd09dfd02d90d61197c5ee0d0`, and merged-main CI run `34184763972` completed successfully across GCC release, Clang release, and GCC ASan+UBSan. The independent post-merge audit found no unresolved correctness, witness-reconstruction, oracle-independence, or complexity-claim blocker. See `docs/phase27_sealing_audit.md`.
+
+The next promoted frontier is Phase 28: bounded affine-gap BWT search. It must add explicit gap-open/gap-extend state without weakening the exact witness or cost-boundary discipline sealed here.
