@@ -48,3 +48,9 @@ Focused verification covers:
 - auxiliary invariant validation after every randomized operation.
 
 Remote full CI is the backward-compatibility gate for the sealed Phase-34/35/36 link-cut tests in addition to the new Phase-37 suite.
+
+## Sealed boundary and next frontier
+
+Phase 37 is sealed after implementation PR #91 passed GCC release, Clang release, and GCC ASan+UBSan on exact head `a5d843a59aa9285ca95406a6894fccc91da52d4b`, then squash-merged as `main@0d7d24702bc6d20ad62e3ed861cf29074b832380` with the merged-main CI matrix also fully green. The post-merge architecture audit found no unresolved lazy-tag, representability, topology, oracle-independence, sanitizer, or complexity-claim blocker.
+
+The internal min/max fields are proof machinery for transactional addition and are deliberately not promoted as trivial path-min/path-max API variants. Phase 38 changes the correctness dimension instead: ordered represented-path navigation. The target is zero-based path rank selection whose answer depends on the auxiliary in-order sequence after `make_root(first)` and `access(second)`, with lazy state pushed while descending and the selected vertex splayed so the standard amortized link-cut bound remains the appropriate sequence-level claim.
