@@ -1,5 +1,6 @@
 #include "algorithms/graphs/link_cut_tree.hpp"
 
+#include <algorithm>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -92,9 +93,9 @@ LinkCutForest::ExactSum LinkCutForest::add_exact(
   return result;
 }
 
-LinkCutForest::ExactSum LinkCutForest::scale_exact_value(
-    std::int64_t value, std::size_t count) noexcept {
-  ExactSum addend = exact_from_value(value);
+LinkCutForest::ExactSum LinkCutForest::scale_exact(
+    const ExactSum& value, std::size_t count) noexcept {
+  ExactSum addend = value;
   const bool negative = addend.negative;
   addend.negative = false;
   ExactSum result{};
@@ -112,26 +113,36 @@ LinkCutForest::ExactSum LinkCutForest::scale_exact_value(
   return result;
 }
 
+LinkCutForest::ExactSum LinkCutForest::scale_exact_value(
+    std::int64_t value, std::size_t count) noexcept {
+  return scale_exact(exact_from_value(value), count);
+}
+
 bool LinkCutForest::exact_equal(const ExactSum& first,
                                 const ExactSum& second) noexcept {
   return first.low == second.low && first.high == second.high &&
          first.negative == second.negative;
 }
 
-std::int64_t LinkCutForest::narrow_exact(const ExactSum& value) {
+bool LinkCutForest::exact_is_zero(const ExactSum& value) noexcept {
+  return value.low == 0 && value.high == 0;
+}
+
+bool LinkCutForest::exact_fits_int64(const ExactSum& value) noexcept {
   if (value.high != 0) {
-    throw std::overflow_error("link-cut path sum is outside int64");
+    return false;
   }
   constexpr std::uint64_t kNegativeLimit = std::uint64_t{1} << 63U;
   constexpr std::uint64_t kPositiveLimit = kNegativeLimit - 1U;
+  return value.negative ? value.low <= kNegativeLimit
+                        : value.low <= kPositiveLimit;
+}
+
+std::int64_t LinkCutForest::narrow_exact_unchecked(
+    const ExactSum& value) noexcept {
+  constexpr std::uint64_t kNegativeLimit = std::uint64_t{1} << 63U;
   if (!value.negative) {
-    if (value.low > kPositiveLimit) {
-      throw std::overflow_error("link-cut path sum is outside int64");
-    }
     return static_cast<std::int64_t>(value.low);
-  }
-  if (value.low > kNegativeLimit) {
-    throw std::overflow_error("link-cut path sum is outside int64");
   }
   if (value.low == kNegativeLimit) {
     return std::numeric_limits<std::int64_t>::min();
@@ -139,29 +150,110 @@ std::int64_t LinkCutForest::narrow_exact(const ExactSum& value) {
   return -static_cast<std::int64_t>(value.low);
 }
 
-void LinkCutForest::pull(Vertex vertex) noexcept {
-  nodes_[vertex].auxiliary_size =
-      1 + child_size(nodes_[vertex].left) + child_size(nodes_[vertex].right);
-  if (nodes_[vertex].has_assignment) {
-    nodes_[vertex].auxiliary_sum = scale_exact_value(
-        nodes_[vertex].assignment_value, nodes_[vertex].auxiliary_size);
-    return;
+std::int64_t LinkCutForest::narrow_exact(const ExactSum& value) {
+  if (!exact_fits_int64(value)) {
+    throw std::overflow_error("link-cut path sum is outside int64");
   }
-  nodes_[vertex].auxiliary_sum =
-      add_exact(add_exact(child_sum(nodes_[vertex].left),
-                          exact_from_value(nodes_[vertex].value)),
-                child_sum(nodes_[vertex].right));
+  return narrow_exact_unchecked(value);
 }
 
-void LinkCutForest::apply_assignment(Vertex vertex, std::int64_t value) noexcept {
+bool LinkCutForest::can_add_int64(std::int64_t value,
+                                  std::int64_t delta) noexcept {
+  if (delta > 0) {
+    return value <= std::numeric_limits<std::int64_t>::max() - delta;
+  }
+  if (delta < 0) {
+    return value >= std::numeric_limits<std::int64_t>::min() - delta;
+  }
+  return true;
+}
+
+std::int64_t LinkCutForest::add_exact_to_int64(
+    std::int64_t value, const ExactSum& delta) {
+  const ExactSum result = add_exact(exact_from_value(value), delta);
+  if (!exact_fits_int64(result)) {
+    throw std::overflow_error("link-cut path addition would overflow int64");
+  }
+  return narrow_exact_unchecked(result);
+}
+
+void LinkCutForest::pull(Vertex vertex) {
+  Node& node = nodes_[vertex];
+  node.auxiliary_size =
+      1 + child_size(node.left) + child_size(node.right);
+
+  if (node.has_assignment) {
+    node.auxiliary_sum =
+        scale_exact_value(node.assignment_value, node.auxiliary_size);
+    node.auxiliary_min = node.assignment_value;
+    node.auxiliary_max = node.assignment_value;
+    return;
+  }
+
+  ExactSum sum = exact_from_value(node.value);
+  std::int64_t minimum = node.value;
+  std::int64_t maximum = node.value;
+  const bool shifted_children = !exact_is_zero(node.pending_addition);
+
+  const auto include_child = [&](Vertex child) {
+    if (child == kNone) {
+      return;
+    }
+    ExactSum sum_part = nodes_[child].auxiliary_sum;
+    std::int64_t child_minimum = nodes_[child].auxiliary_min;
+    std::int64_t child_maximum = nodes_[child].auxiliary_max;
+    if (shifted_children) {
+      sum_part = add_exact(
+          sum_part,
+          scale_exact(node.pending_addition, nodes_[child].auxiliary_size));
+      child_minimum = add_exact_to_int64(child_minimum, node.pending_addition);
+      child_maximum = add_exact_to_int64(child_maximum, node.pending_addition);
+    }
+    sum = add_exact(sum, sum_part);
+    minimum = std::min(minimum, child_minimum);
+    maximum = std::max(maximum, child_maximum);
+  };
+
+  include_child(node.left);
+  include_child(node.right);
+  node.auxiliary_sum = sum;
+  node.auxiliary_min = minimum;
+  node.auxiliary_max = maximum;
+}
+
+void LinkCutForest::apply_assignment(Vertex vertex,
+                                     std::int64_t value) noexcept {
   if (vertex == kNone) {
     return;
   }
-  nodes_[vertex].value = value;
-  nodes_[vertex].auxiliary_sum =
-      scale_exact_value(value, nodes_[vertex].auxiliary_size);
-  nodes_[vertex].has_assignment = true;
-  nodes_[vertex].assignment_value = value;
+  Node& node = nodes_[vertex];
+  node.value = value;
+  node.auxiliary_sum = scale_exact_value(value, node.auxiliary_size);
+  node.auxiliary_min = value;
+  node.auxiliary_max = value;
+  node.has_assignment = true;
+  node.assignment_value = value;
+  node.pending_addition = ExactSum{};
+}
+
+void LinkCutForest::apply_addition(Vertex vertex, const ExactSum& delta) {
+  if (vertex == kNone || exact_is_zero(delta)) {
+    return;
+  }
+  Node& node = nodes_[vertex];
+  if (node.has_assignment) {
+    const std::int64_t assigned =
+        add_exact_to_int64(node.assignment_value, delta);
+    apply_assignment(vertex, assigned);
+    return;
+  }
+
+  node.value = add_exact_to_int64(node.value, delta);
+  node.auxiliary_min = add_exact_to_int64(node.auxiliary_min, delta);
+  node.auxiliary_max = add_exact_to_int64(node.auxiliary_max, delta);
+  node.auxiliary_sum =
+      add_exact(node.auxiliary_sum, scale_exact(delta, node.auxiliary_size));
+  node.pending_addition = add_exact(node.pending_addition, delta);
 }
 
 void LinkCutForest::apply_reverse(Vertex vertex) noexcept {
@@ -172,18 +264,25 @@ void LinkCutForest::apply_reverse(Vertex vertex) noexcept {
   nodes_[vertex].reversed = !nodes_[vertex].reversed;
 }
 
-void LinkCutForest::push(Vertex vertex) noexcept {
-  if (nodes_[vertex].has_assignment) {
-    apply_assignment(nodes_[vertex].left, nodes_[vertex].assignment_value);
-    apply_assignment(nodes_[vertex].right, nodes_[vertex].assignment_value);
-    nodes_[vertex].has_assignment = false;
+void LinkCutForest::push(Vertex vertex) {
+  Node& node = nodes_[vertex];
+  if (node.has_assignment) {
+    apply_assignment(node.left, node.assignment_value);
+    apply_assignment(node.right, node.assignment_value);
+    node.has_assignment = false;
   }
-  if (!nodes_[vertex].reversed) {
+  if (!exact_is_zero(node.pending_addition)) {
+    const ExactSum delta = node.pending_addition;
+    apply_addition(node.left, delta);
+    apply_addition(node.right, delta);
+    node.pending_addition = ExactSum{};
+  }
+  if (!node.reversed) {
     return;
   }
-  apply_reverse(nodes_[vertex].left);
-  apply_reverse(nodes_[vertex].right);
-  nodes_[vertex].reversed = false;
+  apply_reverse(node.left);
+  apply_reverse(node.right);
+  node.reversed = false;
 }
 
 void LinkCutForest::push_path(Vertex vertex) {
@@ -200,7 +299,7 @@ void LinkCutForest::push_path(Vertex vertex) {
   }
 }
 
-void LinkCutForest::rotate(Vertex vertex) noexcept {
+void LinkCutForest::rotate(Vertex vertex) {
   const Vertex parent = nodes_[vertex].parent;
   const Vertex grand = nodes_[parent].parent;
   const bool vertex_is_right = nodes_[parent].right == vertex;
@@ -352,6 +451,7 @@ void LinkCutForest::assign_value(Vertex vertex, std::int64_t value) {
   access(vertex);
   nodes_[vertex].value = value;
   nodes_[vertex].has_assignment = false;
+  nodes_[vertex].pending_addition = ExactSum{};
   pull(vertex);
 }
 
@@ -365,6 +465,24 @@ void LinkCutForest::assign_path_value(Vertex first, Vertex second,
   }
   access(second);
   apply_assignment(second, value);
+}
+
+void LinkCutForest::add_path_value(Vertex first, Vertex second,
+                                   std::int64_t delta) {
+  validate_vertex(first);
+  validate_vertex(second);
+  make_root(first);
+  if (find_root(second) != first) {
+    throw std::invalid_argument("path addition requires connected vertices");
+  }
+  access(second);
+  const Node& path = nodes_[second];
+  if (!can_add_int64(path.auxiliary_min, delta) ||
+      !can_add_int64(path.auxiliary_max, delta)) {
+    throw std::overflow_error(
+        "link-cut path addition would overflow an individual node value");
+  }
+  apply_addition(second, exact_from_value(delta));
 }
 
 std::int64_t LinkCutForest::path_sum(Vertex first, Vertex second) {
@@ -388,7 +506,10 @@ bool LinkCutForest::valid_auxiliary_invariants() const {
 
   for (Vertex vertex = 0; vertex < vertex_count; ++vertex) {
     const Node& node = nodes_[vertex];
-    if (node.auxiliary_size == 0) {
+    if (node.auxiliary_size == 0 || node.auxiliary_min > node.auxiliary_max) {
+      return false;
+    }
+    if (node.has_assignment && !exact_is_zero(node.pending_addition)) {
       return false;
     }
     if (node.parent != kNone && node.parent >= vertex_count) {
@@ -436,84 +557,117 @@ bool LinkCutForest::valid_auxiliary_invariants() const {
     bool expanded;
     bool inherited_assignment;
     std::int64_t inherited_value;
+    ExactSum inherited_addition;
   };
 
   std::vector<unsigned char> state(vertex_count, 0);
   std::vector<std::size_t> computed_size(vertex_count, 0);
   std::vector<ExactSum> computed_sum(vertex_count);
+  std::vector<std::int64_t> computed_min(vertex_count, 0);
+  std::vector<std::int64_t> computed_max(vertex_count, 0);
+
   for (Vertex root = 0; root < vertex_count; ++root) {
     if (!is_auxiliary_root(root) || state[root] != 0) {
       continue;
     }
 
     std::vector<Frame> stack;
-    stack.push_back(Frame{root, false, false, 0});
+    stack.push_back(Frame{root, false, false, 0, ExactSum{}});
     while (!stack.empty()) {
       const Frame frame = stack.back();
       stack.pop_back();
       const Vertex vertex = frame.vertex;
+      const Node& node = nodes_[vertex];
+
       if (!frame.expanded) {
         if (state[vertex] == 1 || state[vertex] == 2) {
           return false;
         }
         state[vertex] = 1;
-        const bool effective_assignment =
-            frame.inherited_assignment || nodes_[vertex].has_assignment;
-        const std::int64_t effective_value = frame.inherited_assignment
-                                                  ? frame.inherited_value
-                                                  : nodes_[vertex].assignment_value;
-        stack.push_back(Frame{vertex, true, frame.inherited_assignment,
-                              frame.inherited_value});
-        if (nodes_[vertex].right != kNone) {
-          stack.push_back(Frame{nodes_[vertex].right, false,
-                                effective_assignment, effective_value});
+
+        bool child_assignment = false;
+        std::int64_t child_assignment_value = 0;
+        ExactSum child_addition{};
+        if (frame.inherited_assignment) {
+          child_assignment = true;
+          child_assignment_value = frame.inherited_value;
+        } else if (node.has_assignment) {
+          const ExactSum assigned = add_exact(
+              exact_from_value(node.assignment_value), frame.inherited_addition);
+          if (!exact_fits_int64(assigned)) {
+            return false;
+          }
+          child_assignment = true;
+          child_assignment_value = narrow_exact_unchecked(assigned);
+        } else {
+          child_addition =
+              add_exact(node.pending_addition, frame.inherited_addition);
         }
-        if (nodes_[vertex].left != kNone) {
-          stack.push_back(Frame{nodes_[vertex].left, false,
-                                effective_assignment, effective_value});
+
+        stack.push_back(Frame{vertex, true, frame.inherited_assignment,
+                              frame.inherited_value,
+                              frame.inherited_addition});
+        if (node.right != kNone) {
+          stack.push_back(Frame{node.right, false, child_assignment,
+                                child_assignment_value, child_addition});
+        }
+        if (node.left != kNone) {
+          stack.push_back(Frame{node.left, false, child_assignment,
+                                child_assignment_value, child_addition});
         }
         continue;
       }
 
       const std::size_t expected_size =
-          1 + (nodes_[vertex].left == kNone
-                   ? 0
-                   : computed_size[nodes_[vertex].left]) +
-          (nodes_[vertex].right == kNone
-               ? 0
-               : computed_size[nodes_[vertex].right]);
-      if (nodes_[vertex].auxiliary_size != expected_size) {
+          1 + (node.left == kNone ? 0 : computed_size[node.left]) +
+          (node.right == kNone ? 0 : computed_size[node.right]);
+      if (node.auxiliary_size != expected_size) {
         return false;
       }
 
-      ExactSum expected_sum{};
+      std::int64_t own_value = 0;
       if (frame.inherited_assignment) {
-        expected_sum = scale_exact_value(frame.inherited_value, expected_size);
-      } else if (nodes_[vertex].has_assignment) {
-        if (nodes_[vertex].value != nodes_[vertex].assignment_value) {
-          return false;
-        }
-        expected_sum =
-            scale_exact_value(nodes_[vertex].assignment_value, expected_size);
-        if (!exact_equal(nodes_[vertex].auxiliary_sum, expected_sum)) {
-          return false;
-        }
+        own_value = frame.inherited_value;
       } else {
-        expected_sum = add_exact(
-            add_exact(nodes_[vertex].left == kNone
-                          ? ExactSum{}
-                          : computed_sum[nodes_[vertex].left],
-                      exact_from_value(nodes_[vertex].value)),
-            nodes_[vertex].right == kNone
-                ? ExactSum{}
-                : computed_sum[nodes_[vertex].right]);
-        if (!exact_equal(nodes_[vertex].auxiliary_sum, expected_sum)) {
+        const ExactSum shifted = add_exact(exact_from_value(node.value),
+                                           frame.inherited_addition);
+        if (!exact_fits_int64(shifted)) {
+          return false;
+        }
+        own_value = narrow_exact_unchecked(shifted);
+      }
+
+      ExactSum expected_sum = exact_from_value(own_value);
+      std::int64_t expected_min = own_value;
+      std::int64_t expected_max = own_value;
+      if (node.left != kNone) {
+        expected_sum = add_exact(computed_sum[node.left], expected_sum);
+        expected_min = std::min(expected_min, computed_min[node.left]);
+        expected_max = std::max(expected_max, computed_max[node.left]);
+      }
+      if (node.right != kNone) {
+        expected_sum = add_exact(expected_sum, computed_sum[node.right]);
+        expected_min = std::min(expected_min, computed_min[node.right]);
+        expected_max = std::max(expected_max, computed_max[node.right]);
+      }
+
+      const bool inherited_identity =
+          !frame.inherited_assignment && exact_is_zero(frame.inherited_addition);
+      if (inherited_identity) {
+        if (!exact_equal(node.auxiliary_sum, expected_sum) ||
+            node.auxiliary_min != expected_min ||
+            node.auxiliary_max != expected_max) {
+          return false;
+        }
+        if (node.has_assignment && node.value != node.assignment_value) {
           return false;
         }
       }
 
       computed_size[vertex] = expected_size;
       computed_sum[vertex] = expected_sum;
+      computed_min[vertex] = expected_min;
+      computed_max[vertex] = expected_max;
       state[vertex] = 2;
     }
   }
