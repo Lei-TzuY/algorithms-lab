@@ -109,6 +109,15 @@ small-instance total. Production optimum cost and reconstructed witness are
 checked against that oracle.
 
 Focused execution uses the repository warning policy under GCC and Clang plus a
-real AddressSanitizer/UndefinedBehaviorSanitizer build. Full-repository
-integration remains a GitHub Actions gate for the exact PR head and, after
-merge, for the exact merged `main`.
+real AddressSanitizer/UndefinedBehaviorSanitizer build. The exact implementation
+PR #101 and the exact merged-main checkpoint `34c288d206d0d7595bf7c216289b8592ba76de04`
+both passed the repository GCC release, Clang release, and GCC ASan+UBSan CI
+matrix; merged-main run `34363518566` completed successfully.
+
+## Sealed boundary
+
+Phase 42 stops at the exact first-principles Chu-Liu-Edmonds capability above.
+Alternate arborescence implementations or minor policy variants are not added
+merely to increase algorithm count. The next promoted frontier is directed
+control-flow dominance, whose semi-dominator/link-eval invariants and immediate-
+dominator witness form a distinct proof and architecture surface.
