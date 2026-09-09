@@ -47,3 +47,9 @@ The long trace maintains an independent eager adjacency matrix and reconstructs 
 Once the represented path is exposed, rank descent follows one auxiliary-tree root-to-node path using stored subtree sizes and then splays the selected node. Together with `make_root/access/splay`, this retains the standard link-cut **amortized `O(log V)`** sequence-level operation bound.
 
 No worst-case `O(log V)` per-operation claim is made: an individual auxiliary splay can still be linear in its current height. The existing `push_path` implementation also uses temporary storage proportional to that auxiliary height while propagating lazy state.
+
+## Sealed boundary
+
+Phase 38 is sealed only after the implementation reached merged `main` at `a1cf0bdec718201000d0784f95f1393937ed791c` and push CI run `34337793152` completed successfully on GCC release, Clang release, and GCC ASan+UBSan. The phase establishes ordered represented-path selection; it does **not** claim rooted-subtree accounting, path-extremum selection, or worst-case logarithmic splay operations.
+
+The next frontier deliberately changes the maintained invariant rather than adding another path accessor: Phase 39 introduces virtual-child represented-size accounting so rooted subtree cardinality can be answered while preferred paths continue to change.
