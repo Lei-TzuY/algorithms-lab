@@ -42,6 +42,7 @@ add_library(algorithms_lab
   src/graphs/graph.cpp
   src/graphs/directed_arborescence.cpp
   src/graphs/dominator_tree.cpp
+  src/graphs/dominance_frontier.cpp
   src/graphs/traversal.cpp
   src/graphs/shortest_paths.cpp
   src/graphs/minimum_spanning_tree.cpp
@@ -87,6 +88,7 @@ if(BUILD_TESTING)
     tests/test_graphs.cpp
     tests/test_directed_arborescence.cpp
     tests/test_dominator_tree.cpp
+    tests/test_dominance_frontier.cpp
     tests/test_shortest_paths.cpp
     tests/test_phase2.cpp
     tests/test_knapsack.cpp
