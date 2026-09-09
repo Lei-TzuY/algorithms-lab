@@ -45,6 +45,7 @@ add_library(algorithms_lab
   src/graphs/minimum_spanning_tree.cpp
   src/graphs/strongly_connected_components.cpp
   src/graphs/max_flow.cpp
+  src/graphs/gomory_hu_tree.cpp
   src/graphs/min_cost_flow.cpp
   src/graphs/min_cost_circulation.cpp
   src/graphs/bipartite_matching.cpp
@@ -117,6 +118,7 @@ if(BUILD_TESTING)
     tests/test_bwt_run_sampled_locate.cpp
     tests/test_bwt_memoized_run_sampled_locate.cpp
     tests/test_max_flow.cpp
+    tests/test_gomory_hu_tree.cpp
     tests/test_min_cost_flow.cpp
     tests/test_min_cost_circulation.cpp
     tests/test_hungarian_assignment.cpp
