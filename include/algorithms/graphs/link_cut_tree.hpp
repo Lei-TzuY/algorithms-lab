@@ -13,23 +13,52 @@ class LinkCutForest {
  public:
   explicit LinkCutForest(std::size_t vertex_count);
 
-  [[nodiscard]] std::size_t vertex_count() const noexcept { return nodes_.size(); }
+  [[nodiscard]] std::size_t vertex_count() const noexcept {
+    return nodes_.size();
+  }
 
+  // Adds one represented-tree edge. Throws when the edge would be a self-loop
+  // or would connect vertices already in the same represented tree.
   void link(Vertex first, Vertex second);
+
+  // Removes exactly one represented-tree edge. Throws when the requested pair
+  // is not a direct represented-tree edge.
   void cut(Vertex first, Vertex second);
+
+  // Link-cut queries are structurally mutating: preferred paths are exposed and
+  // auxiliary splay trees are rearranged even though represented topology stays
+  // unchanged.
   [[nodiscard]] bool connected(Vertex first, Vertex second);
+
+  // Returns the number of represented-tree edges on the unique path.
+  // Throws when the vertices are disconnected.
   [[nodiscard]] std::size_t path_edge_distance(Vertex first, Vertex second);
 
+  // Replaces one vertex value exactly. The operation itself never rejects a
+  // representable int64 value merely because an exposed auxiliary aggregate is
+  // outside int64; internal aggregates use a wider exact representation.
   void assign_value(Vertex vertex, std::int64_t value);
+
+  // Uniformly replaces every node value on the represented path. The exposed
+  // preferred path receives one lazy assignment tag, so the operation preserves
+  // exact aggregate state without narrowing intermediate sums.
   void assign_path_value(Vertex first, Vertex second, std::int64_t value);
 
-  // Adds delta to every represented-path node. Numeric state is transactional:
-  // std::overflow_error is thrown before any represented node value changes if
-  // even one affected value would leave int64_t. Preferred-path exposure may
-  // still rearrange auxiliary splay structure, as with all link-cut queries.
+  // Adds delta to every node on the represented path. The operation rejects
+  // transactionally before changing any represented node value if even one
+  // affected value would leave int64. Preferred-path exposure may still
+  // rearrange auxiliary splay structure, as with all link-cut queries.
   void add_path_value(Vertex first, Vertex second, std::int64_t delta);
 
+  // Returns the exact represented-path node-value sum when it is representable
+  // as int64. Throws std::overflow_error only when that final exact result is
+  // genuinely outside int64, and std::invalid_argument when disconnected.
   [[nodiscard]] std::int64_t path_sum(Vertex first, Vertex second);
+
+  // Diagnostic check for the auxiliary forest: child/parent consistency,
+  // acyclicity, stored auxiliary subtree sizes, exact aggregate/lazy-tag
+  // semantics. A parent pointer may be a represented path-parent even when it
+  // is not an auxiliary-tree child link.
   [[nodiscard]] bool valid_auxiliary_invariants() const;
 
  private:
@@ -84,7 +113,6 @@ class LinkCutForest {
   static bool can_add_int64(std::int64_t value, std::int64_t delta) noexcept;
   static std::int64_t add_exact_to_int64(std::int64_t value,
                                          const ExactSum& delta);
-
   void pull(Vertex vertex);
   void apply_assignment(Vertex vertex, std::int64_t value) noexcept;
   void apply_addition(Vertex vertex, const ExactSum& delta);
