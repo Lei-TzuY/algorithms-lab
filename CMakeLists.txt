@@ -50,6 +50,7 @@ add_library(algorithms_lab
   src/graphs/register_coalescing.cpp
   src/graphs/backend_spill_lowering.cpp
   src/graphs/backend_register_reservation.cpp
+  src/graphs/backend_frame_layout.cpp
   src/graphs/traversal.cpp
   src/graphs/shortest_paths.cpp
   src/graphs/minimum_spanning_tree.cpp
@@ -103,6 +104,7 @@ if(BUILD_TESTING)
     tests/test_register_coalescing.cpp
     tests/test_backend_spill_lowering.cpp
     tests/test_backend_register_reservation.cpp
+    tests/test_backend_frame_layout.cpp
     tests/test_shortest_paths.cpp
     tests/test_phase2.cpp
     tests/test_knapsack.cpp
