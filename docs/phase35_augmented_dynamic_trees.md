@@ -72,6 +72,10 @@ Point assignment and path-sum queries use the same link-cut access/splay machine
 
 The private exact aggregate expands each node by constant-size two-limb state, so it does not change the asymptotic storage bound.
 
-## Phase boundary
+## Claim boundary and seal
 
-This implementation completes the Phase-35 capability target but does not seal the phase by itself. The ROADMAP remains ACTIVE / unchecked until the exact PR head passes the full repository GCC/Clang/ASan matrix, the merged-main run passes, and a separate architecture/sealing audit confirms there is no remaining blocker.
+Phase 35 is **SEALED** after implementation candidate `dc5e4595337395c032c42c7a252c0e28cd09d52a` passed full-repository CI run `34325300351`, merged as `main@aa91765285541c8e209d171d9f027b8c5941c7e7`, and merged-main CI run `34325821036` completed successfully on GCC release, Clang release, and GCC ASan+UBSan.
+
+The sealed capability is exact node-value point assignment plus represented-path sum over the existing dynamic-forest topology. The audit found no correctness, representability, sanitizer, or complexity-claim blocker. Path min/max variants are intentionally not added merely to enlarge the API.
+
+Phase 36 promotes a genuinely new mechanism: **lazy represented-path assignment**. A uniform path assignment must compose correctly with access/splay and lazy reversal, update the exact auxiliary sum as path length times the assigned value without narrowing intermediate state, and preserve the existing amortized link-cut complexity contract.
