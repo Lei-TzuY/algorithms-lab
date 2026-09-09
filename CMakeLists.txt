@@ -126,6 +126,7 @@ if(BUILD_TESTING)
     tests/test_heavy_light_decomposition.cpp
     tests/test_link_cut_tree.cpp
     tests/test_link_cut_tree_augmented.cpp
+    tests/test_link_cut_tree_lazy_assignment.cpp
     tests/test_offline_dynamic_connectivity.cpp
     tests/test_online_paging.cpp
     tests/test_geometry2d.cpp

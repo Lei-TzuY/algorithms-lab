@@ -39,15 +39,20 @@ class LinkCutForest {
   // outside int64; internal aggregates use a wider exact representation.
   void assign_value(Vertex vertex, std::int64_t value);
 
+  // Uniformly replaces every node value on the represented path. The exposed
+  // preferred path receives one lazy assignment tag, so the operation preserves
+  // exact aggregate state without narrowing intermediate sums.
+  void assign_path_value(Vertex first, Vertex second, std::int64_t value);
+
   // Returns the exact represented-path node-value sum when it is representable
   // as int64. Throws std::overflow_error only when that final exact result is
   // genuinely outside int64, and std::invalid_argument when disconnected.
   [[nodiscard]] std::int64_t path_sum(Vertex first, Vertex second);
 
   // Diagnostic check for the auxiliary forest: child/parent consistency,
-  // acyclicity, stored auxiliary subtree sizes, and stored exact aggregates. A
-  // parent pointer may be a represented path-parent even when it is not an
-  // auxiliary-tree child link.
+  // acyclicity, stored auxiliary subtree sizes, and exact aggregate/lazy-tag
+  // semantics. A parent pointer may be a represented path-parent even when it
+  // is not an auxiliary-tree child link.
   [[nodiscard]] bool valid_auxiliary_invariants() const;
 
  private:
@@ -67,6 +72,8 @@ class LinkCutForest {
     std::int64_t value = 0;
     ExactSum auxiliary_sum{};
     bool reversed = false;
+    bool has_assignment = false;
+    std::int64_t assignment_value = 0;
   };
 
   std::vector<Node> nodes_;
@@ -84,10 +91,13 @@ class LinkCutForest {
                                      const ExactSum& smaller) noexcept;
   static ExactSum add_exact(const ExactSum& first,
                             const ExactSum& second) noexcept;
+  static ExactSum scale_exact_value(std::int64_t value,
+                                    std::size_t count) noexcept;
   static bool exact_equal(const ExactSum& first,
                           const ExactSum& second) noexcept;
   static std::int64_t narrow_exact(const ExactSum& value);
   void pull(Vertex vertex) noexcept;
+  void apply_assignment(Vertex vertex, std::int64_t value) noexcept;
   void apply_reverse(Vertex vertex) noexcept;
   void push(Vertex vertex) noexcept;
   void push_path(Vertex vertex);

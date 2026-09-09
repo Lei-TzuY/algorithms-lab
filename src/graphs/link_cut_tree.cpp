@@ -92,6 +92,26 @@ LinkCutForest::ExactSum LinkCutForest::add_exact(
   return result;
 }
 
+LinkCutForest::ExactSum LinkCutForest::scale_exact_value(
+    std::int64_t value, std::size_t count) noexcept {
+  ExactSum addend = exact_from_value(value);
+  const bool negative = addend.negative;
+  addend.negative = false;
+  ExactSum result{};
+  std::uint64_t multiplier = static_cast<std::uint64_t>(count);
+  while (multiplier != 0) {
+    if ((multiplier & 1U) != 0U) {
+      result = add_magnitude(result, addend);
+    }
+    multiplier >>= 1U;
+    if (multiplier != 0) {
+      addend = add_magnitude(addend, addend);
+    }
+  }
+  result.negative = negative && (result.low != 0 || result.high != 0);
+  return result;
+}
+
 bool LinkCutForest::exact_equal(const ExactSum& first,
                                 const ExactSum& second) noexcept {
   return first.low == second.low && first.high == second.high &&
@@ -122,10 +142,26 @@ std::int64_t LinkCutForest::narrow_exact(const ExactSum& value) {
 void LinkCutForest::pull(Vertex vertex) noexcept {
   nodes_[vertex].auxiliary_size =
       1 + child_size(nodes_[vertex].left) + child_size(nodes_[vertex].right);
+  if (nodes_[vertex].has_assignment) {
+    nodes_[vertex].auxiliary_sum = scale_exact_value(
+        nodes_[vertex].assignment_value, nodes_[vertex].auxiliary_size);
+    return;
+  }
   nodes_[vertex].auxiliary_sum =
       add_exact(add_exact(child_sum(nodes_[vertex].left),
                           exact_from_value(nodes_[vertex].value)),
                 child_sum(nodes_[vertex].right));
+}
+
+void LinkCutForest::apply_assignment(Vertex vertex, std::int64_t value) noexcept {
+  if (vertex == kNone) {
+    return;
+  }
+  nodes_[vertex].value = value;
+  nodes_[vertex].auxiliary_sum =
+      scale_exact_value(value, nodes_[vertex].auxiliary_size);
+  nodes_[vertex].has_assignment = true;
+  nodes_[vertex].assignment_value = value;
 }
 
 void LinkCutForest::apply_reverse(Vertex vertex) noexcept {
@@ -137,6 +173,11 @@ void LinkCutForest::apply_reverse(Vertex vertex) noexcept {
 }
 
 void LinkCutForest::push(Vertex vertex) noexcept {
+  if (nodes_[vertex].has_assignment) {
+    apply_assignment(nodes_[vertex].left, nodes_[vertex].assignment_value);
+    apply_assignment(nodes_[vertex].right, nodes_[vertex].assignment_value);
+    nodes_[vertex].has_assignment = false;
+  }
   if (!nodes_[vertex].reversed) {
     return;
   }
@@ -310,7 +351,20 @@ void LinkCutForest::assign_value(Vertex vertex, std::int64_t value) {
   validate_vertex(vertex);
   access(vertex);
   nodes_[vertex].value = value;
+  nodes_[vertex].has_assignment = false;
   pull(vertex);
+}
+
+void LinkCutForest::assign_path_value(Vertex first, Vertex second,
+                                      std::int64_t value) {
+  validate_vertex(first);
+  validate_vertex(second);
+  make_root(first);
+  if (find_root(second) != first) {
+    throw std::invalid_argument("path assignment requires connected vertices");
+  }
+  access(second);
+  apply_assignment(second, value);
 }
 
 std::int64_t LinkCutForest::path_sum(Vertex first, Vertex second) {
@@ -377,6 +431,13 @@ bool LinkCutForest::valid_auxiliary_invariants() const {
     }
   }
 
+  struct Frame {
+    Vertex vertex;
+    bool expanded;
+    bool inherited_assignment;
+    std::int64_t inherited_value;
+  };
+
   std::vector<unsigned char> state(vertex_count, 0);
   std::vector<std::size_t> computed_size(vertex_count, 0);
   std::vector<ExactSum> computed_sum(vertex_count);
@@ -385,12 +446,8 @@ bool LinkCutForest::valid_auxiliary_invariants() const {
       continue;
     }
 
-    struct Frame {
-      Vertex vertex;
-      bool expanded;
-    };
     std::vector<Frame> stack;
-    stack.push_back(Frame{root, false});
+    stack.push_back(Frame{root, false, false, 0});
     while (!stack.empty()) {
       const Frame frame = stack.back();
       stack.pop_back();
@@ -400,12 +457,20 @@ bool LinkCutForest::valid_auxiliary_invariants() const {
           return false;
         }
         state[vertex] = 1;
-        stack.push_back(Frame{vertex, true});
+        const bool effective_assignment =
+            frame.inherited_assignment || nodes_[vertex].has_assignment;
+        const std::int64_t effective_value = frame.inherited_assignment
+                                                  ? frame.inherited_value
+                                                  : nodes_[vertex].assignment_value;
+        stack.push_back(Frame{vertex, true, frame.inherited_assignment,
+                              frame.inherited_value});
         if (nodes_[vertex].right != kNone) {
-          stack.push_back(Frame{nodes_[vertex].right, false});
+          stack.push_back(Frame{nodes_[vertex].right, false,
+                                effective_assignment, effective_value});
         }
         if (nodes_[vertex].left != kNone) {
-          stack.push_back(Frame{nodes_[vertex].left, false});
+          stack.push_back(Frame{nodes_[vertex].left, false,
+                                effective_assignment, effective_value});
         }
         continue;
       }
@@ -421,16 +486,30 @@ bool LinkCutForest::valid_auxiliary_invariants() const {
         return false;
       }
 
-      const ExactSum expected_sum = add_exact(
-          add_exact(nodes_[vertex].left == kNone
-                        ? ExactSum{}
-                        : computed_sum[nodes_[vertex].left],
-                    exact_from_value(nodes_[vertex].value)),
-          nodes_[vertex].right == kNone
-              ? ExactSum{}
-              : computed_sum[nodes_[vertex].right]);
-      if (!exact_equal(nodes_[vertex].auxiliary_sum, expected_sum)) {
-        return false;
+      ExactSum expected_sum{};
+      if (frame.inherited_assignment) {
+        expected_sum = scale_exact_value(frame.inherited_value, expected_size);
+      } else if (nodes_[vertex].has_assignment) {
+        if (nodes_[vertex].value != nodes_[vertex].assignment_value) {
+          return false;
+        }
+        expected_sum =
+            scale_exact_value(nodes_[vertex].assignment_value, expected_size);
+        if (!exact_equal(nodes_[vertex].auxiliary_sum, expected_sum)) {
+          return false;
+        }
+      } else {
+        expected_sum = add_exact(
+            add_exact(nodes_[vertex].left == kNone
+                          ? ExactSum{}
+                          : computed_sum[nodes_[vertex].left],
+                      exact_from_value(nodes_[vertex].value)),
+            nodes_[vertex].right == kNone
+                ? ExactSum{}
+                : computed_sum[nodes_[vertex].right]);
+        if (!exact_equal(nodes_[vertex].auxiliary_sum, expected_sum)) {
+          return false;
+        }
       }
 
       computed_size[vertex] = expected_size;
