@@ -128,9 +128,22 @@ calling conventions, hardware scratch-register reservation, spill-cost
 optimization, post-rewrite reallocation, MemorySSA, and backend-wide optimality
 remain outside this Phase-50 implementation slice.
 
-## Phase status
+## Sealed status and next frontier
 
-Implementation is complete only when this candidate passes exact full-repository
-GCC release, Clang release, and GCC ASan+UBSan CI and the merged `main` repeats
-that matrix successfully. Until then Phase 50 remains an active frontier rather
-than a sealed claim.
+Phase 50 is sealed at merged `main@d5c4153f7ca5e89ba3aa73a138aace8156534111`.
+The exact implementation candidate `333d54fd25d551c70dd0dddc43db82d404ebe3b5`
+passed GCC release, Clang release, and GCC ASan+UBSan in CI run `34402086929`;
+the merged-main integration run `34402793128` repeated the same three-way
+matrix successfully.
+
+The next coherent backend gap is not another abstract operation kind. Phase 50
+still names spill scratch registers in an operation-local namespace without
+proving that those temporaries fit a finite physical register file alongside
+the Phase-49 assignment. Phase 51 therefore promotes scratch-aware register
+reservation: reduce the allocatable register budget by a candidate reserved
+scratch suffix, rerun the sealed Phase-49/50 pipeline, and accept a reservation
+only when the measured `max_scratch_registers` fits that suffix. Used scratch
+indices can then map injectively to physical ids outside the allocator-visible
+prefix. Byte-level frame layout, concrete instruction selection/addressing,
+calling conventions, minimum-spill/global-register optimality, MemorySSA, and
+post-rewrite optimization remain outside that next slice.
