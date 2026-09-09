@@ -40,6 +40,7 @@ add_library(algorithms_lab
   src/geometry/geometry2d.cpp
   src/greedy/interval_scheduling.cpp
   src/graphs/graph.cpp
+  src/graphs/directed_arborescence.cpp
   src/graphs/traversal.cpp
   src/graphs/shortest_paths.cpp
   src/graphs/minimum_spanning_tree.cpp
@@ -83,6 +84,7 @@ if(BUILD_TESTING)
     tests/test_searching_sorting.cpp
     tests/test_data_structures.cpp
     tests/test_graphs.cpp
+    tests/test_directed_arborescence.cpp
     tests/test_shortest_paths.cpp
     tests/test_phase2.cpp
     tests/test_knapsack.cpp
