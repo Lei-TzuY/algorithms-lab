@@ -129,9 +129,23 @@ Focused GCC and Clang strict-warning syntax gates pass before upload. Full
 repository GCC, Clang, and ASan+UBSan execution remains the authoritative remote
 integration gate.
 
-## Current boundary
+## Sealed boundary and next frontier
 
-This is liveness-pruned scalar SSA only. Semi-pruned SSA, MemorySSA, SSA
-destruction, optimization passes, post-dominators/control dependence, incremental
-CFG maintenance, and production compiler IR integration remain separate
-architectural hypotheses.
+Phase 46 is sealed after implementation PR #109 candidate
+`29458348474d011bcc1cd533ba0a985a3078135f` passed CI run `34381169510`, was
+integrated as `main@3527e8f9b0f8abe9647fc6f951454c8c6b8a6f6a`, and the exact
+merged-main run `34381733038` completed successfully on GCC release, Clang
+release, and GCC ASan+UBSan.
+
+The sealed scope is liveness-pruned scalar SSA only. Semi-pruned SSA is a weaker
+placement regime and is not promoted merely for catalog breadth. MemorySSA,
+optimization passes, post-dominators/control dependence, register allocation,
+and incremental CFG maintenance remain separate architectural hypotheses.
+
+Phase 47 promotes the next executable boundary: out-of-SSA lowering. Phi results
+must become predecessor-specific edge copies with explicit parallel-copy
+semantics; critical edges must be split when an edge-local copy bundle cannot be
+placed unambiguously, and cyclic copy bundles must be scheduled without
+clobbering source values. The lowering must preserve the sealed SSA value
+identity/reachability semantics and expose replayable provenance suitable for
+independent semantic verification.
