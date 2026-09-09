@@ -116,10 +116,16 @@ same candidate before remote full-repository CI. These tests are implementation
 evidence; the dominance-frontier phi-placement theorem and dominator-stack
 renaming argument remain proof obligations.
 
-## Current boundary
+## Sealed boundary
 
-Phase 45 stops at deterministic phi materialization and scalar variable version
-renaming for the explicit event IR above. Liveness-pruned/semi-pruned SSA,
-MemorySSA, SSA destruction, optimization passes, post-dominators/control
-dependence, and incremental CFG maintenance are separate architectural
-hypotheses.
+Phase 45 is sealed at merged `main@800f63b54fcfb0612fdf67eba27c5c3d41849576`.
+The exact implementation candidate passed pull-request CI run `34377126366`, and
+the merged-main tree passed push CI run `34377844865`; both matrices completed
+successfully under GCC release, Clang release, and GCC ASan+UBSan.
+
+The sealed capability is deterministic minimal scalar SSA for the explicit event
+IR above. Liveness-pruned/semi-pruned SSA, MemorySSA, SSA destruction,
+optimization passes, post-dominators/control dependence, and incremental CFG
+maintenance remain separate architectural hypotheses. Phase 46 promotes the
+first of those gaps: liveness-pruned SSA phi placement with independently verified
+block liveness while preserving the sealed renaming semantics.
