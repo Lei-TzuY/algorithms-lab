@@ -63,3 +63,19 @@ opcodes, addressing modes, a frame/base pointer, callee/caller-saved policy,
 calling convention, prologue/epilogue, red zones, variable-size objects, slot
 coloring/reuse, or an ABI-minimal frame. It is a target-neutral deterministic
 byte-layout boundary over the sealed backend pipeline.
+
+## Seal and promotion
+
+Phase 52 implementation PR #121 used exact head
+`83f58c66d9c3ca154cb8b68eb1dd8db910a9c245` over sealed Phase-51
+`main@326c01b248d8fe856557b35c8eb8387b3845cb4f` and was squash-merged as
+`main@af316ff58300f51be00aa58844f52b5d55c32369`. The exact merged-main CI run
+`34410865957` completed successfully on GCC release, Clang release, and GCC
+ASan+UBSan.
+
+Phase 52 is therefore **SEALED**. The next coherent backend boundary is Phase 53:
+translate the sealed positive frame-byte offsets into a target-neutral signed
+base-relative displacement view using an explicit logical frame-base byte anchor
+and caller-supplied representable displacement interval. Concrete ISA opcode
+selection, encoded addressing modes, stack/base-register assignment, calling
+conventions, prologue/epilogue, and ABI policy remain outside that next slice.
