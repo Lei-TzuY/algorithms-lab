@@ -67,8 +67,10 @@ every feasible backend selection it chooses bounded frame parameters plus a
 logical anchor, constructs the Phase-53 view twice, and independently replays
 every slot/class/location/block/operation mapping and provenance field.
 
-The repository GCC/Clang/ASan+UBSan matrix is the authoritative integration
-gate. Local focused source arithmetic tests are supplementary evidence only.
+The exact merged-main repository matrix on `main@7c1c1dfc2440e1c02009fa2a1ce7672140143b8e`
+(run `34415763955`) completed successfully on GCC release, Clang release, and
+GCC ASan+UBSan. This closes the integration gate for the sealed Phase-53
+representation.
 
 ## Complexity and non-claims
 
@@ -84,8 +86,16 @@ addressing-mode syntax, calling convention, red zone, callee/caller-save
 policy, prologue/epilogue, or ABI. The signed displacement interval is explicit
 caller policy, not an ISA claim.
 
-## Phase boundary
+## Sealed boundary and next frontier
 
-Phase 53 remains an implementation frontier until the exact candidate reaches
-merged `main` and the merged-main CI matrix succeeds. Any next backend phase
-must be selected only after that architecture/integration audit.
+Phase 53 is sealed after exact implementation CI, merge, merged-main CI, and the
+architecture/integration audit recorded in `phase53_sealing_audit.md`.
+
+The next coherent backend gap is physical ownership of the logical frame base.
+Phase 54 reserves one dedicated frame-base physical register from the same
+finite register file used by Phase 51, reruns scratch-aware allocation over the
+remaining registers, and then reuses sealed Phase 52 and Phase 53 unchanged.
+The goal is to prove the base register is disjoint from every persistent and
+spill-scratch register while retaining complete replay provenance. Concrete ISA
+opcodes, stack-growth convention, ABI, calling convention, and prologue/
+epilogue remain outside that frontier.
