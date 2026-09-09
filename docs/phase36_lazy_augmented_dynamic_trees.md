@@ -80,6 +80,8 @@ The assignment tag and exact scaled aggregate add only constant-size state per n
 
 ## Phase boundary
 
-This implementation candidate completes the Phase-36 capability target but does not seal the phase by itself. The ROADMAP remains ACTIVE / unchecked until the exact candidate passes full-repository GCC/Clang/ASan CI, reaches merged `main`, merged-main CI passes, and a separate architecture/sealing audit confirms no blocker.
+Phase 36 is sealed after candidate `11884b4d073bfe11fbb9834bf99d1f6d1cc2daca` passed full-repository CI run `34328960851`, was squash-merged as `7238fb95a16bdf4cb9b60bbcc2277691265c6e77`, and the exact merged-main CI run `34329511772` completed successfully on GCC release, Clang release, and GCC ASan+UBSan.
 
-Path-addition, min/max, and generic affine lazy tags are intentionally not included in this slice. They would require different composition and representability obligations and must not be treated as free variants of uniform assignment.
+Path addition, min/max, and generic affine lazy tags remain outside the sealed Phase-36 scope. They require different composition and per-node representability obligations and are not treated as free variants of uniform assignment.
+
+The next frontier is Phase 37: affine lazy represented-path updates. Its first coherent slice adds uniform path addition while composing correctly with sealed assignment/reversal tags and transactionally rejecting any update that would move an individual node value outside `int64_t`.
