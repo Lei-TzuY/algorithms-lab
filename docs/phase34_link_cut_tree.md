@@ -70,4 +70,8 @@ The naïve oracle never uses link-cut-tree operations, preferred paths, or splay
 
 This phase does not implement path sums/min/max, node or edge weights, subtree aggregates, dynamic vertex creation, parallel represented edges, or a generic library wrapper. The purpose of the slice is the dynamic-forest topology machinery and its amortized contract.
 
-Phase 34 implementation is complete only after the exact full-repository candidate and merged-main CI gates pass. Sealing and any next frontier are separate architecture decisions.
+## Sealed checkpoint
+
+Phase 34 is sealed after the exact candidate tree reached `main` as `234984b29de44d546fba6c07598e9231e1e33a7b` and push CI run `34321406201` completed successfully on GCC release, Clang release, and GCC ASan+UBSan. The independent 30,000-operation naïve-forest differential and executable auxiliary invariants remain the correctness evidence for this topology layer.
+
+The next frontier is Phase 35 — augmented dynamic trees. It will preserve the sealed represented-forest topology contract while adding node values, point assignment, and exact represented-path sums whose auxiliary aggregates must remain correct across access, rotation, and lazy reversal. Weighted aggregates are intentionally a new phase because they add representability and aggregate-maintenance proof obligations rather than merely another topology query.
