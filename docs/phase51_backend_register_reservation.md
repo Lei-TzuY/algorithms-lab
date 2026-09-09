@@ -40,3 +40,9 @@ A fixed-seed 350-program corpus generates copy/instruction mixes and total regis
 At most `R + 1` complete sealed Phase-49/50 pipeline attempts are evaluated, stopping at the first feasible reservation. Phase 51 therefore multiplies the underlying coalescing/materialization work by at most `R + 1`; it does not claim a more efficient fixed-point solver.
 
 Byte-level stack-frame layout/alignment, concrete ISA opcode legality and addressing modes, calling conventions, spill-cost heuristics, minimum-spill/global allocation optimality, MemorySSA, and post-rewrite reallocation remain outside this slice.
+
+## Sealed boundary and next frontier
+
+Phase 51 is **SEALED** after implementation PR #119 exact candidate `4e2cf7bfbacd547887c68f0c99ba88af298eb682` passed full-repository CI run `34407480514`, was squash-merged as `main@b9b7105766c160031c3b4a35f0603c3b2d4004b8`, and exact merged-main CI run `34408039983` completed successfully on GCC release, Clang release, and GCC ASan+UBSan.
+
+Phase 52 should close the remaining abstract stack-slot gap with a target-neutral byte-addressed spill-frame layout. It should accept explicit uniform slot-size/alignment and frame-alignment parameters, map every stack-slot index to a deterministic non-overlapping byte offset with checked arithmetic, expose frame-size/alignment evidence, and rewrite the Phase-51 physicalized operation view so stack operands carry concrete frame offsets while physical-register ids and operation provenance remain unchanged. Concrete ISA opcodes/addressing modes, stack-growth direction, calling conventions, and prologue/epilogue behavior remain outside that slice.
