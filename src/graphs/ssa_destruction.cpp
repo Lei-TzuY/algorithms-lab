@@ -445,11 +445,11 @@ OutOfSsaProgram destroy_ssa(const Graph& graph, const SsaProgram& program) {
   std::size_t temporary_count = 0U;
   for (LogicalSitePlan& plan : plans) {
     std::vector<SsaScheduledMove> schedule = plan.local_schedule.moves;
-    add_global_offset(schedule, temporary_count);
     if (plan.local_schedule.temporary_count >
         std::numeric_limits<std::size_t>::max() - temporary_count) {
       throw std::length_error("SSA destruction temporary count overflows");
     }
+    add_global_offset(schedule, temporary_count);
     temporary_count += plan.local_schedule.temporary_count;
 
     if (plan.placement == SsaCopyPlacement::predecessor_exit) {
