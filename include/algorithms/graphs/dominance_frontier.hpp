@@ -16,7 +16,7 @@ namespace algorithms::graphs {
 //
 // This direct first-principles implementation evaluates the defining predicate
 // using the sealed DominatorTree index. It intentionally claims the conservative
-// O(VE) construction bound of this definition-based baseline and O(V^2) worst-
+// O(V(V+E)) construction bound of this definition-based baseline and O(V^2) worst-
 // case resident frontier payload. The implementation does not claim the tighter
 // complexity of optimized local/up dominance-frontier algorithms.
 class DominanceFrontierIndex {
