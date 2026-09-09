@@ -87,11 +87,22 @@ IDF closure independently. Every vertex frontier and eight randomized definition
 sets per graph are compared exactly.
 
 Focused GCC and Clang strict-warning builds and an actual GCC ASan+UBSan build
-pass the same repo-native tests before remote full-repository CI.
+pass the same repo-native tests before remote full-repository CI. Implementation
+PR #105 passed the same three remote gates and was squash-merged as
+`0d1115ff30a80947c7f37a1acce09812b9d9e6c1`. The exact merged-main push run
+`34373959705` also completed successfully on GCC release, Clang release, and GCC
+ASan+UBSan.
 
-## Current boundary
+## Sealed boundary and next frontier
 
-This phase stops at exact dominance frontier and deterministic IDF placement
-sets. Post-dominators, control dependence, actual SSA phi-node materialization,
-SSA renaming, liveness-pruned SSA, and incremental CFG updates remain separate
-architectural hypotheses.
+Phase 44 seals at exact definition-based dominance frontiers plus deterministic
+IDF closure. Another frontier algorithm, additional graph-shape variants,
+post-dominators, or control dependence would either duplicate this capability or
+mix a distinct control-flow problem into the phase.
+
+The next promoted frontier is minimal SSA construction: materialize phi nodes
+from the sealed IDF substrate, then rename variable uses and definitions while
+walking the sealed dominator tree. The Phase-45 baseline must expose replayable
+phi incoming/version witnesses and validate the renamed program independently;
+it must not imply liveness-pruned SSA, MemorySSA, optimization passes,
+post-dominator/control-dependence analysis, or incremental CFG maintenance.
