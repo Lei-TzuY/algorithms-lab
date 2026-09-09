@@ -46,6 +46,7 @@ add_library(algorithms_lab
   src/graphs/ssa_construction.cpp
   src/graphs/ssa_pruned.cpp
   src/graphs/ssa_destruction.cpp
+  src/graphs/register_allocation.cpp
   src/graphs/traversal.cpp
   src/graphs/shortest_paths.cpp
   src/graphs/minimum_spanning_tree.cpp
@@ -95,6 +96,7 @@ if(BUILD_TESTING)
     tests/test_ssa_construction.cpp
     tests/test_ssa_pruned.cpp
     tests/test_ssa_destruction.cpp
+    tests/test_register_allocation.cpp
     tests/test_shortest_paths.cpp
     tests/test_phase2.cpp
     tests/test_knapsack.cpp
