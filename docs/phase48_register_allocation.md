@@ -169,10 +169,18 @@ sorting/adjacency work over `L` locations and `I` edges.
 These bounds are intentionally conservative. No optimal register-allocation,
 minimum-spill, coalescing, or backend-wide complexity claim is imported.
 
-## Frontier after integration
+## Sealed boundary and next frontier
 
-This implementation completes the Phase-48 roadmap hypothesis only after the
-exact candidate and merged-main CI gates succeed. The next frontier must be chosen
-by a fresh architecture audit. Likely backend directions include copy coalescing
-or executable spill-code insertion/rewrite, but neither is pre-declared complete
-or folded into this slice.
+Phase 48 is sealed after exact-head CI and merged-main CI both passed on GCC
+release, Clang release, and GCC ASan+UBSan. The sealed boundary is deliberately
+narrow: exact phi-free may-liveness, reconstructable interference, deterministic
+bounded greedy coloring, and an explicit spill witness. It does not claim
+optimal coloring, minimum spilling, copy coalescing, or executable spill rewrite.
+
+A fresh architecture audit promotes one distinct next frontier: interference-safe
+copy coalescing. Phase 49 may use move-preference edges to merge only locations
+that provably do not interfere, rebuild/color the quotient interference graph,
+and expose which scheduled copies become redundant. Executable spill-code
+insertion remains deferred until the repository has a backend IR with explicit
+memory/load/store semantics rather than being silently invented inside the
+allocator.
