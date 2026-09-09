@@ -44,4 +44,6 @@ Dense or disjoint candidate sets can erase the batching benefit, and a large mer
 
 ## Phase boundary
 
-Phase 33 is one coherent batching step: it removes redundant overlapping extraction work while preserving sealed search exactness. Further progress should not farm nearby window-merging variants; after integration, the next decision belongs to a fresh architecture audit.
+Phase 33 is sealed after PR #83 reached `main` and the exact merged-main GCC, Clang, and ASan+UBSan matrix passed. The phase removes redundant overlapping extraction work while preserving the sealed Phase-32 candidate and DP semantics; nearby window-threshold, packing, or merge-order variants would add implementation breadth without a new correctness boundary.
+
+The next frontier is Phase 34 dynamic forests / link-cut trees: online represented-forest topology changes with exact `link`/`cut`/connectivity and path-distance semantics, verified against an independent naïve forest oracle. That promotion is an architectural jump rather than another BWT verification-scheduling variant.
