@@ -101,3 +101,24 @@ plus quotient adjacency/result witnesses.
 No maximum-coalescing, George/Briggs optimality, minimum-register,
 minimum-spill, spill-code insertion/rewrite, machine-opcode legality, MemorySSA,
 or backend-wide optimality claim is made.
+
+## Sealed boundary and next frontier
+
+Phase 49 is sealed only after the implementation reached `main` and the exact
+merged-main GCC release, Clang release, and GCC ASan+UBSan CI jobs all passed.
+The sealed boundary is interference-safe coalescing plus quotient recoloring and
+replayable redundant-copy witnesses; it does not silently add a backend machine
+IR or executable spill code.
+
+A fresh architecture audit promotes one distinct next frontier. Phase 50 should
+introduce a machine-independent backend storage/rewrite representation: physical
+register bindings for assigned classes, deterministic stack slots for spilled
+classes, explicit load/store/register-move operations, and abstract spill-scratch
+registers used only while materializing spilled operands. The lowering must
+preserve phi-free block/operation order and eliminate only copies whose final
+backend storage is identical.
+
+Concrete ISA opcodes, addressing modes, calling conventions, byte-level frame
+layout, mapping spill scratch registers onto real hardware registers, spill-cost
+optimization, post-rewrite reallocation, MemorySSA, and backend-wide optimality
+remain outside the sealed Phase-49 boundary and the promoted Phase-50 baseline.
