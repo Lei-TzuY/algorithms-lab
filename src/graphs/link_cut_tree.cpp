@@ -30,6 +30,10 @@ std::size_t LinkCutForest::child_size(Vertex vertex) const noexcept {
   return vertex == kNone ? 0 : nodes_[vertex].auxiliary_size;
 }
 
+std::size_t LinkCutForest::child_represented_size(Vertex vertex) const noexcept {
+  return vertex == kNone ? 0 : nodes_[vertex].represented_size;
+}
+
 LinkCutForest::ExactSum LinkCutForest::child_sum(Vertex vertex) const noexcept {
   return vertex == kNone ? ExactSum{} : nodes_[vertex].auxiliary_sum;
 }
@@ -181,6 +185,9 @@ void LinkCutForest::pull(Vertex vertex) {
   Node& node = nodes_[vertex];
   node.auxiliary_size =
       1 + child_size(node.left) + child_size(node.right);
+  node.represented_size = 1 + node.virtual_size +
+                          child_represented_size(node.left) +
+                          child_represented_size(node.right);
 
   if (node.has_assignment) {
     node.auxiliary_sum =
@@ -357,6 +364,18 @@ void LinkCutForest::access(Vertex vertex) {
   Vertex current = vertex;
   while (current != kNone) {
     splay(current);
+
+    const Vertex old_right = nodes_[current].right;
+    if (old_right != kNone) {
+      nodes_[current].virtual_size += nodes_[old_right].represented_size;
+    }
+    if (previous != kNone) {
+      if (nodes_[current].virtual_size < nodes_[previous].represented_size) {
+        throw std::logic_error("link-cut virtual-size invariant violated");
+      }
+      nodes_[current].virtual_size -= nodes_[previous].represented_size;
+    }
+
     nodes_[current].right = previous;
     if (previous != kNone) {
       nodes_[previous].parent = current;
@@ -396,7 +415,10 @@ void LinkCutForest::link(Vertex first, Vertex second) {
   if (find_root(second) == first) {
     throw std::invalid_argument("link would create a represented-tree cycle");
   }
+  access(second);
   nodes_[first].parent = second;
+  nodes_[second].virtual_size += nodes_[first].represented_size;
+  pull(second);
 }
 
 void LinkCutForest::cut(Vertex first, Vertex second) {
@@ -444,6 +466,25 @@ std::size_t LinkCutForest::path_edge_distance(Vertex first, Vertex second) {
   }
   access(second);
   return nodes_[second].auxiliary_size - 1;
+}
+
+std::size_t LinkCutForest::rooted_subtree_vertex_count(Vertex root,
+                                                        Vertex vertex) {
+  validate_vertex(root);
+  validate_vertex(vertex);
+  make_root(root);
+  if (find_root(vertex) != root) {
+    throw std::invalid_argument(
+        "rooted subtree query requires connected vertices");
+  }
+  access(vertex);
+
+  const std::size_t ancestor_contribution =
+      child_represented_size(nodes_[vertex].left);
+  if (nodes_[vertex].represented_size < ancestor_contribution) {
+    throw std::logic_error("link-cut represented-size invariant violated");
+  }
+  return nodes_[vertex].represented_size - ancestor_contribution;
 }
 
 void LinkCutForest::assign_value(Vertex vertex, std::int64_t value) {
@@ -506,7 +547,8 @@ bool LinkCutForest::valid_auxiliary_invariants() const {
 
   for (Vertex vertex = 0; vertex < vertex_count; ++vertex) {
     const Node& node = nodes_[vertex];
-    if (node.auxiliary_size == 0 || node.auxiliary_min > node.auxiliary_max) {
+    if (node.auxiliary_size == 0 || node.represented_size == 0 ||
+        node.auxiliary_min > node.auxiliary_max) {
       return false;
     }
     if (node.has_assignment && !exact_is_zero(node.pending_addition)) {
@@ -562,6 +604,7 @@ bool LinkCutForest::valid_auxiliary_invariants() const {
 
   std::vector<unsigned char> state(vertex_count, 0);
   std::vector<std::size_t> computed_size(vertex_count, 0);
+  std::vector<std::size_t> computed_represented_size(vertex_count, 0);
   std::vector<ExactSum> computed_sum(vertex_count);
   std::vector<std::int64_t> computed_min(vertex_count, 0);
   std::vector<std::int64_t> computed_max(vertex_count, 0);
@@ -625,6 +668,14 @@ bool LinkCutForest::valid_auxiliary_invariants() const {
         return false;
       }
 
+      const std::size_t expected_represented_size =
+          1 + node.virtual_size +
+          (node.left == kNone ? 0 : computed_represented_size[node.left]) +
+          (node.right == kNone ? 0 : computed_represented_size[node.right]);
+      if (node.represented_size != expected_represented_size) {
+        return false;
+      }
+
       std::int64_t own_value = 0;
       if (frame.inherited_assignment) {
         own_value = frame.inherited_value;
@@ -665,6 +716,7 @@ bool LinkCutForest::valid_auxiliary_invariants() const {
       }
 
       computed_size[vertex] = expected_size;
+      computed_represented_size[vertex] = expected_represented_size;
       computed_sum[vertex] = expected_sum;
       computed_min[vertex] = expected_min;
       computed_max[vertex] = expected_max;

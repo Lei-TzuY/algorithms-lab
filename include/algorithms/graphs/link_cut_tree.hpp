@@ -42,6 +42,13 @@ class LinkCutForest {
   [[nodiscard]] Vertex kth_vertex_on_path(Vertex first, Vertex second,
                                           std::size_t rank);
 
+  // Returns the number of vertices in vertex's represented subtree when the
+  // containing tree is rooted at root. Preferred-path structure may change;
+  // represented topology and all numeric values remain unchanged. Throws
+  // std::invalid_argument when root and vertex are disconnected.
+  [[nodiscard]] std::size_t rooted_subtree_vertex_count(Vertex root,
+                                                         Vertex vertex);
+
   // Replaces one vertex value exactly. The operation itself never rejects a
   // representable int64 value merely because an exposed auxiliary aggregate is
   // outside int64; internal aggregates use a wider exact representation.
@@ -52,9 +59,9 @@ class LinkCutForest {
   // exact aggregate state without narrowing intermediate sums.
   void assign_path_value(Vertex first, Vertex second, std::int64_t value);
 
-  // Adds delta to every node on the represented path. The operation rejects
-  // transactionally before changing any represented node value if even one
-  // affected value would leave int64. Preferred-path exposure may still
+  // Adds delta to every node value on the represented path. The operation
+  // rejects transactionally before changing any represented node value if even
+  // one affected value would leave int64. Preferred-path exposure may still
   // rearrange auxiliary splay structure, as with all link-cut queries.
   void add_path_value(Vertex first, Vertex second, std::int64_t delta);
 
@@ -64,9 +71,9 @@ class LinkCutForest {
   [[nodiscard]] std::int64_t path_sum(Vertex first, Vertex second);
 
   // Diagnostic check for the auxiliary forest: child/parent consistency,
-  // acyclicity, stored auxiliary subtree sizes, exact aggregate/lazy-tag
-  // semantics. A parent pointer may be a represented path-parent even when it
-  // is not an auxiliary-tree child link.
+  // acyclicity, stored auxiliary subtree sizes, represented-cardinality
+  // arithmetic, and exact aggregate/lazy-tag semantics. A parent pointer may be
+  // a represented path-parent even when it is not an auxiliary-tree child link.
   [[nodiscard]] bool valid_auxiliary_invariants() const;
 
  private:
@@ -83,6 +90,8 @@ class LinkCutForest {
     Vertex left = kNone;
     Vertex right = kNone;
     std::size_t auxiliary_size = 1;
+    std::size_t virtual_size = 0;
+    std::size_t represented_size = 1;
     std::int64_t value = 0;
     ExactSum auxiliary_sum{};
     std::int64_t auxiliary_min = 0;
@@ -98,6 +107,7 @@ class LinkCutForest {
   void validate_vertex(Vertex vertex) const;
   [[nodiscard]] bool is_auxiliary_root(Vertex vertex) const noexcept;
   [[nodiscard]] std::size_t child_size(Vertex vertex) const noexcept;
+  [[nodiscard]] std::size_t child_represented_size(Vertex vertex) const noexcept;
   [[nodiscard]] ExactSum child_sum(Vertex vertex) const noexcept;
   static ExactSum exact_from_value(std::int64_t value) noexcept;
   static int compare_magnitude(const ExactSum& first,
