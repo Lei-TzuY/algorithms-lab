@@ -49,6 +49,13 @@ class LinkCutForest {
   [[nodiscard]] std::size_t rooted_subtree_vertex_count(Vertex root,
                                                          Vertex vertex);
 
+  // Returns the exact node-value sum in vertex's represented subtree when the
+  // containing tree is rooted at root. Virtual descendants retain independent
+  // numeric contributions while preferred paths and lazy path tags change.
+  // Throws std::invalid_argument when disconnected and std::overflow_error only
+  // when the final exact rooted-subtree sum is outside int64.
+  [[nodiscard]] std::int64_t rooted_subtree_sum(Vertex root, Vertex vertex);
+
   // Replaces one vertex value exactly. The operation itself never rejects a
   // representable int64 value merely because an exposed auxiliary aggregate is
   // outside int64; internal aggregates use a wider exact representation.
@@ -71,9 +78,10 @@ class LinkCutForest {
   [[nodiscard]] std::int64_t path_sum(Vertex first, Vertex second);
 
   // Diagnostic check for the auxiliary forest: child/parent consistency,
-  // acyclicity, stored auxiliary subtree sizes, represented-cardinality
-  // arithmetic, and exact aggregate/lazy-tag semantics. A parent pointer may be
-  // a represented path-parent even when it is not an auxiliary-tree child link.
+  // acyclicity, stored auxiliary subtree sizes, represented-cardinality and
+  // virtual numeric accounting, and exact aggregate/lazy-tag semantics. A
+  // parent pointer may be a represented path-parent even when it is not an
+  // auxiliary-tree child link.
   [[nodiscard]] bool valid_auxiliary_invariants() const;
 
  private:
@@ -94,6 +102,8 @@ class LinkCutForest {
     std::size_t represented_size = 1;
     std::int64_t value = 0;
     ExactSum auxiliary_sum{};
+    ExactSum virtual_sum{};
+    ExactSum auxiliary_virtual_sum{};
     std::int64_t auxiliary_min = 0;
     std::int64_t auxiliary_max = 0;
     bool reversed = false;
@@ -109,6 +119,10 @@ class LinkCutForest {
   [[nodiscard]] std::size_t child_size(Vertex vertex) const noexcept;
   [[nodiscard]] std::size_t child_represented_size(Vertex vertex) const noexcept;
   [[nodiscard]] ExactSum child_sum(Vertex vertex) const noexcept;
+  [[nodiscard]] ExactSum child_auxiliary_virtual_sum(
+      Vertex vertex) const noexcept;
+  [[nodiscard]] ExactSum represented_sum(Vertex vertex) const noexcept;
+  [[nodiscard]] ExactSum child_represented_sum(Vertex vertex) const noexcept;
   static ExactSum exact_from_value(std::int64_t value) noexcept;
   static int compare_magnitude(const ExactSum& first,
                                const ExactSum& second) noexcept;
@@ -118,6 +132,9 @@ class LinkCutForest {
                                      const ExactSum& smaller) noexcept;
   static ExactSum add_exact(const ExactSum& first,
                             const ExactSum& second) noexcept;
+  static ExactSum negate_exact(ExactSum value) noexcept;
+  static ExactSum subtract_exact(const ExactSum& first,
+                                 const ExactSum& second) noexcept;
   static ExactSum scale_exact(const ExactSum& value,
                               std::size_t count) noexcept;
   static ExactSum scale_exact_value(std::int64_t value,

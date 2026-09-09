@@ -131,6 +131,7 @@ if(BUILD_TESTING)
     tests/test_link_cut_tree_lazy_addition.cpp
     tests/test_link_cut_tree_navigation.cpp
     tests/test_link_cut_tree_rooted_subtree.cpp
+    tests/test_link_cut_tree_rooted_subtree_sum.cpp
     tests/test_offline_dynamic_connectivity.cpp
     tests/test_online_paging.cpp
     tests/test_geometry2d.cpp
