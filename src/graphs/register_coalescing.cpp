@@ -67,11 +67,15 @@ struct LocationLess {
   return false;
 }
 
-void merge_roots(std::vector<std::size_t>& parent, const std::size_t first,
-                 const std::size_t second) {
-  const std::size_t lower = std::min(first, second);
-  const std::size_t upper = std::max(first, second);
-  parent[upper] = lower;
+void merge_roots(std::vector<std::size_t>& parent,
+                 std::vector<std::size_t>& class_size,
+                 std::size_t first, std::size_t second) {
+  if (class_size[first] < class_size[second] ||
+      (class_size[first] == class_size[second] && second < first)) {
+    std::swap(first, second);
+  }
+  parent[second] = first;
+  class_size[first] += class_size[second];
 }
 
 struct MoveReference {
@@ -130,6 +134,7 @@ PhiFreeCoalescedRegisterAllocation coalesce_phi_free_registers(
 
   std::vector<std::size_t> parent(location_count);
   std::iota(parent.begin(), parent.end(), 0U);
+  std::vector<std::size_t> class_size(location_count, 1U);
   const std::vector<MoveReference> moves = move_references(program);
   result.preferences.reserve(moves.size());
 
@@ -148,7 +153,7 @@ PhiFreeCoalescedRegisterAllocation coalesce_phi_free_registers(
                             destination_root)) {
         decision = CopyCoalescingDecisionKind::blocked_by_interference;
       } else {
-        merge_roots(parent, source_root, destination_root);
+        merge_roots(parent, class_size, source_root, destination_root);
         decision = CopyCoalescingDecisionKind::merged;
       }
     }
