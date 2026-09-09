@@ -131,9 +131,18 @@ The direct implementation uses:
 No register-allocation/coalescing, MemorySSA, optimization-pass, or
 compiler-wide complexity claim is imported.
 
-## Current boundary
+## Sealed boundary
 
-Phase 47 is scalar virtual-register SSA destruction. Register assignment,
-coalescing, spill code, MemorySSA, optimization passes, post-dominators/control
-dependence, and incremental CFG maintenance remain separate architectural
-hypotheses.
+Phase 47 is sealed at scalar virtual-register SSA destruction. The integrated
+implementation removes every phi, preserves one executable copy site per logical
+phi predecessor, splits ambiguous critical physical arcs without losing parallel
+multiplicity, and sequentializes arbitrary simultaneous copy bundles with a
+deterministic temporary discipline. More copy-placement or copy-scheduler
+variants would refine this completed boundary rather than add a new capability.
+
+Phase 48 moves to a distinct problem: virtual-register allocation over the
+phi-free program. Its first slice is limited to exact may-liveness and
+interference construction plus a deterministic bounded-register coloring that
+returns an explicit spill set. Copy coalescing, spill-code insertion/rewrite,
+optimal coloring, MemorySSA, optimization passes, post-dominators/control
+dependence, and incremental CFG maintenance remain separate hypotheses.
