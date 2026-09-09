@@ -62,7 +62,10 @@ class/location/operation physical-register references and every scratch witness
 to prove they remain below the dedicated base id. Repeated planning is required
 to be deterministic.
 
-Full repository GCC/Clang/ASan+UBSan CI is the authoritative integration gate.
+The exact merged-main repository matrix on
+`main@17a17b56c09e875acebff93c5c3953b1e9e2fddc` (run `34418352836`)
+completed successfully on GCC release, Clang release, and GCC ASan+UBSan. This
+closes the integration gate for the Phase-54 ownership boundary.
 
 ## Complexity and non-claims
 
@@ -77,3 +80,18 @@ callee/caller-save policy, red zone, prologue/epilogue, variable-size objects,
 or slot reuse/coloring. Reserving the highest id is a deterministic
 machine-independent baseline, not an ABI prescription or a minimum-spill/
 optimal-register-allocation claim.
+
+## Sealed boundary and next frontier
+
+Phase 54 is sealed after exact implementation CI, merge, merged-main CI, and the
+architecture/integration audit recorded in `phase54_sealing_audit.md`.
+
+The next coherent backend gap is the entry-time coordinate relation between the
+now-owned frame-base register and the stack pointer around fixed-size frame
+allocation. Phase 55 should add a target-neutral stack-direction-aware setup
+without choosing an ISA opcode or ABI. For lower-growing storage it must express
+`SP += -frame_size` and `base = adjusted_SP + anchor`; for higher-growing
+storage it must express `SP += +frame_size` and
+`base = adjusted_SP - (frame_size-anchor)`. The signed deltas must be checked,
+and composition with every sealed Phase-53 displacement must recover the same
+frame byte location.
