@@ -72,11 +72,21 @@ compares:
 - repeated-build determinism.
 
 Focused GCC and Clang strict-warning builds and GCC ASan+UBSan execution pass the
-same suite before the remote full-repository CI gate.
+same suite before the remote full-repository CI gate. The merged-main push run
+`34370073918` also completed successfully on GCC release, Clang release, and
+GCC ASan+UBSan for exact `main@026066ec4bd4e51c49b593000c67346335dc989b`.
 
-## Current boundary
+## Sealed boundary and next frontier
 
-This slice implements exact dominance from one specified start vertex. It does
-not add dominance frontiers, post-dominators, incremental CFG updates, or SSA
-construction. Those are separate architectural hypotheses and are not implied by
-this checkpoint.
+Phase 43 seals at exact single-start control-flow dominance. The implementation
+provides the immediate-dominator tree and constant-time dominance predicate; it
+does not pretend that a second dominator implementation, a faster link/eval
+variant, or additional tie-policy cases would create a new capability boundary.
+
+Post-dominators, incremental CFG maintenance, and full SSA construction remain
+separate hypotheses. The next promoted frontier is narrower and directly builds
+on this sealed index: exact dominance frontiers plus iterated dominance frontier
+(IDF) closure as a deterministic phi-placement substrate. That next phase must
+state reachable-definition semantics explicitly and verify frontier membership
+against the definition of dominance frontier rather than another implementation
+of the same local/up recurrence.
