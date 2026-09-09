@@ -34,6 +34,14 @@ class LinkCutForest {
   // Throws when the vertices are disconnected.
   [[nodiscard]] std::size_t path_edge_distance(Vertex first, Vertex second);
 
+  // Returns the zero-based rank-th vertex on the represented path from first to
+  // second. Deferred reverse/assignment/addition state is pushed while
+  // descending the exposed auxiliary splay, and the selected vertex is splayed
+  // before return. Throws std::invalid_argument when disconnected and
+  // std::out_of_range when rank is outside the represented path.
+  [[nodiscard]] Vertex kth_vertex_on_path(Vertex first, Vertex second,
+                                          std::size_t rank);
+
   // Replaces one vertex value exactly. The operation itself never rejects a
   // representable int64 value merely because an exposed auxiliary aggregate is
   // outside int64; internal aggregates use a wider exact representation.
