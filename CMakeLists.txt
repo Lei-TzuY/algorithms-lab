@@ -39,6 +39,7 @@ add_library(algorithms_lab
   src/dynamic_programming/tree_independent_set.cpp
   src/geometry/geometry2d.cpp
   src/geometry/planar_diameter.cpp
+  src/geometry/rectangle_union.cpp
   src/greedy/interval_scheduling.cpp
   src/graphs/graph.cpp
   src/graphs/directed_arborescence.cpp
@@ -195,6 +196,7 @@ if(BUILD_TESTING)
     tests/test_online_paging.cpp
     tests/test_geometry2d.cpp
     tests/test_planar_diameter.cpp
+    tests/test_rectangle_union.cpp
     tests/test_number_theory.cpp
     tests/test_number_theoretic_transform.cpp
     tests/test_exact_convolution.cpp
