@@ -130,6 +130,12 @@ TEST_CASE(semantic_cfg_consumes_opaque_replies_per_dynamic_visit_in_loop) {
 
   const OutOfSsaProgram program = construct_control_semantic_out_of_ssa(
       graph, 0U, 1U, blocks, controls);
+  REQUIRE(program.blocks[1].control.nonzero_target.has_value());
+  const SsaLoweredControlTarget loop_back =
+      *program.blocks[1].control.nonzero_target;
+  REQUIRE_EQ(loop_back.logical_successor, Vertex{1U});
+  REQUIRE(loop_back.execution_successor != loop_back.logical_successor);
+
   const auto plan = plan_for(program);
   const std::vector<BackendInstructionOracleReply> no_replies;
   const auto probe = execute_backend_semantic_control_block(
@@ -139,25 +145,31 @@ TEST_CASE(semantic_cfg_consumes_opaque_replies_per_dynamic_visit_in_loop) {
   const std::size_t opaque_operation =
       *probe.block_execution.suspended_at_instruction;
 
-  std::vector<BackendSemanticCfgVisitRequest> visits(4U);
+  std::vector<BackendSemanticCfgVisitRequest> visits(5U);
   visits[1].instruction_replies.push_back(
       BackendInstructionOracleReply{opaque_operation, std::int64_t{1}});
-  visits[2].instruction_replies.push_back(
+  visits[3].instruction_replies.push_back(
       BackendInstructionOracleReply{opaque_operation, std::int64_t{0}});
 
   const auto execution = execute_backend_semantic_cfg(
-      plan, program, 4U, visits, initial_registers(plan), initial_frame(plan));
+      plan, program, 5U, visits, initial_registers(plan), initial_frame(plan));
   REQUIRE_EQ(execution.stop_reason,
              BackendSemanticCfgStopReason::opaque_control);
-  REQUIRE_EQ(execution.completed_visits, std::size_t{4U});
-  REQUIRE_EQ(execution.visits.size(), std::size_t{4U});
+  REQUIRE_EQ(execution.completed_visits, std::size_t{5U});
+  REQUIRE_EQ(execution.visits.size(), std::size_t{5U});
   REQUIRE_EQ(execution.visits[0].block_execution.block_index, Vertex{0U});
   REQUIRE_EQ(execution.visits[1].block_execution.block_index, Vertex{1U});
-  REQUIRE_EQ(execution.visits[2].block_execution.block_index, Vertex{1U});
-  REQUIRE_EQ(execution.visits[3].block_execution.block_index, Vertex{2U});
+  REQUIRE_EQ(execution.visits[2].block_execution.block_index,
+             loop_back.execution_successor);
+  REQUIRE_EQ(execution.visits[3].block_execution.block_index, Vertex{1U});
+  REQUIRE_EQ(execution.visits[4].block_execution.block_index, Vertex{2U});
+  REQUIRE_EQ(execution.visits[1].logical_successor,
+             std::optional<Vertex>{1U});
+  REQUIRE_EQ(execution.visits[1].execution_successor,
+             std::optional<Vertex>{loop_back.execution_successor});
   REQUIRE_EQ(execution.visits[1].predicate_value,
              std::optional<std::int64_t>{1});
-  REQUIRE_EQ(execution.visits[2].predicate_value,
+  REQUIRE_EQ(execution.visits[3].predicate_value,
              std::optional<std::int64_t>{0});
   require_handoff(execution);
 }
@@ -177,12 +189,11 @@ TEST_CASE(semantic_cfg_stops_on_body_suspension_before_control) {
   const std::vector<BackendSemanticCfgVisitRequest> visits(2U);
   const auto execution = execute_backend_semantic_cfg(
       plan, program, 2U, visits, initial_registers(plan), initial_frame(plan));
-
   REQUIRE_EQ(execution.stop_reason,
-             BackendSemanticCfgStopReason::body_suspended);
-  REQUIRE_EQ(execution.completed_visits, std::size_t{1U});
+             BackendSemanticCfgStopReason::cbody_suspended);
+  REQUIRE_EQ(execution.completed_visits, std::size_t{1H});
   REQUIRE_EQ(execution.visits.size(), std::size_t{2U});
-  REQUIRE_EQ(execution.suspended_at_visit, std::optional<std::size_t>{1U});
+  REQUIRE_EQ(execution.suspended_at_visit, std::optional<std::size_t>{1H});
   REQUIRE_EQ(execution.visits[1].status,
              BackendSemanticControlStatus::body_suspended);
   REQUIRE(!execution.visits[1].logical_successor.has_value());
@@ -213,7 +224,7 @@ TEST_CASE(semantic_cfg_budget_bounds_loop_without_claiming_termination) {
   REQUIRE_EQ(execution.next_execution_block, std::optional<Vertex>{1U});
   for (std::size_t visit = 0U; visit < execution.visits.size(); ++visit) {
     REQUIRE_EQ(execution.visits[visit].block_execution.block_index,
-               static_cast<Vertex>(visit % 2U));
+              static_cast<Vertex>(visit % 2U));
   }
   require_handoff(execution);
 }
