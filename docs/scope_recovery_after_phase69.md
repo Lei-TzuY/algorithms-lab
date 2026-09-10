@@ -44,6 +44,13 @@ and then enumerates antipodal hull pairs with rotating calipers, returning a
 canonical farthest-pair witness and verifying the complete result against an
 independent quadratic all-pairs oracle.
 
+After the planar-diameter checkpoint also reached exact merged-main green, the
+third recovered slice moves from point-set extremal geometry to area aggregation:
+exact axis-aligned rectangle union area via an x-sweep, y-coordinate compression,
+and a first-principles covered-length segment tree. It adds a genuine sweep-line
+paradigm with exact bounded-integer area arithmetic and independent small-grid
+union-area verification rather than another distance-query variant.
+
 ## Prospective frontier authority
 
 `ROADMAP.md` still contains historical presentation drift from the frozen
