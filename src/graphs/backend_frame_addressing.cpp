@@ -272,6 +272,7 @@ ScratchAwareBaseRelativeBackendFrame address_scratch_aware_backend_frame(
       mapped_operation.kind = operation.kind;
       mapped_operation.origin_kind = operation.origin_kind;
       mapped_operation.origin_index = operation.origin_index;
+      mapped_operation.instruction_semantics = operation.instruction_semantics;
       mapped_operation.inputs.reserve(operation.inputs.size());
       for (const ByteAddressedBackendStorage input : operation.inputs) {
         mapped_operation.inputs.push_back(
