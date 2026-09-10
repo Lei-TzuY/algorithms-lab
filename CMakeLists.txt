@@ -44,6 +44,7 @@ add_library(algorithms_lab
   src/graphs/dominator_tree.cpp
   src/graphs/dominance_frontier.cpp
   src/graphs/ssa_construction.cpp
+  src/graphs/ssa_scalar_semantics.cpp
   src/graphs/ssa_pruned.cpp
   src/graphs/ssa_destruction.cpp
   src/graphs/register_allocation.cpp
@@ -111,6 +112,7 @@ if(BUILD_TESTING)
     tests/test_dominator_tree.cpp
     tests/test_dominance_frontier.cpp
     tests/test_ssa_construction.cpp
+    tests/test_ssa_scalar_semantics.cpp
     tests/test_ssa_pruned.cpp
     tests/test_ssa_destruction.cpp
     tests/test_register_allocation.cpp
