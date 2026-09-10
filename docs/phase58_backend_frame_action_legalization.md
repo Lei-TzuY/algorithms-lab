@@ -98,5 +98,9 @@ probing, unwind metadata, dynamic `alloca`, variable-sized frames, or
 instruction-count optimality. It only proves that the sealed target-neutral
 actions fit one explicit immediate policy after deterministic legalization.
 
-Phase 58 remains implementation-complete / sealing-audit-pending until the exact
-candidate and merged-main repository matrices are green.
+Phase 58 is SEALED at merged `main@bca64abdf3ec9caf8a6895db5545c232e5015291`
+after exact merged-main CI run `34429736965` passed GCC release, Clang release,
+and GCC ASan+UBSan. The promoted frontier is Phase 59 symbolic fixed-frame
+instruction lowering: executable target-neutral instruction forms with
+independent replay against these sealed legalized-action semantics, without any
+claim of concrete ISA encoding or ABI behavior.
