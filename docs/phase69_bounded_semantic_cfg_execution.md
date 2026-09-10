@@ -72,7 +72,9 @@ loop-carried phi lowers the logical backedge through a compiler-created split
 block, so the tested execution order is `entry -> loop -> split -> loop -> exit`;
 the split visit carries no opaque reply, while the two concrete loop visits own
 independent replies. This prevents reply scripts from being indexed by logical
-block recurrence rather than by the actual lowered execution path.
+block recurrence rather than by the actual lowered execution path. The initial
+integration failure exposed this test-model mismatch; correcting the concrete
+visit sequence required no production-code change.
 
 The repository's full GCC release, Clang release, and GCC ASan+UBSan matrix is the
 integration gate for the retained SSA-destruction, allocation, frame, instruction,
