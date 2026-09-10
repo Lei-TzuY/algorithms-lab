@@ -65,6 +65,7 @@ add_library(algorithms_lab
   src/graphs/backend_spill_transfer_execution.cpp
   src/graphs/backend_instruction_continuation.cpp
   src/graphs/backend_semantic_control.cpp
+  src/graphs/backend_semantic_cfg_execution.cpp
   src/graphs/backend_cfg_path_continuation.cpp
   src/graphs/backend_cfg_path_exit_event.cpp
   src/graphs/traversal.cpp
@@ -135,6 +136,7 @@ if(BUILD_TESTING)
     tests/test_backend_instruction_continuation.cpp
     tests/test_backend_scalar_instruction_execution.cpp
     tests/test_backend_semantic_control.cpp
+    tests/test_backend_semantic_cfg_execution.cpp
     tests/test_backend_cfg_path_continuation.cpp
     tests/test_backend_cfg_path_exit_event.cpp
     tests/test_shortest_paths.cpp
