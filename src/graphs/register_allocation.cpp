@@ -54,6 +54,64 @@ void insert_location(std::vector<SsaCopyLocation>& locations,
   locations.push_back(location);
 }
 
+[[nodiscard]] bool has_cfg_edge(const Graph& graph, const Vertex from,
+                                const Vertex to) {
+  if (to >= graph.vertex_count()) {
+    return false;
+  }
+  const auto& neighbors = graph.neighbors(from);
+  return std::any_of(neighbors.begin(), neighbors.end(),
+                     [to](const Edge& edge) { return edge.to == to; });
+}
+
+void validate_control_target(const Graph& graph, const Vertex block,
+                             const SsaLoweredControlTarget& target) {
+  if (target.logical_successor >= graph.vertex_count() ||
+      !has_cfg_edge(graph, block, target.execution_successor)) {
+    throw std::invalid_argument(
+        "register-allocation control target is outside lowered CFG");
+  }
+}
+
+[[nodiscard]] std::optional<SsaCopyLocation> validate_control(
+    const OutOfSsaProgram& program, const Vertex block) {
+  const SsaLoweredBlock& lowered = program.blocks[block];
+  const auto& control = lowered.control;
+  if (!lowered.reachable && control.kind != SsaControlTerminatorKind::opaque) {
+    throw std::invalid_argument(
+        "register-allocation unreachable block has executable control");
+  }
+
+  switch (control.kind) {
+    case SsaControlTerminatorKind::opaque:
+      if (control.predicate.has_value() || control.jump_target.has_value() ||
+          control.nonzero_target.has_value() || control.zero_target.has_value()) {
+        throw std::invalid_argument(
+            "register-allocation opaque control carries payload");
+      }
+      return std::nullopt;
+    case SsaControlTerminatorKind::jump:
+      if (control.predicate.has_value() || !control.jump_target.has_value() ||
+          control.nonzero_target.has_value() || control.zero_target.has_value()) {
+        throw std::invalid_argument(
+            "register-allocation jump control has malformed shape");
+      }
+      validate_control_target(program.graph, block, *control.jump_target);
+      return std::nullopt;
+    case SsaControlTerminatorKind::branch_if_nonzero:
+      if (!control.predicate.has_value() || control.jump_target.has_value() ||
+          !control.nonzero_target.has_value() || !control.zero_target.has_value() ||
+          control.predicate->kind != SsaCopyLocationKind::value) {
+        throw std::invalid_argument(
+            "register-allocation conditional control has malformed shape");
+      }
+      validate_control_target(program.graph, block, *control.nonzero_target);
+      validate_control_target(program.graph, block, *control.zero_target);
+      return control.predicate;
+  }
+  throw std::invalid_argument("register-allocation unknown control kind");
+}
+
 [[nodiscard]] std::vector<unsigned char> reachable_from(
     const Graph& graph, const Vertex start) {
   graph.validate_vertex(start);
@@ -174,6 +232,8 @@ PhiFreeRegisterAllocation allocate_phi_free_registers(
   const std::vector<unsigned char> reachable =
       reachable_from(program.graph, program.start);
   std::vector<std::vector<Operation>> operations(program.blocks.size());
+  std::vector<std::optional<SsaCopyLocation>> control_predicates(
+      program.blocks.size());
   std::vector<SsaCopyLocation> locations;
   locations.reserve(program.initial_values.size() + program.temporary_count);
   for (const SsaValue initial : program.initial_values) {
@@ -196,6 +256,11 @@ PhiFreeRegisterAllocation allocate_phi_free_registers(
     if (!expected_reachable && !operations[block].empty()) {
       throw std::invalid_argument(
           "unreachable phi-free blocks must not contain operations");
+    }
+    control_predicates[block] = validate_control(program, block);
+    if (control_predicates[block].has_value()) {
+      insert_location(locations, *control_predicates[block],
+                      program.variable_count, program.temporary_count);
     }
     for (const Operation& operation : operations[block]) {
       for (const SsaCopyLocation use : operation.uses) {
@@ -221,7 +286,13 @@ PhiFreeRegisterAllocation allocate_phi_free_registers(
     std::vector<std::size_t> definitions;
   };
   std::vector<std::vector<IndexedOperation>> indexed(program.blocks.size());
+  std::vector<std::optional<std::size_t>> control_predicate_indices(
+      program.blocks.size());
   for (Vertex block = 0U; block < program.blocks.size(); ++block) {
+    if (control_predicates[block].has_value()) {
+      control_predicate_indices[block] =
+          location_index(locations, *control_predicates[block]);
+    }
     indexed[block].reserve(operations[block].size());
     for (const Operation& operation : operations[block]) {
       IndexedOperation item;
@@ -258,6 +329,12 @@ PhiFreeRegisterAllocation allocate_phi_free_registers(
       }
       for (const std::size_t definition : operation.definitions) {
         block_def[block][definition] = 1U;
+      }
+    }
+    if (control_predicate_indices[block].has_value()) {
+      const std::size_t predicate = *control_predicate_indices[block];
+      if (block_def[block][predicate] == 0U) {
+        block_use[block][predicate] = 1U;
       }
     }
   }
@@ -313,6 +390,10 @@ PhiFreeRegisterAllocation allocate_phi_free_registers(
     add_live_clique(live_out[block], interference);
 
     Bits live = live_out[block];
+    if (control_predicate_indices[block].has_value()) {
+      live[*control_predicate_indices[block]] = 1U;
+      add_live_clique(live, interference);
+    }
     std::vector<PhiFreeOperationLiveness> reversed;
     reversed.reserve(indexed[block].size());
     for (std::size_t reverse = indexed[block].size(); reverse > 0U; --reverse) {
