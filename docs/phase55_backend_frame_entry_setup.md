@@ -88,3 +88,24 @@ stack-pointer/base-register ISA instructions, encoded addressing modes,
 calling convention, callee/caller-save policy, red zone, prologue/epilogue
 encoding, unwind metadata, variable-size objects, or stack-slot reuse. It is a
 target-neutral fixed-frame coordinate contract, not an ABI implementation.
+
+## Phase boundary
+
+Phase 55 is sealed at `main@1e10f30cfffd347f74dea8220bf98e225bda50c6` after
+merged-main CI run `34420412273` completed successfully on GCC release, Clang
+release, and GCC ASan+UBSan. The coordinate layer is therefore integrated and
+no further stack-direction or signed-coordinate variant is required in this
+phase.
+
+The next coherent ownership gap is the still-symbolic stack pointer. Phase 56
+should reserve one concrete physical-register id for the stack pointer from the
+same caller-supplied finite register file, rerun the sealed Phase-54 frame-base
+reservation over the remaining prefix, and derive the sealed Phase-55 entry
+coordinates from that nested plan. A successful result must prove that stack
+pointer, frame base, persistent assignments, and spill-scratch registers are
+pairwise disjoint while retaining complete replay provenance. Concrete ISA
+instructions, ABI/calling-convention rules, save/restore policy, unwind data,
+and prologue/epilogue encoding remain outside that slice.
+
+`ROADMAP.md` remains presentation-only historical state for this late backend
+sequence; the phase proof and sealing audits are authoritative for promotion.
