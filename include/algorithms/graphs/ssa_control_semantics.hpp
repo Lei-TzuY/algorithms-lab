@@ -11,9 +11,12 @@ namespace algorithms::graphs {
 
 // Input control semantics are attached per original CFG block. The conditional
 // predicate is a source variable; construction resolves it to the exact SSA
-// reaching definition at block exit before SSA destruction.
+// reaching definition at block exit before SSA destruction. Phase-70 function
+// termination is represented separately from successor control so return_void
+// carries no predicate or CFG-successor payload.
 struct SsaControlTerminatorInput {
   SsaControlTerminatorKind kind{SsaControlTerminatorKind::opaque};
+  SsaControlTerminationKind termination{SsaControlTerminationKind::none};
   std::optional<Variable> predicate;
   std::optional<Vertex> jump_successor;
   std::optional<Vertex> nonzero_successor;
@@ -25,10 +28,11 @@ struct SsaControlTerminatorInput {
 
 // Construct semantic scalar SSA through the sealed Phase-66 constructor, bind
 // branch predicates to their renamed SSA values, destroy SSA through the sealed
-// Phase-47 lowering, and attach explicit lowered control descriptors.
+// Phase-47 lowering, and attach explicit lowered control/termination descriptors.
 //
-// Reachable jump/branch targets must be explicit CFG edges. Unreachable blocks
-// and legacy callers remain opaque. Critical phi-copy edges are mapped to the
+// Reachable jump/branch targets must be explicit CFG edges. return_void is legal
+// only on a reachable CFG sink and remains payload-free. Unreachable blocks and
+// legacy callers remain opaque. Critical phi-copy edges are mapped to the
 // concrete split block that must execute before the logical successor; no target
 // is inferred from adjacency order or block numbering.
 [[nodiscard]] OutOfSsaProgram construct_control_semantic_out_of_ssa(
