@@ -43,6 +43,7 @@ add_library(algorithms_lab
   src/geometry/rectangle_union.cpp
   src/greedy/interval_scheduling.cpp
   src/graphs/graph.cpp
+  src/graphs/eulerian_trail.cpp
   src/graphs/directed_arborescence.cpp
   src/graphs/dominator_tree.cpp
   src/graphs/dominance_frontier.cpp
@@ -116,6 +117,7 @@ if(BUILD_TESTING)
     tests/test_searching_sorting.cpp
     tests/test_data_structures.cpp
     tests/test_graphs.cpp
+    tests/test_eulerian_trail.cpp
     tests/test_directed_arborescence.cpp
     tests/test_dominator_tree.cpp
     tests/test_dominance_frontier.cpp
