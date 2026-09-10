@@ -62,6 +62,7 @@ struct BaseRelativeBackendOperation {
   std::size_t origin_index{0U};
   std::vector<BaseRelativeBackendStorage> inputs;
   std::optional<BaseRelativeBackendStorage> output;
+  SsaInstructionSemantics instruction_semantics{};
   friend bool operator==(const BaseRelativeBackendOperation&,
                          const BaseRelativeBackendOperation&) = default;
 };
@@ -96,10 +97,10 @@ struct ScratchAwareBaseRelativeBackendFrame {
 // byte_offset - anchor with checked signed arithmetic and must lie inside the
 // caller-provided inclusive displacement interval.
 //
-// Physical-register ids, class/location ids, operation provenance, block
-// reachability, and original-block provenance are preserved exactly. This layer
-// does not choose a concrete base register, stack direction, ISA addressing
-// encoding, calling convention, or prologue/epilogue.
+// Physical-register ids, class/location ids, instruction semantics, operation
+// provenance, block reachability, and original-block provenance are preserved
+// exactly. This layer does not choose a concrete base register, stack direction,
+// ISA addressing encoding, calling convention, or prologue/epilogue.
 [[nodiscard]] ScratchAwareBaseRelativeBackendFrame
 address_scratch_aware_backend_frame(
     const ScratchAwareByteAddressedBackendFrame& frame,

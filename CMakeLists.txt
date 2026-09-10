@@ -131,6 +131,7 @@ if(BUILD_TESTING)
     tests/test_backend_frame_bytecode_execution.cpp
     tests/test_backend_spill_transfer_execution.cpp
     tests/test_backend_instruction_continuation.cpp
+    tests/test_backend_scalar_instruction_execution.cpp
     tests/test_backend_cfg_path_continuation.cpp
     tests/test_backend_cfg_path_exit_event.cpp
     tests/test_shortest_paths.cpp

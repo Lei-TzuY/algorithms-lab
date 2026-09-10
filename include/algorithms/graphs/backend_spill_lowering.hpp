@@ -33,12 +33,15 @@ enum class BackendOperationKind : unsigned char {
 // - stack_reload: stack slot -> register
 // - instruction: register inputs -> optional register output
 // - stack_store: register -> stack slot
+// Instruction operations additionally retain canonical SSA scalar semantics;
+// transfer operations keep the default opaque descriptor.
 struct BackendOperation {
   BackendOperationKind kind{BackendOperationKind::instruction};
   PhiFreeOperationKind origin_kind{PhiFreeOperationKind::instruction};
   std::size_t origin_index{0U};
   std::vector<BackendStorage> inputs;
   std::optional<BackendStorage> output;
+  SsaInstructionSemantics instruction_semantics{};
   friend bool operator==(const BackendOperation&, const BackendOperation&) = default;
 };
 

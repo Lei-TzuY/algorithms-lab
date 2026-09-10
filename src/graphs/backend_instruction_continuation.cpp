@@ -1,4 +1,5 @@
 #include "algorithms/graphs/backend_instruction_continuation.hpp"
+#include "algorithms/graphs/ssa_scalar_semantics.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -69,36 +70,61 @@ void write_transfer(
   registers[operation.output->physical_register] = value;
 }
 
-std::vector<std::size_t> instruction_indices(
+[[nodiscard]] SsaInstruction semantic_instruction_shape(
+    const BaseRelativeBackendOperation& operation) {
+  SsaInstruction instruction;
+  instruction.uses.assign(operation.inputs.size(), SsaValue{0U, 0U});
+  if (operation.output.has_value()) {
+    instruction.definition = SsaValue{0U, 0U};
+  }
+  instruction.semantics = operation.instruction_semantics;
+  return instruction;
+}
+
+[[nodiscard]] bool has_known_scalar_semantics(
+    const BaseRelativeBackendOperation& operation) {
+  const SsaInstruction instruction = semantic_instruction_shape(operation);
+  return ssa_instruction_has_executable_scalar_semantics(instruction);
+}
+
+std::vector<std::size_t> validate_semantics_and_opaque_indices(
     const BaseRelativeBackendBlock& block) {
-  std::vector<std::size_t> result;
+  std::vector<std::size_t> opaque_indices;
   for (std::size_t index = 0U; index < block.operations.size(); ++index) {
-    if (block.operations[index].kind == BackendOperationKind::instruction) {
-      result.push_back(index);
+    const auto& operation = block.operations[index];
+    if (operation.kind != BackendOperationKind::instruction) {
+      if (operation.instruction_semantics != SsaInstructionSemantics{}) {
+        throw std::logic_error(
+            "instruction continuation transfer carries scalar semantics");
+      }
+      continue;
+    }
+    if (!has_known_scalar_semantics(operation)) {
+      opaque_indices.push_back(index);
     }
   }
-  return result;
+  return opaque_indices;
 }
 
 void validate_reply_prefix(
     const BaseRelativeBackendBlock& block,
+    const std::vector<std::size_t>& opaque_indices,
     const std::span<const BackendInstructionOracleReply> replies) {
-  const std::vector<std::size_t> indices = instruction_indices(block);
-  if (replies.size() > indices.size()) {
+  if (replies.size() > opaque_indices.size()) {
     throw std::invalid_argument(
-        "instruction continuation script has extra replies");
+        "instruction continuation script has extra opaque replies");
   }
   for (std::size_t index = 0U; index < replies.size(); ++index) {
-    const std::size_t operation_index = indices[index];
+    const std::size_t operation_index = opaque_indices[index];
     const auto& operation = block.operations[operation_index];
     const auto& reply = replies[index];
     if (reply.operation_index != operation_index) {
       throw std::invalid_argument(
-          "instruction continuation reply does not match instruction order");
+          "instruction continuation reply does not match opaque instruction order");
     }
     if (operation.output.has_value() != reply.output_value.has_value()) {
       throw std::invalid_argument(
-          "instruction continuation reply has wrong output shape");
+          "instruction continuation opaque reply has wrong output shape");
     }
   }
 }
@@ -128,7 +154,9 @@ execute_backend_instruction_continuation_block(
 
   const auto& frame = addressed_frame(plan);
   const auto& block = frame.blocks[block_index];
-  validate_reply_prefix(block, instruction_replies);
+  const std::vector<std::size_t> opaque_indices =
+      validate_semantics_and_opaque_indices(block);
+  validate_reply_prefix(block, opaque_indices, instruction_replies);
   const auto slots = displacement_to_slot(frame);
 
   BackendInstructionContinuationExecution result;
@@ -159,10 +187,23 @@ execute_backend_instruction_continuation_block(
       step.kind = operation.kind;
       step.origin_kind = operation.origin_kind;
       step.origin_index = operation.origin_index;
+      step.instruction_semantics = operation.instruction_semantics;
       step.instruction_inputs.reserve(operation.inputs.size());
       for (const auto& input : operation.inputs) {
         step.instruction_inputs.push_back(
             result.after_block_registers[input.physical_register]);
+      }
+
+      const SsaInstruction semantic_shape = semantic_instruction_shape(operation);
+      if (ssa_instruction_has_executable_scalar_semantics(semantic_shape)) {
+        const std::int64_t derived = evaluate_ssa_scalar_instruction(
+            semantic_shape,
+            std::span<const std::int64_t>{step.instruction_inputs});
+        result.after_block_registers[operation.output->physical_register] = derived;
+        step.instruction_semantically_evaluated = true;
+        step.derived_instruction_result = derived;
+        result.steps.push_back(std::move(step));
+        continue;
       }
 
       if (reply_index >= instruction_replies.size()) {

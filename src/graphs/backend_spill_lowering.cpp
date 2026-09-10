@@ -66,14 +66,15 @@ namespace {
   return result;
 }
 
-void append_operation(std::vector<BackendOperation>& output,
-                      const BackendOperationKind kind,
-                      const PhiFreeOperationKind origin_kind,
-                      const std::size_t origin_index,
-                      std::vector<BackendStorage> inputs,
-                      const std::optional<BackendStorage> result_storage) {
+void append_operation(
+    std::vector<BackendOperation>& output, const BackendOperationKind kind,
+    const PhiFreeOperationKind origin_kind, const std::size_t origin_index,
+    std::vector<BackendStorage> inputs,
+    const std::optional<BackendStorage> result_storage,
+    const SsaInstructionSemantics instruction_semantics = {}) {
   output.push_back(BackendOperation{kind, origin_kind, origin_index,
-                                    std::move(inputs), result_storage});
+                                    std::move(inputs), result_storage,
+                                    instruction_semantics});
 }
 
 void lower_move(const SsaScheduledMove& move,
@@ -205,7 +206,8 @@ void lower_instruction(const SsaInstruction& instruction,
       std::max(result.max_scratch_registers, scratch_bindings.size());
   append_operation(output, BackendOperationKind::instruction,
                    PhiFreeOperationKind::instruction, instruction_index,
-                   std::move(lowered_uses), lowered_definition);
+                   std::move(lowered_uses), lowered_definition,
+                   instruction.semantics);
 
   if (spilled_definition.has_value()) {
     append_operation(output, BackendOperationKind::stack_store,

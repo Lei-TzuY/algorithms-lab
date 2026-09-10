@@ -142,6 +142,7 @@ ScratchAwareByteAddressedBackendFrame layout_scratch_aware_backend_frame(
       const BackendOperation& after = physical_block.operations[operation];
       if (before.kind != after.kind || before.origin_kind != after.origin_kind ||
           before.origin_index != after.origin_index ||
+          before.instruction_semantics != after.instruction_semantics ||
           before.inputs.size() != after.inputs.size() ||
           before.output.has_value() != after.output.has_value()) {
         throw std::logic_error(
@@ -205,6 +206,7 @@ ScratchAwareByteAddressedBackendFrame layout_scratch_aware_backend_frame(
       mapped_operation.kind = operation.kind;
       mapped_operation.origin_kind = operation.origin_kind;
       mapped_operation.origin_index = operation.origin_index;
+      mapped_operation.instruction_semantics = operation.instruction_semantics;
       mapped_operation.inputs.reserve(operation.inputs.size());
       for (const BackendStorage input : operation.inputs) {
         mapped_operation.inputs.push_back(map_operation_storage(
