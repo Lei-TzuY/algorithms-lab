@@ -80,6 +80,31 @@ labels, and verifies all three outputs against independent edge/vertex-removal
 connectivity oracles. This recovers a classical DFS proof obligation rather than
 extending the recent geometry, cut, or APSP streak.
 
+After low-link analysis reached exact merged-main green, recovery deliberately
+left adjacent DFS variants and moved to Boolean constraint solving. Exact 2-SAT
+builds the canonical implication graph, reuses the sealed SCC decomposition,
+returns either a satisfying assignment or replayable contradiction paths, and
+uses exhaustive truth-table enumeration as its primary oracle rather than SCC
+self-verification.
+
+After 2-SAT reached exact merged-main green, the next recovery step again changed
+proof model: exact Aho-Corasick matching over arbitrary bytes. It adds a
+first-principles multi-pattern trie/failure automaton with duplicate-pattern and
+empty-pattern semantics, while an independent boundary-by-boundary naïve oracle
+checks every match witness. It does not extend the frozen backend or the sealed
+BWT family.
+
+After Aho-Corasick reached exact merged-main green, a fresh coverage audit found
+no Eulerian-trail / Hierholzer capability in the repository. The next recovered
+slice therefore targets exact edge-covering trails and circuits on the existing
+`Graph` multigraph abstraction: directed and undirected degree/connectivity
+conditions, explicit logical-edge identities for parallel edges and self-loops,
+and first-principles Hierholzer traversal. Small randomized instances are checked
+against an independent exhaustive search over `(current vertex, used-edge mask)`
+rather than by repeating the production feasibility criteria. This adds a new
+edge-decomposition proof model instead of farming another shortest-path, cut, or
+string-index variant.
+
 ## Prospective frontier authority
 
 `ROADMAP.md` still contains historical presentation drift from the frozen
