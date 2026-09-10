@@ -71,10 +71,33 @@ probing, unwind metadata, dynamic `alloca`, or variable-sized frames. The exit
 plan restores only the fixed stack-pointer movement because no ABI save/restore
 policy exists yet.
 
-## Next architecture frontier
+## Sealed checkpoint and Phase 58 promotion
 
-After this action-sequencing slice is integrated and audited, the next gap
-should be selected from the backend boundary exposed by the action witness—not
-by adding cosmetic action variants. A likely next step is target-neutral
-calling-convention preservation metadata or checked action lowering, but no
-such capability is claimed by Phase 57 itself.
+Phase 57 is sealed at merged `main@f457a88ded9aecf1fb020bb65024c21070bce180`.
+The exact post-merge CI run `34425593986` completed successfully on GCC release,
+Clang release, and GCC ASan+UBSan. The phase-level audit is recorded in
+`docs/phase57_sealing_audit.md`.
+
+The action-sequencing gap is therefore closed. The next backend boundary is not
+another high-level action variant but **target-neutral action legalization under
+explicit immediate constraints**.
+
+Phase 58 should consume a sealed `BackendFixedFrameActionPlan` plus a
+caller-supplied legality policy and produce a replayable legalized action
+sequence that:
+
+- splits a stack-pointer movement into deterministic same-direction chunks no
+  larger than the configured positive stack-adjustment immediate magnitude;
+- preserves exact entry/exit inverse movement after chunking, including the
+  Phase-57 `2^63` magnitude boundary when `size_t` can represent it;
+- requires the frame-base materialization displacement to lie inside an explicit
+  caller-supplied signed immediate interval rather than silently narrowing it;
+- returns no legalized frame actions for the same nested infeasible plans that
+  Phase 57 leaves empty; and
+- rejects malformed policies or Phase-57 witnesses instead of manufacturing a
+  target-specific interpretation.
+
+Concrete ISA opcodes/encodings, instruction-count optimality, ABI register
+names, caller/callee-save policy, return-address handling, unwind metadata,
+stack probing, red zones, dynamic `alloca`, and variable-sized frames remain out
+of scope.
