@@ -71,6 +71,7 @@ namespace {
     const PhiFreeBackendSpillLowering& result) {
   BackendControlTerminator lowered;
   lowered.kind = source.kind;
+  lowered.termination = source.termination;
   lowered.jump_target = source.jump_target;
   lowered.nonzero_target = source.nonzero_target;
   lowered.zero_target = source.zero_target;
@@ -113,7 +114,6 @@ void lower_move(const SsaScheduledMove& move,
   const bool source_stack = source.kind == BackendStorageKind::stack_slot;
   const bool destination_stack =
       destination.kind == BackendStorageKind::stack_slot;
-
   if (!source_stack && !destination_stack) {
     if (!is_register(source) || !is_register(destination)) {
       throw std::logic_error("backend register move has invalid storage kind");

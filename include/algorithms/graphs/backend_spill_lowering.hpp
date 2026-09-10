@@ -62,9 +62,12 @@ struct BackendLocationStorage {
 
 // Control stays outside the ordinary operation stream. Conditional predicates
 // are bound to the persistent allocation storage for the renamed SSA value; a
-// control use never fabricates an instruction-local scratch register.
+// control use never fabricates an instruction-local scratch register. Phase-70
+// termination is preserved as a separate payload-free descriptor so return_void
+// cannot be confused with a CFG successor.
 struct BackendControlTerminator {
   SsaControlTerminatorKind kind{SsaControlTerminatorKind::opaque};
+  SsaControlTerminationKind termination{SsaControlTerminationKind::none};
   std::optional<BackendStorage> predicate_storage;
   std::optional<SsaLoweredControlTarget> jump_target;
   std::optional<SsaLoweredControlTarget> nonzero_target;
@@ -102,10 +105,11 @@ struct PhiFreeBackendSpillLowering {
 // scratch registers numbered from zero; the result reports the maximum number
 // simultaneously required by any one phi-free operation.
 //
-// Phase-68 control descriptors remain separate from body operations. Their
-// predicate, when present, binds to the same persistent register/stack location
-// already owned by the allocation; logical and lowered execution targets are
-// retained exactly for canonical-plan provenance.
+// Phase-68 control descriptors and the Phase-70 termination descriptor remain
+// separate from body operations. A conditional predicate, when present, binds
+// to the same persistent register/stack location already owned by allocation;
+// logical/lowered targets and return termination are retained exactly for
+// canonical-plan provenance.
 //
 // This baseline intentionally does not choose concrete ISA opcodes, byte frame
 // offsets/alignment, calling conventions, or hardware scratch registers.

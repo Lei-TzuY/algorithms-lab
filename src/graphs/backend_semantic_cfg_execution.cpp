@@ -43,6 +43,30 @@ struct ReservedFrameRegisters {
   return result;
 }
 
+[[nodiscard]] BackendFixedFrameBytecodeExecutionSnapshots execute_return_exit(
+    const BackendFixedFrameBytecodePlan& plan,
+    const std::vector<std::int64_t>& pre_exit_registers,
+    const std::span<const std::int64_t> initial_registers,
+    const ReservedFrameRegisters reserved) {
+  if (reserved.stack_pointer >= pre_exit_registers.size() ||
+      reserved.frame_base >= pre_exit_registers.size()) {
+    throw std::out_of_range(
+        "semantic return register file omits reserved frame registers");
+  }
+
+  std::vector<std::int64_t> replay_input = pre_exit_registers;
+  replay_input[reserved.stack_pointer] = initial_registers[reserved.stack_pointer];
+  replay_input[reserved.frame_base] = initial_registers[reserved.frame_base];
+
+  BackendFixedFrameBytecodeExecutionSnapshots fixed_frame =
+      execute_backend_fixed_frame_bytecode(plan, replay_input);
+  if (fixed_frame.after_entry_registers != pre_exit_registers) {
+    throw std::logic_error(
+        "semantic return failed canonical pre-exit state reconstruction");
+  }
+  return fixed_frame;
+}
+
 }  // namespace
 
 BackendSemanticCfgExecution execute_backend_semantic_cfg(
@@ -107,6 +131,14 @@ BackendSemanticCfgExecution execute_backend_semantic_cfg(
     }
 
     ++result.completed_visits;
+    if (status == BackendSemanticControlStatus::returned) {
+      BackendFixedFrameBytecodeExecutionSnapshots fixed_frame =
+          execute_return_exit(plan, registers, initial_registers, reserved);
+      registers = fixed_frame.after_exit_registers;
+      result.fixed_frame_exit_replay = std::move(fixed_frame);
+      result.stop_reason = BackendSemanticCfgStopReason::returned;
+      break;
+    }
     if (status == BackendSemanticControlStatus::opaque_control) {
       result.stop_reason = BackendSemanticCfgStopReason::opaque_control;
       break;

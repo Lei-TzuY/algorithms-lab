@@ -109,6 +109,18 @@ void validate_target(const OutOfSsaProgram& program, const Vertex block,
   }
 }
 
+void validate_return_void(const OutOfSsaProgram& program, const Vertex block,
+                          const BackendControlTerminator& control) {
+  if (control.kind != SsaControlTerminatorKind::opaque ||
+      control.predicate_storage.has_value() || control.jump_target.has_value() ||
+      control.nonzero_target.has_value() || control.zero_target.has_value()) {
+    throw std::logic_error("semantic return_void descriptor is malformed");
+  }
+  if (!program.graph.neighbors(block).empty()) {
+    throw std::logic_error("semantic return_void block is not a CFG sink");
+  }
+}
+
 }  // namespace
 
 BackendSemanticControlExecution execute_backend_semantic_control_block(
@@ -131,6 +143,7 @@ BackendSemanticControlExecution execute_backend_semantic_control_block(
       selection.abstract_lowering.blocks[block_index].control;
   BackendSemanticControlExecution result;
   result.control_kind = control.kind;
+  result.termination_kind = control.termination;
   result.block_execution = execute_backend_instruction_continuation_block(
       plan, block_index, initial_registers, initial_frame_slot_values,
       instruction_replies);
@@ -138,6 +151,17 @@ BackendSemanticControlExecution execute_backend_semantic_control_block(
   if (result.block_execution.suspended_at_instruction.has_value()) {
     result.status = BackendSemanticControlStatus::body_suspended;
     return result;
+  }
+
+  switch (control.termination) {
+    case SsaControlTerminationKind::none:
+      break;
+    case SsaControlTerminationKind::return_void:
+      validate_return_void(program, block_index, control);
+      result.status = BackendSemanticControlStatus::returned;
+      return result;
+    default:
+      throw std::logic_error("semantic control has unknown termination kind");
   }
 
   switch (control.kind) {

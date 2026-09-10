@@ -137,6 +137,7 @@ if(BUILD_TESTING)
     tests/test_backend_scalar_instruction_execution.cpp
     tests/test_backend_semantic_control.cpp
     tests/test_backend_semantic_cfg_execution.cpp
+    tests/test_backend_return_void.cpp
     tests/test_backend_cfg_path_continuation.cpp
     tests/test_backend_cfg_path_exit_event.cpp
     tests/test_shortest_paths.cpp
