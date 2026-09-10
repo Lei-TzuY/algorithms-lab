@@ -93,8 +93,22 @@ lifetime, unwind behavior, or performance from CI timing.
 
 ## Frontier
 
-Phase 65 is implementation-complete / sealing-audit-pending only after the exact
-candidate and merged-main GCC release, Clang release, and GCC ASan+UBSan matrices
-succeed. A later frontier must be chosen by architecture audit from semantics
-actually present in the retained IR; it must not fabricate branch predicates,
-return blocks, or automatic whole-program termination merely to keep expanding.
+Phase 65 is **SEALED**. PR #147 exact head
+`a46882441471a647e7a53235d4bfc4a0f689261e` passed GitHub Actions run
+`34465238457` on GCC release, Clang release, and GCC ASan+UBSan. The merged
+checkpoint `main@3dfeabf3a63964718e02273cbf96c0d3e91d8999` passed push run
+`34465888422` on the same three jobs.
+
+The late-backend sequence is now at a mature semantic checkpoint. The retained
+`SsaInstruction` still carries only dataflow uses plus an optional definition;
+it has no opcode/computation semantics. The retained CFG still carries no
+runtime branch predicate, automatic successor choice, or return/termination
+semantic. Consequently there is no safe Phase-66 execution slice that can be
+implemented from the current IR without inventing meaning that the program does
+not encode.
+
+A future continuation must begin with an explicit IR/schema design decision that
+adds real instruction and/or control-flow semantics plus corresponding proof and
+verification obligations. Until that architectural premise exists, automatic
+branching, return-block discovery, whole-program execution, ABI behavior, or
+native execution are intentionally out of scope rather than implied next steps.
