@@ -62,6 +62,7 @@ add_library(algorithms_lab
   src/graphs/backend_frame_bytecode_execution.cpp
   src/graphs/backend_spill_transfer_execution.cpp
   src/graphs/backend_instruction_continuation.cpp
+  src/graphs/backend_cfg_path_continuation.cpp
   src/graphs/traversal.cpp
   src/graphs/shortest_paths.cpp
   src/graphs/minimum_spanning_tree.cpp
@@ -127,6 +128,7 @@ if(BUILD_TESTING)
     tests/test_backend_frame_bytecode_execution.cpp
     tests/test_backend_spill_transfer_execution.cpp
     tests/test_backend_instruction_continuation.cpp
+    tests/test_backend_cfg_path_continuation.cpp
     tests/test_shortest_paths.cpp
     tests/test_phase2.cpp
     tests/test_knapsack.cpp
