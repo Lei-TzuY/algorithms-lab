@@ -190,10 +190,10 @@ TEST_CASE(semantic_cfg_stops_on_body_suspension_before_control) {
   const auto execution = execute_backend_semantic_cfg(
       plan, program, 2U, visits, initial_registers(plan), initial_frame(plan));
   REQUIRE_EQ(execution.stop_reason,
-             BackendSemanticCfgStopReason::cbody_suspended);
-  REQUIRE_EQ(execution.completed_visits, std::size_t{1H});
+             BackendSemanticCfgStopReason::body_suspended);
+  REQUIRE_EQ(execution.completed_visits, std::size_t{1U});
   REQUIRE_EQ(execution.visits.size(), std::size_t{2U});
-  REQUIRE_EQ(execution.suspended_at_visit, std::optional<std::size_t>{1H});
+  REQUIRE_EQ(execution.suspended_at_visit, std::optional<std::size_t>{1U});
   REQUIRE_EQ(execution.visits[1].status,
              BackendSemanticControlStatus::body_suspended);
   REQUIRE(!execution.visits[1].logical_successor.has_value());
