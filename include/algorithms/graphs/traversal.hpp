@@ -30,6 +30,30 @@ struct BreadthFirstSearchResult {
                                 Vertex target);
 [[nodiscard]] bool has_cycle(const Graph& graph);
 
+struct UndirectedEdgeWitness {
+  Vertex first;
+  Vertex second;
+  Weight weight;
+
+  friend bool operator==(const UndirectedEdgeWitness&,
+                         const UndirectedEdgeWitness&) = default;
+};
+
+struct UndirectedLowLinkResult {
+  std::vector<UndirectedEdgeWitness> bridges;
+  std::vector<Vertex> articulation_vertices;
+  std::vector<std::size_t> bridge_component_of;
+  std::size_t bridge_component_count = 0;
+};
+
+// Tarjan low-link analysis for the repository's undirected multigraph model.
+// Connectivity ignores edge weights but bridge witnesses retain them. Parallel
+// edge copies are distinguished internally; self-loops can never be bridges.
+// Bridge-component ids are assigned deterministically by increasing seed vertex
+// after every bridge edge is removed. Throws invalid_argument for directed input.
+[[nodiscard]] UndirectedLowLinkResult analyze_undirected_low_link(
+    const Graph& graph);
+
 // Returns nullopt when a directed cycle prevents a topological ordering.
 // Throws invalid_argument for undirected graphs.
 [[nodiscard]] std::optional<std::vector<Vertex>> topological_sort(
