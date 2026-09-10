@@ -83,6 +83,6 @@ No wall-clock or throughput claim is derived from CI timing.
 
 ## Frontier
 
-Phase 62 is implementation-complete / sealing-audit-pending only after its exact candidate and merged-main GCC/Clang/ASan+UBSan matrices pass.
+Phase 62 is **SEALED** after PR #141 reached merged `main@b637636cf3371a1b66877de688721044bdf89807` and exact merged-main CI run `34449072412` completed successfully on GCC release, Clang release, and GCC ASan+UBSan.
 
-This phase deliberately stops at the first opaque body instruction and does not define CFG execution. A later phase may add an explicit target-neutral instruction-semantics boundary or control-flow execution, but must not infer native ISA, ABI, object loading, relocation, or real machine-memory behavior from these scalar spill cells.
+The next coherent boundary is explicit instruction-result continuation. The retained `SsaInstruction` carries dataflow uses/definition but no opcode or computation semantics, so production must not invent arithmetic or treat an opaque instruction as a no-op. A promoted Phase 63 may accept caller-supplied result/acknowledgement values for each encountered opaque instruction, record the observed register inputs plus supplied result as replay provenance, and continue the already-materialized transfer/store suffix until the next barrier or block completion. CFG path selection, native ISA/ABI semantics, object loading, relocation, and real machine-memory behavior remain outside this boundary.
