@@ -30,17 +30,19 @@ struct BackendCfgPathContinuationExecution {
                          const BackendCfgPathContinuationExecution&) = default;
 };
 
-// Execute one explicit caller-supplied path through the sealed out-of-SSA CFG.
-// The caller chooses every visited block and supplies one instruction-reply
-// script per visit; production never derives a branch predicate or successor.
-// The complete backend plan is first rebuilt from `program` plus the policy and
-// layout configuration retained by `plan`, and exact equality is required.
+// Execute one explicit caller-supplied path through a compatible sealed
+// out-of-SSA CFG. The caller chooses every visited block and supplies one
+// instruction-reply script per visit; production never derives a branch
+// predicate, successor, or termination decision. Phase 64 rebuilds the retained
+// Phase-56 backend witness from `program` and the policies/configuration retained
+// by `plan`; each visited block then reuses the sealed Phase-63 trust boundary.
 //
 // The path must start at `program.start`; every consecutive transition must be
 // a directed CFG edge. Repeated vertices and self-loop transitions are legal
 // when the graph contains the corresponding edge. A suspended Phase-63 block
 // stops the path before any successor executes. Caller-owned inputs are never
-// mutated.
+// mutated. Exhausting the finite caller path is not interpreted as function
+// termination and does not execute the fixed-frame exit sequence.
 [[nodiscard]] BackendCfgPathContinuationExecution
 execute_backend_cfg_path_continuation(
     const BackendFixedFrameBytecodePlan& plan, const OutOfSsaProgram& program,
