@@ -109,9 +109,22 @@ does not claim physical parallel-edge identity at the semantic-control layer.
 Those remain separate frontiers rather than being smuggled into this first
 terminator slice.
 
-## Checkpoint status
+## Sealed status
 
-Implementation is ready for exact PR CI and merged-main verification. Phase 68
-must not be considered sealed until the registered semantic-control sources and
-dedicated tests pass GCC release, Clang release, and GCC ASan+UBSan on the exact
-candidate and again after integration.
+Phase 68 is **SEALED** after implementation PR #153 exact candidate
+`09b9a0d80994fdb962efce01be1cec9ab5e4ca4c` passed CI run `34500447455`
+on GCC release, Clang release, and GCC ASan+UBSan, was squash-merged as
+`main@508020ffb2c7fb14ccd2d1e4fc2bad01fd337479`, and exact merged-main CI
+run `34501679430` completed successfully on the same three gates.
+
+The architecture audit found no unresolved control-provenance, predicate-storage,
+critical-edge, suspension, register-write interference, or copy-coalescing
+correctness blocker. Phase 68 stops at one completed block plus explicit successor
+selection; it does not farm terminator variants.
+
+The promoted frontier is bounded multi-block semantic CFG execution. A successor
+may now be followed only when Phase-68 control selected it explicitly. The next
+executor must preserve exact inter-block register/frame handoff, stop honestly on
+body suspension or opaque control, and use an explicit visit budget for loops.
+Budget exhaustion is not function return or termination. General memory, calls,
+returns, ABI, exceptions, and target-ISA execution remain separate frontiers.
