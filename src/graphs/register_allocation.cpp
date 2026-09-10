@@ -399,6 +399,27 @@ PhiFreeRegisterAllocation allocate_phi_free_registers(
     for (std::size_t reverse = indexed[block].size(); reverse > 0U; --reverse) {
       const IndexedOperation& operation = indexed[block][reverse - 1U];
       const Bits after = live;
+
+      for (const std::size_t definition : operation.definitions) {
+        for (std::size_t location = 0U; location < location_count; ++location) {
+          if (after[location] == 0U || location == definition) {
+            continue;
+          }
+          const bool coalescible_copy_source =
+              operation.kind != PhiFreeOperationKind::instruction &&
+              std::find(operation.uses.begin(), operation.uses.end(), location) !=
+                  operation.uses.end();
+          if (coalescible_copy_source) {
+            continue;
+          }
+          if (definition < location) {
+            interference.emplace(definition, location);
+          } else {
+            interference.emplace(location, definition);
+          }
+        }
+      }
+
       for (const std::size_t definition : operation.definitions) {
         live[definition] = 0U;
       }
