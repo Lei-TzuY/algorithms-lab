@@ -1,4 +1,5 @@
 #include "algorithms/graphs/backend_cfg_path_exit_event.hpp"
+#include "algorithms/graphs/backend_stack_pointer_reservation.hpp"
 
 #include <cstddef>
 #include <cstdint>
