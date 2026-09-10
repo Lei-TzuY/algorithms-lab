@@ -40,10 +40,11 @@ namespace {
                      [to](const Edge& edge) { return edge.to == to; });
 }
 
-void require_no_payload(const SsaControlTerminatorInput& control) {
+void require_no_payload(const SsaControlTerminatorInput& control,
+                        const char* context) {
   if (control.predicate.has_value() || control.jump_successor.has_value() ||
       control.nonzero_successor.has_value() || control.zero_successor.has_value()) {
-    throw std::invalid_argument("opaque control terminator carries semantic payload");
+    throw std::invalid_argument(context);
   }
 }
 
@@ -51,17 +52,36 @@ void validate_control(const Graph& graph, const Vertex block,
                       const bool reachable, const std::size_t variable_count,
                       const SsaControlTerminatorInput& control) {
   if (!reachable) {
-    if (control.kind != SsaControlTerminatorKind::opaque) {
+    if (control.kind != SsaControlTerminatorKind::opaque ||
+        control.termination != SsaControlTerminationKind::none) {
       throw std::invalid_argument(
           "unreachable block cannot carry executable control semantics");
     }
-    require_no_payload(control);
+    require_no_payload(control,
+                       "unreachable opaque control terminator carries payload");
     return;
   }
 
+  switch (control.termination) {
+    case SsaControlTerminationKind::none:
+      break;
+    case SsaControlTerminationKind::return_void:
+      if (control.kind != SsaControlTerminatorKind::opaque) {
+        throw std::invalid_argument(
+            "return_void cannot combine with successor control semantics");
+      }
+      require_no_payload(control, "return_void control terminator carries payload");
+      if (!graph.neighbors(block).empty()) {
+        throw std::invalid_argument("return_void control block must be a CFG sink");
+      }
+      return;
+  }
+  throw std::invalid_argument("unknown control termination kind");
+
   switch (control.kind) {
     case SsaControlTerminatorKind::opaque:
-      require_no_payload(control);
+      require_no_payload(control,
+                         "opaque control terminator carries semantic payload");
       return;
     case SsaControlTerminatorKind::jump:
       if (control.predicate.has_value() || !control.jump_successor.has_value() ||
@@ -183,6 +203,7 @@ OutOfSsaProgram construct_control_semantic_out_of_ssa(
   for (Vertex block = 0U; block < original_count; ++block) {
     SsaLoweredControlTerminator lowered;
     lowered.kind = controls[block].kind;
+    lowered.termination = controls[block].termination;
     switch (controls[block].kind) {
       case SsaControlTerminatorKind::opaque:
         break;
