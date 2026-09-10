@@ -83,6 +83,16 @@ execution bound. Storage remains linear in the existing execution trace.
 Phase 67 does **not** choose CFG successors, infer program termination, interpret
 branches, add loads/stores over a general memory model, execute calls, define an
 ABI, or claim target ISA semantics. CFG path and exit ownership remain exactly
-where the sealed Phase-64/65 contracts place them. The next architectural
-frontier, if promoted after merged-main verification and audit, must add a new
-semantic control boundary rather than manufacturing more scalar opcode variants.
+where the sealed Phase-64/65 contracts place them.
+
+## Sealed status
+
+Phase 67 is **SEALED** after implementation PR #151 reached merged
+`main@615cf49baf85502e18eef7aa95951767e99a6a77` and merged-main CI run
+`34488175900` completed successfully on GCC release, Clang release, and GCC
+ASan+UBSan. The architecture audit found no unresolved scalar-execution blocker.
+
+The promoted frontier is an explicit control/terminator semantic boundary. The
+current retained IR has CFG topology but no branch/terminator descriptor, so a
+future executor must not infer successor choice from adjacency order. More scalar
+opcode variants alone would not constitute the next architectural phase.
