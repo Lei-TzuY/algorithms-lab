@@ -75,8 +75,9 @@ void validate_control(const Graph& graph, const Vertex block,
         throw std::invalid_argument("return_void control block must be a CFG sink");
       }
       return;
+    default:
+      throw std::invalid_argument("unknown control termination kind");
   }
-  throw std::invalid_argument("unknown control termination kind");
 
   switch (control.kind) {
     case SsaControlTerminatorKind::opaque:
