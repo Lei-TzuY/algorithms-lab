@@ -75,6 +75,39 @@ std::vector<Point2i> jarvis_hull(std::vector<Point2i> points) {
   return hull;
 }
 
+bool closest_result_less(const algorithms::geometry::ClosestPairResult& left,
+                         const algorithms::geometry::ClosestPairResult& right) {
+  if (left.squared_distance != right.squared_distance) {
+    return left.squared_distance < right.squared_distance;
+  }
+  if (!(left.first == right.first)) {
+    return lex_less(left.first, right.first);
+  }
+  return lex_less(left.second, right.second);
+}
+
+algorithms::geometry::ClosestPairResult brute_force_closest_pair(
+    const std::vector<Point2i>& points) {
+  auto make_result = [](Point2i first, Point2i second) {
+    if (lex_less(second, first)) {
+      std::swap(first, second);
+    }
+    return algorithms::geometry::ClosestPairResult{
+        first, second, squared_distance(first, second)};
+  };
+
+  auto best = make_result(points[0], points[1]);
+  for (std::size_t i = 0; i < points.size(); ++i) {
+    for (std::size_t j = i + 1U; j < points.size(); ++j) {
+      const auto candidate = make_result(points[i], points[j]);
+      if (closest_result_less(candidate, best)) {
+        best = candidate;
+      }
+    }
+  }
+  return best;
+}
+
 }  // namespace
 
 TEST_CASE(geometry_exact_predicates_and_intersections) {
@@ -164,5 +197,76 @@ TEST_CASE(geometry_randomized_hull_against_jarvis_and_segment_symmetry) {
     REQUIRE_EQ(value, segments_intersect(b, a, c, d));
     REQUIRE_EQ(value, segments_intersect(a, b, d, c));
     REQUIRE_EQ(value, segments_intersect(c, d, a, b));
+  }
+}
+
+TEST_CASE(geometry_closest_pair_degenerate_duplicate_and_boundary_cases) {
+  using algorithms::geometry::ClosestPairResult;
+  using algorithms::geometry::closest_pair;
+
+  REQUIRE(!closest_pair(std::vector<Point2i>{}).has_value());
+  REQUIRE(!closest_pair(std::vector<Point2i>{{5, -7}}).has_value());
+  REQUIRE_EQ(closest_pair(std::vector<Point2i>{{3, 4}, {0, 0}}).value(),
+             ClosestPairResult({{0, 0}, {3, 4}, 25}));
+
+  const std::vector<Point2i> duplicates{{4, 5}, {-2, 7}, {4, 5}, {-2, 7}};
+  REQUIRE_EQ(closest_pair(duplicates).value(),
+             ClosestPairResult({{-2, 7}, {-2, 7}, 0}));
+
+  const std::vector<Point2i> extremes{{-1'000'000'000, -1'000'000'000},
+                                      {1'000'000'000, 1'000'000'000}};
+  REQUIRE_EQ(closest_pair(extremes)->squared_distance,
+             std::int64_t{8'000'000'000'000'000'000LL});
+  REQUIRE_THROWS_AS(
+      closest_pair(std::vector<Point2i>{{0, 0}, {1'000'000'001, 0}}),
+      std::out_of_range);
+}
+
+TEST_CASE(geometry_closest_pair_ties_cross_split_and_grid) {
+  using algorithms::geometry::ClosestPairResult;
+  using algorithms::geometry::closest_pair;
+
+  const std::vector<Point2i> square{{1, 1}, {0, 1}, {1, 0}, {0, 0}};
+  const ClosestPairResult expected{{0, 0}, {0, 1}, 1};
+  REQUIRE_EQ(closest_pair(square).value(), expected);
+  auto reversed = square;
+  std::reverse(reversed.begin(), reversed.end());
+  REQUIRE_EQ(closest_pair(reversed).value(), expected);
+
+  const std::vector<Point2i> cross_split{{-100, 1000}, {-50, -1000}, {-1, 7},
+                                          {1, 7},      {50, 1000},   {100, -1000}};
+  REQUIRE_EQ(closest_pair(cross_split).value(),
+             ClosestPairResult({{-1, 7}, {1, 7}, 4}));
+
+  std::vector<Point2i> grid;
+  for (std::int32_t x = -5; x <= 5; ++x) {
+    for (std::int32_t y = -5; y <= 5; ++y) {
+      grid.push_back({x * 10, y * 10});
+    }
+  }
+  REQUIRE_EQ(closest_pair(grid).value(), brute_force_closest_pair(grid));
+}
+
+TEST_CASE(geometry_closest_pair_randomized_quadratic_differential) {
+  using algorithms::geometry::closest_pair;
+
+  std::mt19937_64 rng(0xC105E57ULL);
+  for (std::size_t trial = 0; trial < 1500; ++trial) {
+    const std::size_t count = 2U + static_cast<std::size_t>(rng() % 63U);
+    std::vector<Point2i> points;
+    points.reserve(count);
+    for (std::size_t i = 0; i < count; ++i) {
+      points.push_back(Point2i{
+          static_cast<std::int32_t>(
+              static_cast<std::int64_t>(rng() % 2001U) - 1000),
+          static_cast<std::int32_t>(
+              static_cast<std::int64_t>(rng() % 2001U) - 1000)});
+    }
+    const auto expected = brute_force_closest_pair(points);
+    REQUIRE_EQ(closest_pair(points).value(), expected);
+
+    auto shuffled = points;
+    std::shuffle(shuffled.begin(), shuffled.end(), rng);
+    REQUIRE_EQ(closest_pair(shuffled).value(), expected);
   }
 }
