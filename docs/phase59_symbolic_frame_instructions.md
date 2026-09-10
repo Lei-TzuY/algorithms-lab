@@ -55,4 +55,6 @@ For `A` legalized entry/exit actions, lowering performs one Phase-58 canonical r
 
 ## Frontier
 
-Phase 59 is implementation-complete / sealing-audit-pending until the exact candidate and merged-main GCC/Clang/ASan+UBSan matrices pass. A later phase may consume these symbolic instructions to introduce a more concrete machine-instruction or encoding policy, but no such target-specific behavior is claimed here.
+Phase 59 is SEALED at merged `main@01ec5849e5a346414bfd18af8a6c7b89fdc33720` after exact merged-main CI run `34436410591` completed successfully on GCC release, Clang release, and GCC ASan+UBSan. The promoted frontier is Phase 60 canonical fixed-frame byte encoding: consume only a canonical Phase-59 symbolic plan, revalidate that witness, serialize the three symbolic instruction forms into one explicit repository-defined byte format, and provide an independent decoder/replayer that proves the bytes preserve Phase-59 register-state semantics.
+
+Phase 60 is an educational repository bytecode boundary, not a claim about x86-64, AArch64, RISC-V, any ABI, instruction-size optimality, relocations, object files, or executable machine code.
