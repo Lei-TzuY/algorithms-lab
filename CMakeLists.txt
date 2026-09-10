@@ -93,6 +93,7 @@ add_library(algorithms_lab
   src/polynomials/number_theoretic_transform.cpp
   src/polynomials/formal_power_series.cpp
   src/streaming/misra_gries.cpp
+  src/strings/aho_corasick.cpp
   src/strings/bwt_index.cpp
   src/strings/bwt_text_extraction.cpp
   src/strings/bwt_seed_verify.cpp
@@ -164,6 +165,7 @@ if(BUILD_TESTING)
     tests/test_z_function.cpp
     tests/test_rolling_hash.cpp
     tests/test_suffix_array.cpp
+    tests/test_aho_corasick.cpp
     tests/test_bwt_index.cpp
     tests/test_bwt_text_extraction.cpp
     tests/test_bwt_seed_verify.cpp
