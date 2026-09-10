@@ -61,6 +61,14 @@ Gomory-Hu tree supplies secondary cross-implementation evidence. This is a
 deliberate contrast among direct deterministic contraction, repeated-flow
 cut-equivalent trees, and the sealed randomized unweighted Karger contract.
 
+After the Stoer-Wagner checkpoint reached exact merged-main green, a fresh
+coverage audit found that the repository still had only single-source
+Dijkstra/Bellman-Ford shortest paths and no Johnson/APSP implementation. The
+next recovered slice therefore targets Johnson all-pairs shortest paths: global
+Bellman-Ford potentials, exact non-negative reweighting, one heap-Dijkstra pass
+per source, and an independent Floyd-Warshall primary oracle. This deliberately
+leaves the cut frontier instead of farming another min-cut variant.
+
 ## Prospective frontier authority
 
 `ROADMAP.md` still contains historical presentation drift from the frozen
