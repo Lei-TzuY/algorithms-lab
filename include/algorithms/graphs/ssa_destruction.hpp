@@ -54,7 +54,7 @@ enum class SsaCopyPlacement : unsigned char {
   split_blocks,
 };
 
-// Phase-68 control semantics remain distinct from ordinary scalar instructions.
+// Phase-68 successor control remains distinct from ordinary scalar instructions.
 // Opaque control preserves the sealed caller-owned successor boundary. A jump
 // names one explicit logical successor. branch_if_nonzero additionally names the
 // exact SSA predicate value plus explicit nonzero/zero logical successors.
@@ -62,6 +62,14 @@ enum class SsaControlTerminatorKind : unsigned char {
   opaque,
   jump,
   branch_if_nonzero,
+};
+
+// Phase-70 function termination is orthogonal to successor selection. A
+// return_void descriptor carries no value, predicate, or CFG-successor payload.
+// `none` preserves all sealed Phase-68/69 non-terminal behavior.
+enum class SsaControlTerminationKind : unsigned char {
+  none,
+  return_void,
 };
 
 // SSA destruction may split one logical edge to materialize phi copies. Control
@@ -78,6 +86,7 @@ struct SsaLoweredControlTarget {
 
 struct SsaLoweredControlTerminator {
   SsaControlTerminatorKind kind{SsaControlTerminatorKind::opaque};
+  SsaControlTerminationKind termination{SsaControlTerminationKind::none};
   std::optional<SsaCopyLocation> predicate;
   std::optional<SsaLoweredControlTarget> jump_target;
   std::optional<SsaLoweredControlTarget> nonzero_target;
