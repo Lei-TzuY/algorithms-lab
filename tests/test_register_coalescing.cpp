@@ -179,7 +179,7 @@ TEST_CASE(copy_coalescing_blocks_interfering_move) {
   REQUIRE(*reg_of(result, loc(0U)) != *reg_of(result, loc(1U)));
 }
 
-TEST_CASE(copy_coalescing_checks_merged_class_against_interference) {
+TEST_CASE(copy_coalescing_blocks_class_clobbered_by_later_copy) {
   OutOfSsaProgram program = one_block(3U);
   program.blocks[0].entry_moves.push_back({loc(2U), loc(1U)});
   program.blocks[0].entry_moves.push_back({loc(1U), loc(0U)});
@@ -188,12 +188,14 @@ TEST_CASE(copy_coalescing_checks_merged_class_against_interference) {
 
   const auto result = coalesce_phi_free_registers(program, 3U);
   verify_result(program, result);
+  REQUIRE_EQ(result.classes.size(), 3U);
   REQUIRE_EQ(result.preferences[0].decision,
-             CopyCoalescingDecisionKind::merged);
+             CopyCoalescingDecisionKind::blocked_by_interference);
   REQUIRE_EQ(result.preferences[1].decision,
              CopyCoalescingDecisionKind::blocked_by_interference);
-  REQUIRE_EQ(class_of(result, loc(1U)), class_of(result, loc(2U)));
   REQUIRE(class_of(result, loc(0U)) != class_of(result, loc(1U)));
+  REQUIRE(class_of(result, loc(1U)) != class_of(result, loc(2U)));
+  REQUIRE(class_of(result, loc(0U)) != class_of(result, loc(2U)));
 }
 
 TEST_CASE(copy_coalescing_zero_budget_spills_whole_class) {

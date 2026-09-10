@@ -45,6 +45,7 @@ add_library(algorithms_lab
   src/graphs/dominance_frontier.cpp
   src/graphs/ssa_construction.cpp
   src/graphs/ssa_scalar_semantics.cpp
+  src/graphs/ssa_control_semantics.cpp
   src/graphs/ssa_pruned.cpp
   src/graphs/ssa_destruction.cpp
   src/graphs/register_allocation.cpp
@@ -63,6 +64,7 @@ add_library(algorithms_lab
   src/graphs/backend_frame_bytecode_execution.cpp
   src/graphs/backend_spill_transfer_execution.cpp
   src/graphs/backend_instruction_continuation.cpp
+  src/graphs/backend_semantic_control.cpp
   src/graphs/backend_cfg_path_continuation.cpp
   src/graphs/backend_cfg_path_exit_event.cpp
   src/graphs/traversal.cpp
@@ -132,6 +134,7 @@ if(BUILD_TESTING)
     tests/test_backend_spill_transfer_execution.cpp
     tests/test_backend_instruction_continuation.cpp
     tests/test_backend_scalar_instruction_execution.cpp
+    tests/test_backend_semantic_control.cpp
     tests/test_backend_cfg_path_continuation.cpp
     tests/test_backend_cfg_path_exit_event.cpp
     tests/test_shortest_paths.cpp

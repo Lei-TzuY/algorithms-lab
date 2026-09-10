@@ -56,11 +56,14 @@ struct PhiFreeRegisterAllocation {
 };
 
 // Compute exact backward may-liveness over the sealed phi-free operation order:
-// entry moves, instructions, then exit moves. Interference is reconstructed from
-// simultaneous live-before/live-after sets. A deterministic greedy coloring then
-// assigns the lowest available physical register in descending-degree order;
-// locations that cannot be assigned within register_budget are returned as
-// explicit spills. No optimal-coloring/minimum-spill/coalescing claim is made.
+// entry moves, instructions, then exit moves. Interference contains simultaneous
+// live-before/live-after cliques plus write-clobber edges from each definition to
+// locations live after that operation. Scheduled-copy sources are excluded from
+// that extra write edge so a source/destination pair may still be coalesced when
+// they are not simultaneously live. A deterministic greedy coloring then assigns
+// the lowest available physical register in descending-degree order; locations
+// that cannot be assigned within register_budget are returned as explicit spills.
+// No optimal-coloring/minimum-spill/coalescing claim is made.
 [[nodiscard]] PhiFreeRegisterAllocation allocate_phi_free_registers(
     const OutOfSsaProgram& program, std::size_t register_budget);
 

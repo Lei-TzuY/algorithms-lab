@@ -66,6 +66,26 @@ namespace {
   return result;
 }
 
+[[nodiscard]] BackendControlTerminator lower_control(
+    const SsaLoweredControlTerminator& source,
+    const PhiFreeBackendSpillLowering& result) {
+  BackendControlTerminator lowered;
+  lowered.kind = source.kind;
+  lowered.jump_target = source.jump_target;
+  lowered.nonzero_target = source.nonzero_target;
+  lowered.zero_target = source.zero_target;
+  if (source.predicate.has_value()) {
+    const BackendStorage storage =
+        location_binding(result, *source.predicate).storage;
+    if (storage.kind == BackendStorageKind::spill_scratch_register) {
+      throw std::logic_error(
+          "backend control predicate cannot use transient scratch storage");
+    }
+    lowered.predicate_storage = storage;
+  }
+  return lowered;
+}
+
 void append_operation(
     std::vector<BackendOperation>& output, const BackendOperationKind kind,
     const PhiFreeOperationKind origin_kind, const std::size_t origin_index,
@@ -316,6 +336,7 @@ PhiFreeBackendSpillLowering lower_phi_free_backend_storage(
     BackendLoweredBlock& destination = result.blocks[block];
     destination.reachable = source.reachable;
     destination.original_block = source.original_block;
+    destination.control = lower_control(source.control, result);
 
     for (std::size_t index = 0U; index < source.entry_moves.size(); ++index) {
       lower_move(source.entry_moves[index], PhiFreeOperationKind::entry_move,
