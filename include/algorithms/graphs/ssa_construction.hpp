@@ -52,8 +52,7 @@ struct SsaInstruction {
 struct SsaPhiIncoming {
   Vertex predecessor;
   SsaValue value;
-  friend bool operator==(const SsaPhiIncoming&,
-                         const SsaPhiIncoming&) = default;
+  friend bool operator==(const SsaPhiIncoming&, const SsaPhiIncoming&) = default;
 };
 
 struct SsaPhi {
