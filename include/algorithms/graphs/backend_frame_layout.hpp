@@ -58,6 +58,7 @@ struct ByteAddressedBackendOperation {
   std::size_t origin_index{0U};
   std::vector<ByteAddressedBackendStorage> inputs;
   std::optional<ByteAddressedBackendStorage> output;
+  SsaInstructionSemantics instruction_semantics{};
   friend bool operator==(const ByteAddressedBackendOperation&,
                          const ByteAddressedBackendOperation&) = default;
 };
@@ -87,7 +88,8 @@ struct ScratchAwareByteAddressedBackendFrame {
 
 // Convert the sealed Phase-51 selection into a target-neutral byte-addressed
 // spill-frame view. Every abstract stack slot receives one deterministic byte
-// offset. Physical-register ids and all operation/block provenance are preserved.
+// offset. Physical-register ids, instruction semantics, and all operation/block
+// provenance are preserved.
 //
 // The caller supplies one uniform spill-slot size/alignment plus an overall frame
 // alignment. Alignments must be nonzero powers of two and frame alignment must be
