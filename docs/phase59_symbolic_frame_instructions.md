@@ -18,7 +18,7 @@ Lowering does not trust a caller-supplied legalized sequence merely because ever
 
 `legalize_fixed_frame_actions(source_plan.source_plan, source_plan.policy)`
 
-and requires exact equality with the supplied Phase-58 witness before selecting any instruction. Any tampered action, reordered chunk, changed physical-register id, changed immediate, or changed legality policy is therefore rejected with `std::logic_error`.
+and requires exact equality with the supplied Phase-58 witness before selecting any instruction. Tampered actions, reordered chunks, changed physical-register ids, changed immediates, and valid-but-changed legality policies therefore fail the canonical equality check with `std::logic_error`; a malformed policy may be rejected earlier by the sealed Phase-58 policy validation with `std::invalid_argument`.
 
 An infeasible canonical Phase-58 plan remains a successful empty symbolic plan.
 
