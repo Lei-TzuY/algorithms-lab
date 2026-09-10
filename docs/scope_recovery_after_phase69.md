@@ -105,6 +105,18 @@ rather than by repeating the production feasibility criteria. This adds a new
 edge-decomposition proof model instead of farming another shortest-path, cut, or
 string-index variant.
 
+After the Eulerian-trail checkpoint reached exact merged-main green, recovery
+again moved away from adjacent graph/string/cut variants. A fresh coverage audit
+found no integer-factorization capability even though the sealed number-theory
+foundation already provides Euclidean GCD, overflow-safe modular arithmetic, and
+deterministic full-`uint64_t` primality. The next recovered slice therefore adds
+exact full-width prime factorization through replayable Pollard-Rho splitting.
+Randomness affects the search path and runtime only: every returned factor is
+certified prime, the sorted factor multiset multiplies back to the input, bounded
+inputs are checked against independent trial division, and full-width known
+factorizations cover adversarial arithmetic. No deterministic Pollard-Rho runtime,
+cryptographic-randomness, or probabilistic-correctness claim is implied.
+
 ## Prospective frontier authority
 
 `ROADMAP.md` still contains historical presentation drift from the frozen

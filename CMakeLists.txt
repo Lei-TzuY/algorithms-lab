@@ -90,6 +90,7 @@ add_library(algorithms_lab
   src/graphs/offline_dynamic_connectivity.cpp
   src/online/paging.cpp
   src/optimization/hungarian_assignment.cpp
+  src/number_theory/factorization.cpp
   src/number_theory/modular.cpp
   src/polynomials/number_theoretic_transform.cpp
   src/polynomials/formal_power_series.cpp
@@ -203,6 +204,7 @@ if(BUILD_TESTING)
     tests/test_geometry2d.cpp
     tests/test_planar_diameter.cpp
     tests/test_rectangle_union.cpp
+    tests/test_factorization.cpp
     tests/test_number_theory.cpp
     tests/test_number_theoretic_transform.cpp
     tests/test_exact_convolution.cpp
