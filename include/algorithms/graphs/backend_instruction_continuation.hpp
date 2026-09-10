@@ -11,9 +11,10 @@
 namespace algorithms::graphs {
 
 // One explicit caller-supplied semantic-oracle reply for an opaque body
-// instruction. `operation_index` must match the next instruction barrier in
-// block order. Instructions with a materialized output require output_value;
-// no-output instructions are acknowledged by a reply with no value.
+// instruction. `operation_index` must match the next opaque instruction barrier
+// in block order. Instructions with a materialized output require output_value;
+// no-output opaque instructions are acknowledged by a reply with no value.
+// Known Phase-66 scalar instructions consume no reply.
 struct BackendInstructionOracleReply {
   std::size_t operation_index{0U};
   std::optional<std::int64_t> output_value;
@@ -22,9 +23,12 @@ struct BackendInstructionOracleReply {
                          const BackendInstructionOracleReply&) = default;
 };
 
-// Replay record for either one known transfer or one opaque instruction.
-// Transfer steps carry transferred_value. Instruction steps carry the observed
-// register inputs and distinguish an acknowledged reply from a suspension.
+// Replay record for one known transfer or body instruction. Transfer steps carry
+// transferred_value. Instruction steps carry the observed register inputs plus
+// their retained Phase-66 semantic descriptor. A known scalar instruction is
+// marked instruction_semantically_evaluated and carries derived_instruction_result;
+// an opaque instruction instead distinguishes caller acknowledgement from honest
+// suspension through instruction_acknowledged/supplied_instruction_result.
 struct BackendInstructionContinuationStep {
   std::size_t operation_index{0U};
   BackendOperationKind kind{BackendOperationKind::register_move};
@@ -32,6 +36,9 @@ struct BackendInstructionContinuationStep {
   std::size_t origin_index{0U};
   std::optional<std::int64_t> transferred_value;
   std::vector<std::int64_t> instruction_inputs;
+  SsaInstructionSemantics instruction_semantics{};
+  bool instruction_semantically_evaluated{false};
+  std::optional<std::int64_t> derived_instruction_result;
   bool instruction_acknowledged{false};
   std::optional<std::int64_t> supplied_instruction_result;
 
@@ -52,14 +59,17 @@ struct BackendInstructionContinuationExecution {
                          const BackendInstructionContinuationExecution&) = default;
 };
 
-// Continue one canonical Phase-62 block execution across an ordered prefix of
-// opaque instructions using caller-supplied results/acknowledgements. The
-// sealed Phase-62 executor remains the provenance, finite-state, and complete
-// block-preflight trust boundary. Production never derives an instruction
-// result: it only records current register inputs, applies an explicitly
-// supplied result to the already-materialized output register, and resumes the
-// known register/frame transfers. If replies are exhausted, execution suspends
-// before the next opaque instruction. Caller-owned spans are never mutated.
+// Continue one canonical Phase-62 block execution. Instructions carrying a
+// validated non-opaque Phase-66 scalar descriptor are evaluated from the actual
+// materialized register inputs and their checked result is written to the
+// already-materialized output register. Opaque instructions retain the sealed
+// Phase-63 ordered caller-reply contract and suspend honestly when the reply
+// prefix is exhausted. Known scalar instructions never consume oracle replies.
+//
+// The sealed Phase-62 executor remains the byte/provenance, finite-state, and
+// complete-block-preflight trust boundary. This function does not invent CFG
+// successor, termination, branch, memory, call, or ABI semantics. Caller-owned
+// spans are never mutated.
 [[nodiscard]] BackendInstructionContinuationExecution
 execute_backend_instruction_continuation_block(
     const BackendFixedFrameBytecodePlan& plan, std::size_t block_index,
