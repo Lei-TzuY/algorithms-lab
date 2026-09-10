@@ -202,13 +202,15 @@ TEST_CASE(semantic_cfg_stops_on_body_suspension_before_control) {
 }
 
 TEST_CASE(semantic_cfg_budget_bounds_loop_without_claiming_termination) {
-  Graph graph(2U, true);
+  Graph graph(3U, true);
   graph.add_edge(0U, 1U);
-  graph.add_edge(1U, 0U);
-  std::vector<std::vector<SemanticSsaInputInstruction>> blocks(2U);
-  std::vector<SsaControlTerminatorInput> controls(2U);
+  graph.add_edge(1U, 2U);
+  graph.add_edge(2U, 1U);
+  std::vector<std::vector<SemanticSsaInputInstruction>> blocks(3U);
+  std::vector<SsaControlTerminatorInput> controls(3U);
   controls[0] = jump_control(1U);
-  controls[1] = jump_control(0U);
+  controls[1] = jump_control(2U);
+  controls[2] = jump_control(1U);
 
   const OutOfSsaProgram program = construct_control_semantic_out_of_ssa(
       graph, 0U, 0U, blocks, controls);
@@ -222,10 +224,11 @@ TEST_CASE(semantic_cfg_budget_bounds_loop_without_claiming_termination) {
   REQUIRE_EQ(execution.completed_visits, std::size_t{5U});
   REQUIRE_EQ(execution.visits.size(), std::size_t{5U});
   REQUIRE_EQ(execution.next_execution_block, std::optional<Vertex>{1U});
-  for (std::size_t visit = 0U; visit < execution.visits.size(); ++visit) {
-    REQUIRE_EQ(execution.visits[visit].block_execution.block_index,
-              static_cast<Vertex>(visit % 2U));
-  }
+  REQUIRE_EQ(execution.visits[0].block_execution.block_index, Vertex{0U});
+  REQUIRE_EQ(execution.visits[1].block_execution.block_index, Vertex{1U});
+  REQUIRE_EQ(execution.visits[2].block_execution.block_index, Vertex{2U});
+  REQUIRE_EQ(execution.visits[3].block_execution.block_index, Vertex{1U});
+  REQUIRE_EQ(execution.visits[4].block_execution.block_index, Vertex{2U});
   require_handoff(execution);
 }
 
