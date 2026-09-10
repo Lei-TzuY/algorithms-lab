@@ -15,15 +15,43 @@ const StackPointerOwnedBackendFramePlan& phase56_plan(
   return plan.source_plan.source_plan.source_plan.source_plan;
 }
 
-const ScratchAwareBaseRelativeBackendFrame& require_addressed_frame(
+const ScratchAwareBaseRelativeBackendFrame& require_canonical_addressed_frame(
     const BackendFixedFrameBytecodePlan& plan) {
-  const auto& frame =
-      phase56_plan(plan).stack_directed_frame_plan.frame_base_plan.addressed_frame;
-  if (!frame.has_value()) {
+  const auto& phase56 = phase56_plan(plan);
+  const auto& directed = phase56.stack_directed_frame_plan;
+  const auto& base_plan = directed.frame_base_plan;
+  if (!base_plan.non_base_register_plan.selection.has_value() ||
+      !base_plan.byte_addressed_frame.has_value() ||
+      !base_plan.addressed_frame.has_value()) {
     throw std::invalid_argument(
-        "spill-transfer execution requires a successful addressed frame");
+        "spill-transfer execution requires complete successful frame provenance");
   }
-  return *frame;
+
+  const ScratchAwareByteAddressedBackendFrame rebuilt_byte_frame =
+      layout_scratch_aware_backend_frame(
+          *base_plan.non_base_register_plan.selection,
+          base_plan.byte_addressed_frame->config);
+  if (rebuilt_byte_frame != *base_plan.byte_addressed_frame) {
+    throw std::logic_error(
+        "spill-transfer Phase-52 byte frame disagrees with retained selection");
+  }
+
+  const ScratchAwareBaseRelativeBackendFrame rebuilt_addressed_frame =
+      address_scratch_aware_backend_frame(
+          rebuilt_byte_frame, base_plan.addressed_frame->addressing_config);
+  if (rebuilt_addressed_frame != *base_plan.addressed_frame) {
+    throw std::logic_error(
+        "spill-transfer Phase-53 addressed body is not canonical");
+  }
+
+  const StackDirectedBackendFramePlan rebuilt_directed =
+      derive_stack_directed_backend_frame_entry(
+          base_plan, directed.stack_growth_direction);
+  if (rebuilt_directed != directed) {
+    throw std::logic_error(
+        "spill-transfer Phase-55 frame-entry provenance is not canonical");
+  }
+  return *base_plan.addressed_frame;
 }
 
 struct ValidatedStorageDomain {
@@ -110,9 +138,15 @@ void validate_transfer_operation(const BaseRelativeBackendOperation& operation,
                                  const ValidatedStorageDomain& domain,
                                  const std::size_t register_count) {
   if (operation.kind == BackendOperationKind::instruction) {
-    throw std::invalid_argument(
-        "spill-transfer execution does not define opaque instruction semantics");
+    for (const auto& input : operation.inputs) {
+      validate_physical_register(input, domain, register_count);
+    }
+    if (operation.output.has_value()) {
+      validate_physical_register(*operation.output, domain, register_count);
+    }
+    return;
   }
+
   if (operation.inputs.size() != 1U || !operation.output.has_value()) {
     throw std::logic_error(
         "spill-transfer operation must have exactly one input and one output");
@@ -134,7 +168,7 @@ void validate_transfer_operation(const BaseRelativeBackendOperation& operation,
       static_cast<void>(validate_frame_slot(output, domain));
       return;
     case BackendOperationKind::instruction:
-      break;
+      return;
   }
   throw std::logic_error("spill-transfer operation has unknown kind");
 }
@@ -170,13 +204,15 @@ BackendSpillTransferBlockExecution execute_backend_spill_transfer_block(
     const BackendFixedFrameBytecodePlan& plan, const std::size_t block_index,
     const std::span<const std::int64_t> initial_registers,
     const std::span<const std::int64_t> initial_frame_slot_values) {
-  // Reuse the sealed Phase-61 trust boundary. This validates strict decoding,
-  // canonical source/byte identity, entry/exit register references, and checked
-  // fixed-frame arithmetic without mutating caller-owned state.
+  // Reuse the sealed Phase-61 trust boundary for strict bytecode decoding,
+  // canonical entry/exit identity, finite register preflight, and checked
+  // fixed-frame arithmetic.
   const BackendFixedFrameBytecodeExecutionSnapshots fixed_frame =
       execute_backend_fixed_frame_bytecode(plan, initial_registers);
 
-  const auto& frame = require_addressed_frame(plan);
+  // Phase 61 does not independently rebuild the nested addressed body. Phase 62
+  // does, because it consumes that body as executable storage-transfer input.
+  const auto& frame = require_canonical_addressed_frame(plan);
   if (block_index >= frame.blocks.size()) {
     throw std::out_of_range("spill-transfer block index out of range");
   }
@@ -189,8 +225,8 @@ BackendSpillTransferBlockExecution execute_backend_spill_transfer_block(
   const ValidatedStorageDomain domain = validate_storage_domain(
       plan, frame, initial_registers.size(), initial_frame_slot_values.size());
 
-  // Preflight the complete selected block before state mutation so an opaque
-  // instruction or malformed later transfer cannot leave a partial prefix.
+  // Preflight the complete selected block before transfer mutation. Even
+  // operations after an opaque barrier must be structurally valid.
   for (const auto& operation : block.operations) {
     validate_transfer_operation(operation, domain, initial_registers.size());
   }
@@ -205,6 +241,14 @@ BackendSpillTransferBlockExecution execute_backend_spill_transfer_block(
 
   for (std::size_t index = 0U; index < block.operations.size(); ++index) {
     const auto& operation = block.operations[index];
+    if (operation.kind == BackendOperationKind::instruction) {
+      result.steps.push_back(BackendSpillTransferExecutionStep{
+          index, operation.kind, operation.origin_kind, operation.origin_index,
+          std::nullopt});
+      result.suspended_at_instruction = index;
+      break;
+    }
+
     const std::int64_t value =
         read_transfer_input(operation, domain, result.after_block_registers,
                             result.frame_slot_values);
