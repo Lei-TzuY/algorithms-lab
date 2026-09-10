@@ -26,4 +26,10 @@ Deterministic tests cover opcode shape rejection, legacy opaque behavior, exact 
 
 ## Scope boundary
 
-This is an IR semantic substrate, not an automatic backend executor. Phase 66 deliberately does not add branch predicates, terminators, memory operations, calls, ABI behavior, or implicit function completion. A follow-up phase is justified only after this semantic substrate is merged and can be consumed without weakening the sealed Phase-63/64 caller-oracle trust boundary.
+This is an IR semantic substrate, not an automatic backend executor. Phase 66 deliberately does not add branch predicates, terminators, memory operations, calls, ABI behavior, or implicit function completion.
+
+## Sealed checkpoint and next frontier
+
+Phase 66 is sealed only after its implementation and integration gates both passed. Implementation PR #149 used exact head `027eec23f22f33166b1589ceea02fcd339754673`; exact-head CI run `34474243250` completed successfully. The squash-merged checkpoint is `main@18b73244539faa6b5d22be8ad3c35b415c8556d3`; merged-main CI run `34474919545` completed successfully on GCC release, Clang release, and GCC ASan+UBSan.
+
+The next coherent frontier is not a larger scalar opcode list and not inferred control flow. Phase 67 should make the sealed Phase-63 instruction-continuation boundary consume Phase-66 semantics: instructions with validated executable scalar semantics may derive their result from the observed backend register inputs, while `opaque` instructions remain caller-owned oracle barriers and still suspend honestly when no reply is supplied. CFG path choice, branch selection, and termination remain caller-owned until an explicit control-flow semantic representation is introduced in a later phase.
