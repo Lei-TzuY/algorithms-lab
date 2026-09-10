@@ -1,7 +1,9 @@
 #include "algorithms/graphs/gomory_hu_tree.hpp"
 
 #include <algorithm>
+#include <cstdint>
 #include <limits>
+#include <numeric>
 #include <queue>
 #include <stdexcept>
 #include <utility>
@@ -34,6 +36,41 @@ void validate_input(std::size_t vertex_count,
     directed.push_back(CapacityEdge{edge.second, edge.first, edge.capacity});
   }
   return directed;
+}
+
+using WideWeight = std::uint64_t;
+
+[[nodiscard]] WideWeight checked_wide_add(WideWeight first,
+                                          WideWeight second) {
+  if (second > std::numeric_limits<WideWeight>::max() - first) {
+    throw std::overflow_error(
+        "Stoer-Wagner total non-loop capacity exceeds uint64_t");
+  }
+  return first + second;
+}
+
+[[nodiscard]] std::vector<bool> normalized_side(
+    std::size_t vertex_count, const std::vector<Vertex>& members) {
+  std::vector<bool> side(vertex_count, false);
+  for (const Vertex vertex : members) {
+    side[vertex] = true;
+  }
+  if (side[0]) {
+    for (std::size_t vertex = 0; vertex < vertex_count; ++vertex) {
+      side[vertex] = !side[vertex];
+    }
+  }
+  return side;
+}
+
+[[nodiscard]] bool side_is_less(const std::vector<bool>& first,
+                                const std::vector<bool>& second) {
+  for (std::size_t index = 0; index < first.size(); ++index) {
+    if (first[index] != second[index]) {
+      return !first[index] && second[index];
+    }
+  }
+  return false;
 }
 
 }  // namespace
@@ -128,6 +165,112 @@ GomoryHuTree build_gomory_hu_tree(
   }
 
   return GomoryHuTree(std::move(parent), std::move(cut_to_parent));
+}
+
+std::optional<WeightedGlobalMinCutResult> stoer_wagner_global_min_cut(
+    std::size_t vertex_count,
+    std::span<const UndirectedCapacityEdge> edges) {
+  validate_input(vertex_count, edges);
+  if (vertex_count < 2) {
+    return std::nullopt;
+  }
+
+  WideWeight total_non_loop_capacity = 0;
+  std::vector<std::vector<WideWeight>> adjacency(
+      vertex_count, std::vector<WideWeight>(vertex_count, 0));
+
+  for (const auto& edge : edges) {
+    if (edge.first == edge.second) {
+      continue;
+    }
+    const auto capacity = static_cast<WideWeight>(edge.capacity);
+    total_non_loop_capacity =
+        checked_wide_add(total_non_loop_capacity, capacity);
+    adjacency[edge.first][edge.second] =
+        checked_wide_add(adjacency[edge.first][edge.second], capacity);
+    adjacency[edge.second][edge.first] =
+        checked_wide_add(adjacency[edge.second][edge.first], capacity);
+  }
+
+  std::vector<Vertex> active(vertex_count);
+  std::iota(active.begin(), active.end(), Vertex{0});
+
+  std::vector<std::vector<Vertex>> members(vertex_count);
+  for (Vertex vertex = 0; vertex < vertex_count; ++vertex) {
+    members[vertex].push_back(vertex);
+  }
+
+  WideWeight best_weight = std::numeric_limits<WideWeight>::max();
+  std::vector<bool> best_side;
+
+  while (active.size() > 1) {
+    std::vector<bool> added(vertex_count, false);
+    std::vector<WideWeight> connection(vertex_count, 0);
+    Vertex previous = vertex_count;
+
+    for (std::size_t order = 0; order < active.size(); ++order) {
+      Vertex selected = vertex_count;
+      for (const Vertex vertex : active) {
+        if (added[vertex]) {
+          continue;
+        }
+        if (selected == vertex_count ||
+            connection[vertex] > connection[selected] ||
+            (connection[vertex] == connection[selected] &&
+             vertex < selected)) {
+          selected = vertex;
+        }
+      }
+
+      if (order + 1 == active.size()) {
+        const WideWeight phase_cut = connection[selected];
+        auto candidate_side =
+            normalized_side(vertex_count, members[selected]);
+        if (phase_cut < best_weight ||
+            (phase_cut == best_weight &&
+             (best_side.empty() ||
+              side_is_less(candidate_side, best_side)))) {
+          best_weight = phase_cut;
+          best_side = std::move(candidate_side);
+        }
+
+        if (previous == vertex_count) {
+          throw std::logic_error(
+              "Stoer-Wagner phase ended without a merge predecessor");
+        }
+
+        for (const Vertex vertex : active) {
+          if (vertex == previous || vertex == selected) {
+            continue;
+          }
+          const WideWeight merged =
+              checked_wide_add(adjacency[previous][vertex],
+                               adjacency[selected][vertex]);
+          adjacency[previous][vertex] = merged;
+          adjacency[vertex][previous] = merged;
+        }
+
+        members[previous].insert(members[previous].end(),
+                                 members[selected].begin(),
+                                 members[selected].end());
+        members[selected].clear();
+        active.erase(std::find(active.begin(), active.end(), selected));
+        break;
+      }
+
+      added[selected] = true;
+      previous = selected;
+      for (const Vertex vertex : active) {
+        if (!added[vertex]) {
+          connection[vertex] =
+              checked_wide_add(connection[vertex],
+                               adjacency[selected][vertex]);
+        }
+      }
+    }
+  }
+
+  return WeightedGlobalMinCutResult{best_weight, std::move(best_side)};
 }
 
 }  // namespace algorithms::graphs
