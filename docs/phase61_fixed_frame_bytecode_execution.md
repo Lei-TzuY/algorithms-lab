@@ -34,6 +34,8 @@ The corpus is implementation evidence, not a theorem proof. Correctness relies o
 
 For `B` bytecode bytes, `I` decoded instructions, and `R` caller registers, validation and execution take `O(B + I + R)` time including Phase-60 canonical re-encoding and the two returned register snapshots. Working/output storage is `O(I + R)` in addition to the supplied canonical plan.
 
-## Frontier
+## Sealed boundary and next frontier
 
-Phase 61 is implementation-complete / sealing-audit-pending until the exact candidate and merged-main GCC/Clang/ASan+UBSan matrices pass. A later backend phase must add a genuinely new execution or representation boundary; this executor does not justify memory semantics, body instruction execution, native code, ABI, or target-specific claims.
+Phase 61 is **SEALED** at merged `main@3ec4a413d4c0aa2bd28410a332b7d45e365128c0` after exact push CI run `34444146450` completed successfully on GCC release, Clang release, and GCC ASan+UBSan. The architecture audit is recorded in `phase61_sealing_audit.md`.
+
+The next coherent backend gap is not another fixed-frame opcode or byte-encoding variant. Phase 62 is promoted as **target-neutral spill-transfer execution**: reuse the preserved addressed backend blocks beneath the canonical Phase-60/61 provenance, add explicit finite frame-storage state, and execute only the already-materialized `register_move`, `stack_reload`, and `stack_store` transfer operations with strict address/register validation. Opaque `instruction` operations remain an explicit non-executed boundary until a later phase supplies body-instruction semantics. Phase 62 must not claim native memory, ISA execution, ABI behavior, or arbitrary body computation.
