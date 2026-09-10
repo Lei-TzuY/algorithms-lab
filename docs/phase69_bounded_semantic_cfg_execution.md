@@ -67,6 +67,13 @@ exhaustion with an exact next-block witness, critical-edge phi-copy split routin
 and malformed budget/request shape. Every multi-visit test independently checks
 the Phase-64 register-handoff equality between consecutive visits.
 
+The loop regression deliberately distinguishes logical from concrete visits. Its
+loop-carried phi lowers the logical backedge through a compiler-created split
+block, so the tested execution order is `entry -> loop -> split -> loop -> exit`;
+the split visit carries no opaque reply, while the two concrete loop visits own
+independent replies. This prevents reply scripts from being indexed by logical
+block recurrence rather than by the actual lowered execution path.
+
 The repository's full GCC release, Clang release, and GCC ASan+UBSan matrix is the
 integration gate for the retained SSA-destruction, allocation, frame, instruction,
 and semantic-control layers.
