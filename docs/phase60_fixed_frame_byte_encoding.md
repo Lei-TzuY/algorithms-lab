@@ -48,4 +48,4 @@ For `I` symbolic instructions, encoding performs one Phase-59 canonical re-deriv
 
 ## Frontier
 
-Phase 60 is implementation-complete / sealing-audit-pending until the exact candidate and merged-main GCC/Clang/ASan+UBSan matrices pass. Any later backend frontier must add a genuinely new representation or execution boundary; this phase does not justify target-specific opcode/ABI claims.
+Phase 60 is **SEALED** after exact merged-main GCC/Clang/ASan+UBSan verification and the Phase-60 architecture audit. The next promoted boundary is Phase 61 canonical fixed-frame bytecode execution: production must revalidate the complete encoded plan and execute it over an explicit finite register file with checked arithmetic and replayable entry/exit snapshots. This remains target-neutral educational execution semantics; no target-specific opcode, ABI, object-code, or native-execution claim is implied.
