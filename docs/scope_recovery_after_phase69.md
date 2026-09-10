@@ -51,6 +51,16 @@ and a first-principles covered-length segment tree. It adds a genuine sweep-line
 paradigm with exact bounded-integer area arithmetic and independent small-grid
 union-area verification rather than another distance-query variant.
 
+After the rectangle-union checkpoint reached exact merged-main green, the next
+recovered slice leaves the geometry streak rather than farming adjacent polygon
+helpers. It targets deterministic exact weighted global minimum cut via the
+Stoer-Wagner maximum-adjacency/contraction algorithm. The slice reuses the
+existing undirected-capacity edge abstraction, but not max-flow as its production
+engine; exhaustive bipartition remains the primary oracle, while the sealed
+Gomory-Hu tree supplies secondary cross-implementation evidence. This is a
+deliberate contrast among direct deterministic contraction, repeated-flow
+cut-equivalent trees, and the sealed randomized unweighted Karger contract.
+
 ## Prospective frontier authority
 
 `ROADMAP.md` still contains historical presentation drift from the frozen
