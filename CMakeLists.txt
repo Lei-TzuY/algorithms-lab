@@ -57,6 +57,7 @@ add_library(algorithms_lab
   src/graphs/backend_stack_pointer_reservation.cpp
   src/graphs/backend_frame_actions.cpp
   src/graphs/backend_frame_action_legalization.cpp
+  src/graphs/backend_symbolic_frame_instructions.cpp
   src/graphs/traversal.cpp
   src/graphs/shortest_paths.cpp
   src/graphs/minimum_spanning_tree.cpp
@@ -117,6 +118,7 @@ if(BUILD_TESTING)
     tests/test_backend_stack_pointer_reservation.cpp
     tests/test_backend_frame_actions.cpp
     tests/test_backend_frame_action_legalization.cpp
+    tests/test_backend_symbolic_frame_instructions.cpp
     tests/test_shortest_paths.cpp
     tests/test_phase2.cpp
     tests/test_knapsack.cpp
