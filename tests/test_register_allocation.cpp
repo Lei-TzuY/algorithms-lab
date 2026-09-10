@@ -120,6 +120,18 @@ std::size_t index_of(const std::vector<SsaCopyLocation>& locations,
   return static_cast<std::size_t>(found - locations.begin());
 }
 
+void insert_canonical_edge(
+    std::set<std::pair<std::size_t, std::size_t>>& edges, std::size_t first,
+    std::size_t second) {
+  if (first == second) {
+    return;
+  }
+  if (second < first) {
+    std::swap(first, second);
+  }
+  edges.emplace(first, second);
+}
+
 std::set<std::pair<std::size_t, std::size_t>> expected_interference(
     const OutOfSsaProgram& program,
     const PhiFreeRegisterAllocation& allocation,
@@ -142,6 +154,30 @@ std::set<std::pair<std::size_t, std::size_t>> expected_interference(
       for (std::size_t first = 0U; first < live.size(); ++first) {
         for (std::size_t second = first + 1U; second < live.size(); ++second) {
           edges.emplace(live[first], live[second]);
+        }
+      }
+    }
+
+    for (std::size_t operation_index = 0U;
+         operation_index < operations[block].size(); ++operation_index) {
+      const OracleOperation& operation = operations[block][operation_index];
+      for (const SsaCopyLocation definition : operation.definitions) {
+        const std::size_t definition_index =
+            index_of(allocation.locations, definition);
+        for (std::size_t location = 0U;
+             location < allocation.locations.size(); ++location) {
+          if (location == definition_index ||
+              !oracle_live_from(program, operations, block,
+                                operation_index + 1U,
+                                allocation.locations[location])) {
+            continue;
+          }
+          const bool coalescible_copy_source =
+              operation.kind != PhiFreeOperationKind::instruction &&
+              operation_contains(operation.uses, allocation.locations[location]);
+          if (!coalescible_copy_source) {
+            insert_canonical_edge(edges, definition_index, location);
+          }
         }
       }
     }
@@ -258,6 +294,35 @@ TEST_CASE(register_allocation_linear_liveness_and_spill) {
   REQUIRE_EQ(repeated.assignments, allocation.assignments);
   REQUIRE_EQ(repeated.interference_edges, allocation.interference_edges);
   REQUIRE_EQ(repeated.spills, allocation.spills);
+}
+
+TEST_CASE(register_allocation_dead_definition_clobbers_live_through_value) {
+  OutOfSsaProgram program = one_block_program(2U);
+  const SsaValue a0{0U, 0U};
+  const SsaValue b1{1U, 1U};
+  program.blocks[0].instructions.push_back({{}, b1});
+  program.blocks[0].instructions.push_back({{a0}, std::nullopt});
+
+  const PhiFreeRegisterAllocation allocation =
+      allocate_phi_free_registers(program, 1U);
+  verify_against_forward_oracle(program, allocation);
+
+  const std::size_t a_index =
+      index_of(allocation.locations, SsaCopyLocation::from_value(a0));
+  const std::size_t b_index =
+      index_of(allocation.locations, SsaCopyLocation::from_value(b1));
+  std::size_t first = a_index;
+  std::size_t second = b_index;
+  if (second < first) {
+    std::swap(first, second);
+  }
+  std::set<std::pair<std::size_t, std::size_t>> actual;
+  for (const RegisterInterferenceEdge& edge : allocation.interference_edges) {
+    actual.emplace(index_of(allocation.locations, edge.first),
+                   index_of(allocation.locations, edge.second));
+  }
+  REQUIRE(actual.contains({first, second}));
+  REQUIRE_EQ(allocation.spills.size(), 1U);
 }
 
 TEST_CASE(register_allocation_tracks_moves_temporaries_and_kills) {
