@@ -69,6 +69,17 @@ Bellman-Ford potentials, exact non-negative reweighting, one heap-Dijkstra pass
 per source, and an independent Floyd-Warshall primary oracle. This deliberately
 leaves the cut frontier instead of farming another min-cut variant.
 
+After Johnson APSP reached exact merged-main green, another coverage audit moved
+away from shortest-path variants and found a more basic graph-structure gap:
+the repository had no articulation-point, bridge, or bridge-component low-link
+analysis. The next recovered slice therefore adds an iterative Tarjan low-link
+analysis over the existing undirected multigraph `Graph`. It distinguishes
+parallel edge copies with internal edge identities, treats self-loops correctly,
+returns bridge and articulation witnesses plus deterministic bridge-component
+labels, and verifies all three outputs against independent edge/vertex-removal
+connectivity oracles. This recovers a classical DFS proof obligation rather than
+extending the recent geometry, cut, or APSP streak.
+
 ## Prospective frontier authority
 
 `ROADMAP.md` still contains historical presentation drift from the frozen
