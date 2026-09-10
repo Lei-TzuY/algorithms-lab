@@ -54,12 +54,45 @@ enum class SsaCopyPlacement : unsigned char {
   split_blocks,
 };
 
+// Phase-68 control semantics remain distinct from ordinary scalar instructions.
+// Opaque control preserves the sealed caller-owned successor boundary. A jump
+// names one explicit logical successor. branch_if_nonzero additionally names the
+// exact SSA predicate value plus explicit nonzero/zero logical successors.
+enum class SsaControlTerminatorKind : unsigned char {
+  opaque,
+  jump,
+  branch_if_nonzero,
+};
+
+// SSA destruction may split one logical edge to materialize phi copies. Control
+// therefore retains both the source-level logical successor and the concrete
+// lowered execution successor that must run next. Parallel critical arcs are
+// semantically indistinguishable at this control layer and are canonicalized to
+// the lowest deterministic split-block id.
+struct SsaLoweredControlTarget {
+  Vertex logical_successor{0U};
+  Vertex execution_successor{0U};
+  friend bool operator==(const SsaLoweredControlTarget&,
+                         const SsaLoweredControlTarget&) = default;
+};
+
+struct SsaLoweredControlTerminator {
+  SsaControlTerminatorKind kind{SsaControlTerminatorKind::opaque};
+  std::optional<SsaCopyLocation> predicate;
+  std::optional<SsaLoweredControlTarget> jump_target;
+  std::optional<SsaLoweredControlTarget> nonzero_target;
+  std::optional<SsaLoweredControlTarget> zero_target;
+  friend bool operator==(const SsaLoweredControlTerminator&,
+                         const SsaLoweredControlTerminator&) = default;
+};
+
 struct SsaLoweredBlock {
   bool reachable{false};
   std::optional<Vertex> original_block;
   std::vector<SsaScheduledMove> entry_moves;
   std::vector<SsaInstruction> instructions;
   std::vector<SsaScheduledMove> exit_moves;
+  SsaLoweredControlTerminator control{};
   friend bool operator==(const SsaLoweredBlock&, const SsaLoweredBlock&) = default;
 };
 
