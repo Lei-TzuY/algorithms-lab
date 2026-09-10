@@ -137,3 +137,184 @@ TEST_CASE(gomory_hu_randomized_all_pairs_differential) {
     verify_against_exhaustive_oracle(vertex_count, edges);
   }
 }
+
+namespace {
+
+std::uint64_t stoer_wagner_cut_weight(
+    const std::vector<UndirectedCapacityEdge>& edges,
+    const std::vector<bool>& side) {
+  std::uint64_t total = 0;
+  for (const auto& edge : edges) {
+    if (edge.first != edge.second &&
+        side[edge.first] != side[edge.second]) {
+      total += static_cast<std::uint64_t>(edge.capacity);
+    }
+  }
+  return total;
+}
+
+std::uint64_t exhaustive_global_min_cut(
+    std::size_t vertex_count,
+    const std::vector<UndirectedCapacityEdge>& edges) {
+  if (vertex_count < 2 || vertex_count > 12) {
+    throw std::logic_error(
+        "Stoer-Wagner test oracle supports 2..12 vertices");
+  }
+
+  std::uint64_t best = std::numeric_limits<std::uint64_t>::max();
+  const std::uint64_t mask_limit =
+      std::uint64_t{1} << (vertex_count - 1U);
+  for (std::uint64_t mask = 1; mask < mask_limit; ++mask) {
+    std::vector<bool> side(vertex_count, false);
+    for (std::size_t vertex = 1; vertex < vertex_count; ++vertex) {
+      side[vertex] =
+          ((mask >> (vertex - 1U)) & std::uint64_t{1}) != 0;
+    }
+    best = std::min(best, stoer_wagner_cut_weight(edges, side));
+  }
+  return best;
+}
+
+void verify_stoer_wagner_witness(
+    std::size_t vertex_count,
+    const std::vector<UndirectedCapacityEdge>& edges,
+    const algorithms::graphs::WeightedGlobalMinCutResult& result) {
+  REQUIRE_EQ(result.side.size(), vertex_count);
+  REQUIRE(!result.side[0]);
+  REQUIRE(std::find(result.side.begin(), result.side.end(), true) !=
+          result.side.end());
+  REQUIRE(std::find(result.side.begin(), result.side.end(), false) !=
+          result.side.end());
+  REQUIRE_EQ(stoer_wagner_cut_weight(edges, result.side), result.weight);
+}
+
+std::uint64_t gomory_hu_global_cut(
+    std::size_t vertex_count,
+    const std::vector<UndirectedCapacityEdge>& edges) {
+  const auto tree = build_gomory_hu_tree(vertex_count, edges);
+  Capacity best = std::numeric_limits<Capacity>::max();
+  for (Vertex vertex = 1; vertex < vertex_count; ++vertex) {
+    best = std::min(best, tree.cut_to_parent()[vertex]);
+  }
+  return static_cast<std::uint64_t>(best);
+}
+
+}  // namespace
+
+TEST_CASE(stoer_wagner_empty_singleton_and_validation) {
+  const std::vector<UndirectedCapacityEdge> no_edges;
+  REQUIRE(!algorithms::graphs::stoer_wagner_global_min_cut(
+               0, no_edges)
+               .has_value());
+  REQUIRE(!algorithms::graphs::stoer_wagner_global_min_cut(
+               1, no_edges)
+               .has_value());
+
+  const std::vector<UndirectedCapacityEdge> negative = {{0, 0, -1}};
+  REQUIRE_THROWS_AS(
+      algorithms::graphs::stoer_wagner_global_min_cut(1, negative),
+      std::invalid_argument);
+
+  const std::vector<UndirectedCapacityEdge> bad_endpoint = {{0, 2, 1}};
+  REQUIRE_THROWS_AS(
+      algorithms::graphs::stoer_wagner_global_min_cut(2, bad_endpoint),
+      std::out_of_range);
+}
+
+TEST_CASE(stoer_wagner_weighted_parallel_self_loop_and_determinism) {
+  std::vector<UndirectedCapacityEdge> triangle = {
+      {0, 1, 3}, {1, 2, 4}, {0, 2, 5}, {1, 1, 1000},
+  };
+  const auto triangle_result =
+      algorithms::graphs::stoer_wagner_global_min_cut(3, triangle);
+  REQUIRE(triangle_result.has_value());
+  REQUIRE_EQ(triangle_result->weight, std::uint64_t{7});
+  verify_stoer_wagner_witness(3, triangle, *triangle_result);
+
+  std::vector<UndirectedCapacityEdge> parallel = {
+      {0, 1, 2}, {0, 1, 3}, {1, 2, 5},
+      {0, 2, 1}, {2, 2, 999}, {1, 2, 0},
+  };
+  const auto first =
+      algorithms::graphs::stoer_wagner_global_min_cut(3, parallel);
+  REQUIRE(first.has_value());
+  verify_stoer_wagner_witness(3, parallel, *first);
+
+  std::reverse(parallel.begin(), parallel.end());
+  const auto reversed =
+      algorithms::graphs::stoer_wagner_global_min_cut(3, parallel);
+  REQUIRE(reversed.has_value());
+  REQUIRE(*first == *reversed);
+}
+
+TEST_CASE(stoer_wagner_disconnected_and_uint64_capacity_boundary) {
+  const std::vector<UndirectedCapacityEdge> disconnected = {
+      {0, 1, 8}, {2, 2, 4},
+  };
+  const auto disconnected_result =
+      algorithms::graphs::stoer_wagner_global_min_cut(4, disconnected);
+  REQUIRE(disconnected_result.has_value());
+  REQUIRE_EQ(disconnected_result->weight, std::uint64_t{0});
+  verify_stoer_wagner_witness(
+      4, disconnected, *disconnected_result);
+
+  const Capacity maximum = std::numeric_limits<Capacity>::max();
+  const std::vector<UndirectedCapacityEdge> exact_full_width = {
+      {0, 1, maximum}, {0, 1, maximum}, {0, 1, 1},
+  };
+  const auto exact =
+      algorithms::graphs::stoer_wagner_global_min_cut(
+          2, exact_full_width);
+  REQUIRE(exact.has_value());
+  REQUIRE_EQ(exact->weight, std::numeric_limits<std::uint64_t>::max());
+  verify_stoer_wagner_witness(2, exact_full_width, *exact);
+
+  const std::vector<UndirectedCapacityEdge> unrepresentable_total = {
+      {0, 1, maximum}, {0, 1, maximum},
+      {0, 1, 1}, {0, 1, 1},
+  };
+  REQUIRE_THROWS_AS(
+      algorithms::graphs::stoer_wagner_global_min_cut(
+          2, unrepresentable_total),
+      std::overflow_error);
+}
+
+TEST_CASE(stoer_wagner_randomized_exhaustive_and_gomory_hu_crosscheck) {
+  std::mt19937_64 rng(0x53544F4552574147ULL);
+
+  for (std::size_t trial = 0; trial < 600; ++trial) {
+    const std::size_t vertex_count =
+        2 + static_cast<std::size_t>(rng() % 7U);
+    const std::size_t edge_count =
+        static_cast<std::size_t>(rng() % 25U);
+
+    std::vector<UndirectedCapacityEdge> edges;
+    edges.reserve(edge_count);
+    for (std::size_t edge = 0; edge < edge_count; ++edge) {
+      edges.push_back(UndirectedCapacityEdge{
+          static_cast<Vertex>(rng() % vertex_count),
+          static_cast<Vertex>(rng() % vertex_count),
+          static_cast<Capacity>(rng() % 31U),
+      });
+    }
+
+    const auto result =
+        algorithms::graphs::stoer_wagner_global_min_cut(
+            vertex_count, edges);
+    REQUIRE(result.has_value());
+    verify_stoer_wagner_witness(vertex_count, edges, *result);
+
+    REQUIRE_EQ(result->weight,
+               exhaustive_global_min_cut(vertex_count, edges));
+    REQUIRE_EQ(result->weight,
+               gomory_hu_global_cut(vertex_count, edges));
+
+    auto shuffled = edges;
+    std::shuffle(shuffled.begin(), shuffled.end(), rng);
+    const auto replay =
+        algorithms::graphs::stoer_wagner_global_min_cut(
+            vertex_count, shuffled);
+    REQUIRE(replay.has_value());
+    REQUIRE(*replay == *result);
+  }
+}
