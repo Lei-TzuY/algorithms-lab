@@ -3,6 +3,7 @@
 #include "algorithms/graphs/graph.hpp"
 
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <vector>
 
@@ -23,16 +24,36 @@ struct SsaValue {
   friend bool operator==(const SsaValue&, const SsaValue&) = default;
 };
 
+enum class SsaScalarOpcode : unsigned char {
+  opaque,
+  constant_i64,
+  copy_i64,
+  add_i64,
+  subtract_i64,
+  multiply_i64,
+  equal_i64,
+  less_than_i64,
+};
+
+struct SsaInstructionSemantics {
+  SsaScalarOpcode opcode{SsaScalarOpcode::opaque};
+  std::optional<std::int64_t> immediate;
+  friend bool operator==(const SsaInstructionSemantics&,
+                         const SsaInstructionSemantics&) = default;
+};
+
 struct SsaInstruction {
   std::vector<SsaValue> uses;
   std::optional<SsaValue> definition;
+  SsaInstructionSemantics semantics{};
   friend bool operator==(const SsaInstruction&, const SsaInstruction&) = default;
 };
 
 struct SsaPhiIncoming {
   Vertex predecessor;
   SsaValue value;
-  friend bool operator==(const SsaPhiIncoming&, const SsaPhiIncoming&) = default;
+  friend bool operator==(const SsaPhiIncoming&,
+                         const SsaPhiIncoming&) = default;
 };
 
 struct SsaPhi {
