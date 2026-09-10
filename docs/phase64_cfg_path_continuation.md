@@ -94,9 +94,9 @@ acknowledgements across the caller path. Every per-block after-entry/body state,
 final register state, and final frame state must match exactly.
 
 Focused strict-warning compilation of the new production source passes GCC and
-Clang against a minimal interface harness. Exact-head repository GCC release,
-Clang release, and GCC ASan+UBSan CI remain the authoritative full integration
-gate.
+Clang against a minimal interface harness. Exact-head PR CI run `34460706642`
+and merged-main push CI run `34461222150` subsequently completed successfully
+on GCC release, Clang release, and GCC ASan+UBSan.
 
 ## Complexity
 
@@ -112,13 +112,16 @@ Phase-63 traces.
 No native execution, ABI, automatic branch semantics, termination proof, or
 performance claim is made from CI timing.
 
-## Frontier
+## Sealed frontier
 
-Phase 64 is implementation-complete / sealing-audit-pending only after exact
-candidate and merged-main GCC release, Clang release, and GCC ASan+UBSan
-matrices succeed.
+Phase 64 is sealed at merged `main@5da077c705f97e89da21349861e1a96df3cfa7db`
+after exact post-merge CI run `34461222150` completed successfully on GCC
+release, Clang release, and GCC ASan+UBSan.
 
-A later phase should advance only if it adds a new executable semantic boundary,
-not by inventing branch behavior. One coherent next frontier would be an
-explicit caller-supplied termination/exit event that composes the sealed
-fixed-frame exit sequence exactly once after a completed finite CFG path.
+The next coherent boundary remains caller-owned rather than inferred control
+semantics. Phase 65 may accept an explicit caller-supplied termination/exit
+event after a fully completed finite CFG path and compose the canonical sealed
+fixed-frame exit sequence exactly once. Path exhaustion without that event must
+remain non-terminal; suspension must prevent the exit event from being consumed.
+Production must not infer a return block, branch predicate, or termination
+condition that is absent from the retained IR.
