@@ -61,6 +61,10 @@ void validate_persistent_storage(const BackendStorage storage,
 
   std::vector<BackendLoweredBlock> result = lowering.blocks;
   for (BackendLoweredBlock& block : result) {
+    if (block.control.predicate_storage.has_value()) {
+      validate_persistent_storage(*block.control.predicate_storage,
+                                  allocatable_registers);
+    }
     for (BackendOperation& operation : block.operations) {
       for (BackendStorage& input : operation.inputs) {
         input = physicalize_storage(input, total_registers,
