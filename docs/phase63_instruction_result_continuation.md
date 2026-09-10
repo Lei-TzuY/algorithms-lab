@@ -39,7 +39,7 @@ A real upstream integration fixture reuses the Phase-62 path from `OutOfSsaProgr
 
 A fixed-seed 180-program corpus generates 60 mixed register moves, reloads, stores, output-producing instructions, and no-output instructions per block. A test-local scalar interpreter starts from the sealed Phase-61 entry snapshot, consumes the same reply prefix, and independently derives every instruction input snapshot, transfer value, suspension point, final register state, and final frame state. Exact vector/state equality is required.
 
-Focused source-level GCC/Clang strict-warning compilation plus a stubbed Phase-62 continuation-state smoke test passed under GCC, Clang, and actual ASan+UBSan. These runs validate the new state machine in isolation; the exact-head repository CI matrix remains the authoritative cross-layer integration gate.
+Focused source-level GCC/Clang strict-warning compilation plus a stubbed Phase-62 continuation-state smoke test passed under GCC, Clang, and actual ASan+UBSan. The exact-head PR CI and merged-main CI matrices subsequently passed on GCC release, Clang release, and GCC ASan+UBSan.
 
 ## Complexity
 
@@ -47,8 +47,8 @@ Let `S` be canonical frame slots, `O` selected-block operations, `K` opaque inst
 
 No benchmark or native-execution performance claim is made from CI timing.
 
-## Frontier
+## Sealed frontier
 
-Phase 63 is implementation-complete / sealing-audit-pending only after exact candidate and merged-main GCC release, Clang release, and GCC ASan+UBSan matrices succeed.
+Phase 63 is sealed at merged `main@a86e4cc9c48b360d592649262a0d88ac8973c8f8` after exact post-merge CI run `34451828432` completed successfully on GCC release, Clang release, and GCC ASan+UBSan.
 
-The next coherent boundary after sealing is not automatic CFG execution. Runtime branch selection is still absent from the source semantics. A later phase may accept an explicit caller-supplied valid CFG path/transition oracle and compose completed Phase-63 block executions along that path, validating every graph edge and state handoff without fabricating control decisions.
+The next coherent boundary is not automatic CFG execution. Runtime branch selection remains absent from the source semantics. Phase 64 may accept an explicit caller-supplied valid CFG path/transition oracle and compose completed Phase-63 block executions along that path, validating canonical program provenance, the start block, every graph edge, per-block instruction replies, suspension boundaries, and register/frame state handoff without fabricating control decisions.
