@@ -36,3 +36,25 @@ existing bounded-integer `Point2i` geometry domain. It adds a classical
 `O(n log n)` divide-and-conquer algorithm, deterministic witness semantics, and
 an independent quadratic differential oracle. This is intentionally a return to
 algorithmic depth rather than a documentation-only reset.
+
+After that checkpoint reached exact merged-main green, the second recovered
+slice advances the same geometry foundation through a different algorithmic
+paradigm: exact planar diameter. It reuses the sealed monotone-chain convex hull
+and then enumerates antipodal hull pairs with rotating calipers, returning a
+canonical farthest-pair witness and verifying the complete result against an
+independent quadratic all-pairs oracle.
+
+## Prospective frontier authority
+
+`ROADMAP.md` still contains historical presentation drift from the frozen
+compiler/backend excursion (for example an old backend phase can appear as an
+active frontier even though later backend phases were already merged and then
+prospectively frozen here). That stale heading must not be used to resume
+compiler/runtime conquest.
+
+Until the historical roadmap is deliberately normalized without rewriting
+repository history, prospective work is governed by this recovery decision plus
+a fresh live-state / architecture-coverage audit. New slices must add substantial
+algorithmic or data-structural depth, executable behavior, proof obligations,
+and independent verification; green CI alone is not a reason to continue an
+out-of-scope subsystem.
