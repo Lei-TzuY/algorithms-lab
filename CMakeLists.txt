@@ -136,6 +136,7 @@ if(BUILD_TESTING)
   add_executable(algorithms_tests
     tests/test_main.cpp
     tests/test_two_sat.cpp
+    tests/test_cnf_sat.cpp
     tests/test_exact_cover.cpp
     tests/test_matroid_intersection.cpp
     tests/test_stable_matching.cpp
