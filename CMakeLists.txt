@@ -109,6 +109,7 @@ add_library(algorithms_lab
   src/online/paging.cpp
   src/optimization/exact_linear_program.cpp
   src/optimization/hungarian_assignment.cpp
+  src/number_theory/discrete_log.cpp
   src/number_theory/factorization.cpp
   src/number_theory/modular.cpp
   src/polynomials/number_theoretic_transform.cpp
@@ -246,6 +247,7 @@ if(BUILD_TESTING)
     tests/test_kd_tree.cpp
     tests/test_planar_diameter.cpp
     tests/test_rectangle_union.cpp
+    tests/test_discrete_log.cpp
     tests/test_factorization.cpp
     tests/test_finite_field_gaussian_elimination.cpp
     tests/test_number_theory.cpp
