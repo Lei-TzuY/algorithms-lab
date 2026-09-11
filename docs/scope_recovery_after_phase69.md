@@ -138,6 +138,16 @@ verified by enumerating the coefficient-row span rather than by another
 elimination recurrence. This deliberately leaves exact-cover/backtracking search
 instead of farming adjacent combinatorial solvers.
 
+After finite-field linear algebra reached exact merged-main green, a fresh
+coverage audit found no centroid-decomposition capability despite the existing
+heavy-light and link-cut tree families. The next recovered slice therefore adds
+an immutable centroid-decomposition index over strict undirected trees with a
+dynamic nearest-active-vertex overlay. Activate/deactivate/query traces are
+verified against independent breadth-first search on the original tree, while
+edge weights are intentionally ignored because the contract is edge-count
+distance. This changes proof model again—from field elimination to balanced
+separator decomposition—instead of farming adjacent linear-algebra routines.
+
 ## Prospective frontier authority
 
 `ROADMAP.md` still contains historical presentation drift from the frozen
