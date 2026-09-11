@@ -45,6 +45,7 @@ add_library(algorithms_lab
   src/dynamic_programming/matrix_chain.cpp
   src/dynamic_programming/tree_independent_set.cpp
   src/geometry/geometry2d.cpp
+  src/geometry/kd_tree.cpp
   src/geometry/planar_diameter.cpp
   src/geometry/rectangle_union.cpp
   src/greedy/interval_scheduling.cpp
@@ -223,6 +224,7 @@ if(BUILD_TESTING)
     tests/test_mo_distinct.cpp
     tests/test_online_paging.cpp
     tests/test_geometry2d.cpp
+    tests/test_kd_tree.cpp
     tests/test_planar_diameter.cpp
     tests/test_rectangle_union.cpp
     tests/test_factorization.cpp
