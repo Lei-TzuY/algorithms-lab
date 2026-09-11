@@ -89,6 +89,7 @@ add_library(algorithms_lab
   src/graphs/link_cut_tree.cpp
   src/graphs/link_cut_tree_navigation.cpp
   src/graphs/offline_dynamic_connectivity.cpp
+  src/linear_algebra/finite_field_gaussian_elimination.cpp
   src/online/paging.cpp
   src/optimization/hungarian_assignment.cpp
   src/number_theory/factorization.cpp
@@ -207,6 +208,7 @@ if(BUILD_TESTING)
     tests/test_planar_diameter.cpp
     tests/test_rectangle_union.cpp
     tests/test_factorization.cpp
+    tests/test_finite_field_gaussian_elimination.cpp
     tests/test_number_theory.cpp
     tests/test_number_theoretic_transform.cpp
     tests/test_exact_convolution.cpp
