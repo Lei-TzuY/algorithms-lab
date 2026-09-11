@@ -46,6 +46,7 @@ add_library(algorithms_lab
   src/geometry/rectangle_union.cpp
   src/greedy/interval_scheduling.cpp
   src/graphs/graph.cpp
+  src/graphs/maximum_clique.cpp
   src/graphs/centroid_nearest_active.cpp
   src/graphs/eulerian_trail.cpp
   src/graphs/directed_arborescence.cpp
@@ -128,6 +129,7 @@ if(BUILD_TESTING)
     tests/test_data_structures.cpp
     tests/test_li_chao_tree.cpp
     tests/test_graphs.cpp
+    tests/test_maximum_clique.cpp
     tests/test_centroid_nearest_active.cpp
     tests/test_eulerian_trail.cpp
     tests/test_directed_arborescence.cpp
