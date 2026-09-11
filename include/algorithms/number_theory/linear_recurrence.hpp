@@ -1,0 +1,205 @@
+#pragma once
+
+#include "algorithms/number_theory/modular.hpp"
+
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <span>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+
+namespace algorithms::number_theory {
+
+struct LinearRecurrence {
+  std::uint64_t prime_modulus{};
+  // s[n] = coefficients[0] * s[n-1] + ... + coefficients[k-1] * s[n-k]
+  // modulo prime_modulus. Empty coefficients represent the all-zero recurrence.
+  std::vector<std::uint64_t> coefficients;
+
+  friend bool operator==(const LinearRecurrence&, const LinearRecurrence&) = default;
+};
+
+namespace linear_recurrence_detail {
+
+inline void validate_prime_and_residues(
+    std::uint64_t prime_modulus, std::span<const std::uint64_t> values) {
+  if (!is_prime(prime_modulus)) {
+    throw std::invalid_argument("linear recurrence modulus must be prime");
+  }
+  for (const std::uint64_t value : values) {
+    if (value >= prime_modulus) {
+      throw std::invalid_argument("linear recurrence residue is not canonical");
+    }
+  }
+}
+
+inline std::uint64_t add_mod(std::uint64_t a, std::uint64_t b,
+                             std::uint64_t modulus) noexcept {
+  return a >= modulus - b ? a - (modulus - b) : a + b;
+}
+
+inline std::uint64_t sub_mod(std::uint64_t a, std::uint64_t b,
+                             std::uint64_t modulus) noexcept {
+  return a >= b ? a - b : modulus - (b - a);
+}
+
+inline std::vector<std::uint64_t> combine_polynomials(
+    std::span<const std::uint64_t> left,
+    std::span<const std::uint64_t> right,
+    std::span<const std::uint64_t> coefficients, std::uint64_t modulus) {
+  const std::size_t order = coefficients.size();
+  if (order > std::numeric_limits<std::size_t>::max() / 2U + 1U) {
+    throw std::length_error("linear recurrence order is too large");
+  }
+  std::vector<std::uint64_t> product(order * 2U - 1U, 0U);
+  for (std::size_t i = 0; i < order; ++i) {
+    for (std::size_t j = 0; j < order; ++j) {
+      const std::uint64_t term = multiply_mod(left[i], right[j], modulus);
+      product[i + j] = add_mod(product[i + j], term, modulus);
+    }
+  }
+
+  for (std::size_t degree = product.size(); degree-- > order;) {
+    const std::uint64_t value = product[degree];
+    if (value == 0U) {
+      continue;
+    }
+    for (std::size_t coefficient = 0; coefficient < order; ++coefficient) {
+      const std::size_t target = degree - 1U - coefficient;
+      const std::uint64_t term =
+          multiply_mod(value, coefficients[coefficient], modulus);
+      product[target] = add_mod(product[target], term, modulus);
+    }
+  }
+  product.resize(order);
+  return product;
+}
+
+}  // namespace linear_recurrence_detail
+
+// Returns the minimum-order linear recurrence over the prime field F_p that
+// reproduces every supplied canonical residue. The empty/all-zero sequence has
+// order zero. Throws std::invalid_argument for a non-prime modulus or a residue
+// outside [0, p).
+[[nodiscard]] inline LinearRecurrence berlekamp_massey(
+    std::span<const std::uint64_t> sequence, std::uint64_t prime_modulus) {
+  linear_recurrence_detail::validate_prime_and_residues(prime_modulus, sequence);
+
+  std::vector<std::uint64_t> connection{1U};
+  std::vector<std::uint64_t> previous{1U};
+  std::size_t order = 0U;
+  std::size_t shift = 1U;
+  std::uint64_t previous_discrepancy = 1U;
+
+  for (std::size_t index = 0; index < sequence.size(); ++index) {
+    std::uint64_t discrepancy = sequence[index];
+    for (std::size_t i = 1U; i <= order; ++i) {
+      const std::uint64_t term =
+          multiply_mod(connection[i], sequence[index - i], prime_modulus);
+      discrepancy = linear_recurrence_detail::add_mod(
+          discrepancy, term, prime_modulus);
+    }
+
+    if (discrepancy == 0U) {
+      ++shift;
+      continue;
+    }
+
+    const std::uint64_t inverse =
+        power_mod(previous_discrepancy, prime_modulus - 2U, prime_modulus);
+    const std::uint64_t scale =
+        multiply_mod(discrepancy, inverse, prime_modulus);
+    const std::vector<std::uint64_t> old_connection = connection;
+    if (connection.size() < previous.size() + shift) {
+      connection.resize(previous.size() + shift, 0U);
+    }
+    for (std::size_t i = 0; i < previous.size(); ++i) {
+      const std::uint64_t term =
+          multiply_mod(scale, previous[i], prime_modulus);
+      connection[i + shift] = linear_recurrence_detail::sub_mod(
+          connection[i + shift], term, prime_modulus);
+    }
+
+    if (order <= index / 2U) {
+      order = index + 1U - order;
+      previous = old_connection;
+      previous_discrepancy = discrepancy;
+      shift = 1U;
+    } else {
+      ++shift;
+    }
+  }
+
+  std::vector<std::uint64_t> coefficients(order, 0U);
+  for (std::size_t i = 0; i < order; ++i) {
+    const std::uint64_t connection_value = connection[i + 1U];
+    coefficients[i] =
+        connection_value == 0U ? 0U : prime_modulus - connection_value;
+  }
+  return LinearRecurrence{prime_modulus, std::move(coefficients)};
+}
+
+// Evaluates the sequence generated by `coefficients` from its first k terms.
+// Uses characteristic-polynomial binary exponentiation rather than linear
+// rollout. `index` is zero-based. For an order-zero recurrence, all supplied
+// initial terms must be zero and every extrapolated term is zero.
+[[nodiscard]] inline std::uint64_t linear_recurrence_nth(
+    std::span<const std::uint64_t> initial,
+    std::span<const std::uint64_t> coefficients, std::uint64_t index,
+    std::uint64_t prime_modulus) {
+  linear_recurrence_detail::validate_prime_and_residues(prime_modulus, initial);
+  linear_recurrence_detail::validate_prime_and_residues(prime_modulus,
+                                                        coefficients);
+
+  const std::size_t order = coefficients.size();
+  if (order == 0U) {
+    for (const std::uint64_t value : initial) {
+      if (value != 0U) {
+        throw std::invalid_argument(
+            "order-zero recurrence cannot use non-zero initial data");
+      }
+    }
+    return 0U;
+  }
+  if (initial.size() < order) {
+    throw std::invalid_argument(
+        "linear recurrence needs at least k initial terms");
+  }
+  if (index < static_cast<std::uint64_t>(initial.size())) {
+    return initial[static_cast<std::size_t>(index)];
+  }
+
+  std::vector<std::uint64_t> result(order, 0U);
+  result[0] = 1U;
+  std::vector<std::uint64_t> base(order, 0U);
+  if (order == 1U) {
+    base[0] = coefficients[0];
+  } else {
+    base[1] = 1U;
+  }
+
+  std::uint64_t exponent = index;
+  while (exponent != 0U) {
+    if ((exponent & 1U) != 0U) {
+      result = linear_recurrence_detail::combine_polynomials(
+          result, base, coefficients, prime_modulus);
+    }
+    exponent >>= 1U;
+    if (exponent != 0U) {
+      base = linear_recurrence_detail::combine_polynomials(
+          base, base, coefficients, prime_modulus);
+    }
+  }
+
+  std::uint64_t answer = 0U;
+  for (std::size_t i = 0; i < order; ++i) {
+    const std::uint64_t term =
+        multiply_mod(result[i], initial[i], prime_modulus);
+    answer = linear_recurrence_detail::add_mod(answer, term, prime_modulus);
+  }
+  return answer;
+}
+
+}  // namespace algorithms::number_theory

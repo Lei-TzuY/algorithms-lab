@@ -253,6 +253,7 @@ if(BUILD_TESTING)
     tests/test_factorization.cpp
     tests/test_finite_field_gaussian_elimination.cpp
     tests/test_number_theory.cpp
+    tests/test_linear_recurrence.cpp
     tests/test_number_theoretic_transform.cpp
     tests/test_exact_convolution.cpp
     tests/test_formal_power_series.cpp
