@@ -127,6 +127,17 @@ instances are checked against independent exhaustive enumeration of row subsets.
 This deliberately leaves number theory again rather than farming arithmetic
 variants.
 
+After the exact-cover checkpoint reached exact merged-main green, recovery again
+changed proof model. A fresh coverage audit found no finite-field linear-algebra
+capability despite the sealed full-width modular arithmetic foundation. The next
+slice therefore adds deterministic Gauss-Jordan elimination over prime fields,
+returning rank, RREF pivot structure, consistency, a canonical particular
+solution, and a reconstructable nullspace basis. Small prime-field systems are
+checked by exhaustively enumerating every assignment, while rank is independently
+verified by enumerating the coefficient-row span rather than by another
+elimination recurrence. This deliberately leaves exact-cover/backtracking search
+instead of farming adjacent combinatorial solvers.
+
 ## Prospective frontier authority
 
 `ROADMAP.md` still contains historical presentation drift from the frozen
