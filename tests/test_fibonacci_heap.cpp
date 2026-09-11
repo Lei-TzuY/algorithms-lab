@@ -75,6 +75,24 @@ TEST_CASE(fibonacci_heap_meld_preserves_handles_and_move_semantics) {
   REQUIRE(assigned.valid_structure());
 }
 
+TEST_CASE(fibonacci_heap_equal_key_tie_cut_preserves_root_minimum) {
+  FibonacciMinHeap heap;
+  const auto early_handle = heap.insert(100);
+  const auto later_parent = heap.insert(0);
+  const auto consolidation_trigger = heap.insert(-1);
+
+  REQUIRE_EQ(heap.extract_min().handle, consolidation_trigger);
+  REQUIRE(heap.valid_structure());
+
+  // Consolidation makes the lower-key later handle the parent of the earlier
+  // handle. Decreasing the child to the same key must still cut it because the
+  // public heap order is the full deterministic (key, handle) pair.
+  heap.decrease_key(early_handle, 0);
+  REQUIRE_EQ(heap.minimum().handle, early_handle);
+  REQUIRE(heap.contains(later_parent));
+  REQUIRE(heap.valid_structure());
+}
+
 TEST_CASE(fibonacci_heap_consolidation_cuts_and_potential_invariants) {
   FibonacciMinHeap heap;
   std::vector<FibonacciMinHeap::Handle> handles;
