@@ -80,7 +80,10 @@ expired handles can be rejected deterministically.
 Because non-empty `meld` migrates `other`'s handle-ownership entries into the
 destination map, **the public meld operation is `O(other.size())` expected time in
 this educational baseline**, even though the circular root-list splice itself is
-constant time. No `O(1)` public meld claim is made. Handle lookup also inherits
+constant time. The destination reserves ownership capacity before any root-list
+mutation, then transfers existing map nodes before the non-throwing structural
+splice, so an allocation failure cannot occur after the two root lists have been
+partially joined. No `O(1)` public meld claim is made. Handle lookup also inherits
 `unordered_map` expected-time rather than worst-case-constant behavior.
 
 Resident node state is `O(n)`. Consolidation uses an auxiliary degree table and a
@@ -98,8 +101,9 @@ Focused pre-upload verification passes under repository-equivalent settings:
 
 Deterministic coverage checks empty-heap exceptions, duplicate-key tie semantics,
 an equal-key decrease that must cut on handle order, `INT64_MIN`, expired handles,
-illegal key increases, move construction/assignment, consolidation, repeated
-cuts, and the exact potential identity.
+illegal key increases, move construction/assignment, consolidation, an observed
+marked-node state, an observed multi-root cascading cut, and the exact potential
+identity.
 
 The primary randomized differential trace executes 5,000 fixed-seed mixed
 insert/decrease/extract operations against an independent
