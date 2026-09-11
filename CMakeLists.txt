@@ -103,6 +103,7 @@ add_library(algorithms_lab
   src/linear_algebra/finite_field_gaussian_elimination.cpp
   src/offline/mo_distinct.cpp
   src/online/paging.cpp
+  src/optimization/exact_linear_program.cpp
   src/optimization/hungarian_assignment.cpp
   src/number_theory/factorization.cpp
   src/number_theory/modular.cpp
@@ -216,6 +217,7 @@ if(BUILD_TESTING)
     tests/test_min_cost_circulation.cpp
     tests/test_minimum_mean_cycle.cpp
     tests/test_hungarian_assignment.cpp
+    tests/test_exact_linear_program.cpp
     tests/test_bipartite_matching.cpp
     tests/test_general_matching.cpp
     tests/test_randomized_min_cut.cpp
