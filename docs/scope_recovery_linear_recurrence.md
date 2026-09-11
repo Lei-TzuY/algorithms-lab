@@ -37,11 +37,12 @@ multiplication-overflow shortcut is introduced.
 ## Berlekamp-Massey proof boundary
 
 The production connection polynomial starts at `C(x)=1`. At each observed index,
-the discrepancy is the value predicted by the current connection polynomial
-minus the supplied sequence constraint. A zero discrepancy leaves the recurrence
-unchanged. A non-zero discrepancy subtracts an appropriately shifted, scaled
-previous connection polynomial; the scale is `d / b` in `F_p`, where `b` is the
-last discrepancy that increased the linear complexity.
+the discrepancy is the supplied sequence value plus the current connection
+polynomial's history terms, equivalently `actual - predicted` under the returned
+recurrence convention. A zero discrepancy leaves the recurrence unchanged. A
+non-zero discrepancy subtracts an appropriately shifted, scaled previous
+connection polynomial; the scale is `d / b` in `F_p`, where `b` is the last
+discrepancy that increased the linear complexity.
 
 When the old linear complexity `L` satisfies `L <= floor(n/2)`, the standard
 Berlekamp-Massey update raises the new complexity to `n+1-L` and records the old
