@@ -29,6 +29,7 @@ add_library(algorithms_lab
   src/approximation/vertex_cover.cpp
   src/combinatorial/exact_cover.cpp
   src/combinatorial/matroid_intersection.cpp
+  src/combinatorial/stable_matching.cpp
   src/constraints/two_sat.cpp
   src/data_structures/byte_wavelet_matrix.cpp
   src/data_structures/li_chao_tree.cpp
@@ -125,6 +126,7 @@ if(BUILD_TESTING)
     tests/test_two_sat.cpp
     tests/test_exact_cover.cpp
     tests/test_matroid_intersection.cpp
+    tests/test_stable_matching.cpp
     tests/test_searching_sorting.cpp
     tests/test_data_structures.cpp
     tests/test_li_chao_tree.cpp
