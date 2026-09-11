@@ -31,6 +31,7 @@ add_library(algorithms_lab
   src/combinatorial/matroid_intersection.cpp
   src/combinatorial/stable_matching.cpp
   src/constraints/two_sat.cpp
+  src/data_structures/b_tree_set.cpp
   src/data_structures/byte_wavelet_matrix.cpp
   src/data_structures/li_chao_tree.cpp
   src/data_structures/packed_rank_select.cpp
@@ -130,6 +131,7 @@ if(BUILD_TESTING)
     tests/test_stable_matching.cpp
     tests/test_searching_sorting.cpp
     tests/test_data_structures.cpp
+    tests/test_b_tree_set.cpp
     tests/test_li_chao_tree.cpp
     tests/test_graphs.cpp
     tests/test_maximum_clique.cpp
