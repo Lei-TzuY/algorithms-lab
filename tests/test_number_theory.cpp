@@ -1,12 +1,16 @@
+#include "algorithms/number_theory/discrete_logarithm.hpp"
 #include "algorithms/number_theory/modular.hpp"
 #include "test_framework.hpp"
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
+#include <optional>
 #include <random>
 #include <stdexcept>
 
+using algorithms::number_theory::baby_step_giant_step_discrete_log;
 using algorithms::number_theory::gcd;
 using algorithms::number_theory::is_prime;
 using algorithms::number_theory::multiply_mod;
@@ -50,6 +54,21 @@ std::uint64_t small_power_mod(std::uint64_t base, std::uint64_t exponent,
     }
   }
   return result;
+}
+
+std::optional<std::uint64_t> brute_discrete_log(std::uint64_t base,
+                                                std::uint64_t target,
+                                                std::uint64_t prime) {
+  base %= prime;
+  target %= prime;
+  std::uint64_t value = 1U;
+  for (std::uint64_t exponent = 0U; exponent < prime - 1U; ++exponent) {
+    if (value == target) {
+      return exponent;
+    }
+    value = multiply_mod(value, base, prime);
+  }
+  return std::nullopt;
 }
 
 }  // namespace
@@ -112,4 +131,52 @@ TEST_CASE(number_theory_randomized_against_independent_small_oracles) {
     const std::uint64_t value = rng() % 1'000'000U;
     REQUIRE_EQ(is_prime(value), trial_prime(value));
   }
+}
+
+TEST_CASE(number_theory_discrete_log_validation_and_group_boundaries) {
+  REQUIRE_THROWS_AS(baby_step_giant_step_discrete_log(2U, 1U, 8U),
+                    std::invalid_argument);
+  REQUIRE_THROWS_AS(baby_step_giant_step_discrete_log(0U, 1U, 7U),
+                    std::invalid_argument);
+  REQUIRE_THROWS_AS(baby_step_giant_step_discrete_log(2U, 0U, 7U),
+                    std::invalid_argument);
+  REQUIRE_THROWS_AS(baby_step_giant_step_discrete_log(2U, 1U, 7U, 0U),
+                    std::invalid_argument);
+  REQUIRE_EQ(baby_step_giant_step_discrete_log(1U, 1U, 2U),
+             std::optional<std::uint64_t>{0U});
+}
+
+TEST_CASE(number_theory_discrete_log_least_exponent_and_no_solution) {
+  REQUIRE_EQ(baby_step_giant_step_discrete_log(2U, 1U, 7U),
+             std::optional<std::uint64_t>{0U});
+  REQUIRE_EQ(baby_step_giant_step_discrete_log(2U, 4U, 7U),
+             std::optional<std::uint64_t>{2U});
+  REQUIRE_EQ(baby_step_giant_step_discrete_log(2U, 3U, 7U), std::nullopt);
+  REQUIRE_EQ(baby_step_giant_step_discrete_log(4U, 2U, 7U),
+             std::optional<std::uint64_t>{2U});
+}
+
+TEST_CASE(number_theory_discrete_log_exhaustive_small_prime_differential) {
+  constexpr std::array<std::uint64_t, 11> primes{
+      2U, 3U, 5U, 7U, 11U, 13U, 17U, 19U, 23U, 29U, 31U};
+  for (const std::uint64_t prime : primes) {
+    for (std::uint64_t base = 1U; base < prime; ++base) {
+      for (std::uint64_t target = 1U; target < prime; ++target) {
+        REQUIRE_EQ(baby_step_giant_step_discrete_log(base, target, prime, 16U),
+                   brute_discrete_log(base, target, prime));
+      }
+    }
+  }
+}
+
+TEST_CASE(number_theory_discrete_log_large_prime_and_resource_budget) {
+  constexpr std::uint64_t prime = 998244353U;
+  constexpr std::uint64_t base = 3U;
+  constexpr std::uint64_t exponent = 1'234'567U;
+  const std::uint64_t target = power_mod(base, exponent, prime);
+  REQUIRE_EQ(baby_step_giant_step_discrete_log(base, target, prime, 40'000U),
+             std::optional<std::uint64_t>{exponent});
+  REQUIRE_THROWS_AS(
+      baby_step_giant_step_discrete_log(base, target, prime, 100U),
+      std::length_error);
 }
