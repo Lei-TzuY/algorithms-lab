@@ -92,6 +92,7 @@ add_library(algorithms_lab
   src/graphs/link_cut_tree_navigation.cpp
   src/graphs/offline_dynamic_connectivity.cpp
   src/linear_algebra/finite_field_gaussian_elimination.cpp
+  src/offline/mo_distinct.cpp
   src/online/paging.cpp
   src/optimization/hungarian_assignment.cpp
   src/number_theory/factorization.cpp
@@ -207,6 +208,7 @@ if(BUILD_TESTING)
     tests/test_link_cut_tree_rooted_subtree.cpp
     tests/test_link_cut_tree_rooted_subtree_sum.cpp
     tests/test_offline_dynamic_connectivity.cpp
+    tests/test_mo_distinct.cpp
     tests/test_online_paging.cpp
     tests/test_geometry2d.cpp
     tests/test_planar_diameter.cpp
