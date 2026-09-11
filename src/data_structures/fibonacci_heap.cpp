@@ -291,26 +291,26 @@ void FibonacciMinHeap::cascading_cut(Node* node) noexcept {
 void FibonacciMinHeap::consolidate() {
   std::vector<Node*> roots;
   roots.reserve(root_count_);
+  std::vector<Node*> by_degree(nodes_.size(), nullptr);
+
   Node* current = min_;
   for (std::size_t index = 0U; index < root_count_; ++index) {
     roots.push_back(current);
     current = current->right;
   }
 
+  // Complete all scratch allocation before mutating root-list topology. If an
+  // allocation above fails, the heap is still structurally unchanged.
   for (Node* root : roots) {
     make_singleton(root);
   }
   min_ = nullptr;
   root_count_ = 0U;
 
-  std::vector<Node*> by_degree;
   for (Node* root : roots) {
     Node* node = root;
     std::size_t degree = node->degree;
     while (true) {
-      if (degree >= by_degree.size()) {
-        by_degree.resize(degree + 1U, nullptr);
-      }
       if (by_degree[degree] == nullptr) {
         by_degree[degree] = node;
         break;
