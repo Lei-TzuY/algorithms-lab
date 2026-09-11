@@ -105,18 +105,27 @@ TEST_CASE(fibonacci_heap_consolidation_cuts_and_potential_invariants) {
   REQUIRE(heap.root_count() < std::size_t{127});
   REQUIRE(heap.valid_structure());
 
+  bool observed_mark = heap.marked_count() > 0U;
+  bool observed_cascading_cut = false;
   for (std::size_t index = handles.size(); index-- > 1U;) {
     if (!heap.contains(handles[index])) {
       continue;
     }
     const std::int64_t lowered =
         -static_cast<std::int64_t>(index) - std::int64_t{1000};
+    const std::size_t roots_before = heap.root_count();
     heap.decrease_key(handles[index], lowered);
+    const std::size_t roots_after = heap.root_count();
+    observed_mark = observed_mark || heap.marked_count() > 0U;
+    observed_cascading_cut =
+        observed_cascading_cut || roots_after > roots_before + 1U;
     REQUIRE(heap.valid_structure());
     REQUIRE(heap.marked_count() <= heap.size());
     REQUIRE_EQ(heap.potential(),
                heap.root_count() + 2U * heap.marked_count());
   }
+  REQUIRE(observed_mark);
+  REQUIRE(observed_cascading_cut);
 }
 
 TEST_CASE(fibonacci_heap_randomized_differential_against_ordered_oracle) {
