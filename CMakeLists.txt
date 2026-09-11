@@ -86,6 +86,7 @@ add_library(algorithms_lab
   src/graphs/traversal.cpp
   src/graphs/shortest_paths.cpp
   src/graphs/steiner_tree.cpp
+  src/graphs/chinese_postman.cpp
   src/graphs/minimum_spanning_tree.cpp
   src/graphs/strongly_connected_components.cpp
   src/graphs/max_flow.cpp
@@ -176,6 +177,7 @@ if(BUILD_TESTING)
     tests/test_backend_cfg_path_exit_event.cpp
     tests/test_shortest_paths.cpp
     tests/test_steiner_tree.cpp
+    tests/test_chinese_postman.cpp
     tests/test_phase2.cpp
     tests/test_knapsack.cpp
     tests/test_lis.cpp
