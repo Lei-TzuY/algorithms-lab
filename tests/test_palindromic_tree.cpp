@@ -16,6 +16,22 @@ using algorithms::strings::PalindromeRecord;
 using algorithms::strings::PalindromicTree;
 using Bytes = std::vector<std::uint8_t>;
 
+struct ByteVectorLess {
+  bool operator()(const Bytes& left, const Bytes& right) const noexcept {
+    const std::size_t common =
+        left.size() < right.size() ? left.size() : right.size();
+    for (std::size_t index = 0; index < common; ++index) {
+      if (left[index] < right[index]) {
+        return true;
+      }
+      if (right[index] < left[index]) {
+        return false;
+      }
+    }
+    return left.size() < right.size();
+  }
+};
+
 bool is_palindrome(const Bytes& text, std::size_t begin, std::size_t end) {
   while (begin < end) {
     --end;
@@ -33,8 +49,11 @@ struct OracleInfo {
   std::size_t first_end{};
 };
 
-std::map<Bytes, OracleInfo> brute_palindromes(const Bytes& text) {
-  std::map<Bytes, OracleInfo> result;
+using OracleMap = std::map<Bytes, OracleInfo, ByteVectorLess>;
+using RecordMap = std::map<Bytes, PalindromeRecord, ByteVectorLess>;
+
+OracleMap brute_palindromes(const Bytes& text) {
+  OracleMap result;
   for (std::size_t begin = 0; begin < text.size(); ++begin) {
     for (std::size_t end = begin + 1U; end <= text.size(); ++end) {
       if (!is_palindrome(text, begin, end)) {
@@ -89,7 +108,7 @@ void verify_against_oracle(const Bytes& text) {
   REQUIRE_EQ(records.size(), oracle.size());
   REQUIRE_EQ(tree.distinct_palindrome_count(), oracle.size());
 
-  std::map<Bytes, PalindromeRecord> actual;
+  RecordMap actual;
   for (const PalindromeRecord& record : records) {
     REQUIRE(record.node_id >= 2U);
     REQUIRE(record.first_end <= text.size());
