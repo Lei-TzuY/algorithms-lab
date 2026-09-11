@@ -37,6 +37,7 @@ add_library(algorithms_lab
   src/data_structures/run_length_byte_rank.cpp
   src/data_structures/persistent_segment_tree.cpp
   src/data_structures/splay_set.cpp
+  src/data_structures/van_emde_boas_set.cpp
   src/dynamic_programming/edit_distance.cpp
   src/dynamic_programming/knapsack.cpp
   src/dynamic_programming/longest_increasing_subsequence.cpp
@@ -175,6 +176,7 @@ if(BUILD_TESTING)
     tests/test_byte_trie.cpp
     tests/test_rollback_dsu.cpp
     tests/test_splay_set.cpp
+    tests/test_van_emde_boas_set.cpp
     tests/test_persistent_segment_tree.cpp
     tests/test_packed_rank_select.cpp
     tests/test_run_length_byte_rank.cpp
