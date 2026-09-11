@@ -1,5 +1,6 @@
 #include "test_framework.hpp"
 
+#include <algorithm>
 #include <cstdint>
 #include <iterator>
 #include <limits>
@@ -11,10 +12,12 @@
 
 #include "algorithms/data_structures/binary_heap.hpp"
 #include "algorithms/data_structures/disjoint_set_union.hpp"
+#include "algorithms/data_structures/fks_static_set.hpp"
 #include "algorithms/data_structures/treap_set.hpp"
 
 using algorithms::data_structures::BinaryHeap;
 using algorithms::data_structures::DisjointSetUnion;
+using algorithms::data_structures::FksStaticSet32;
 using algorithms::data_structures::TreapSet;
 
 TEST_CASE(binary_heap_basic_and_duplicates) {
@@ -195,4 +198,81 @@ TEST_CASE(treap_set_sorted_insertion_and_repeated_root_erasure) {
   }
   REQUIRE(treap.empty());
   REQUIRE(treap.valid_invariants());
+}
+
+TEST_CASE(fks_static_set_empty_boundaries_and_replay) {
+  FksStaticSet32 empty({}, 1U);
+  REQUIRE(empty.empty());
+  REQUIRE(empty.valid_structure());
+  REQUIRE(!empty.contains(0U));
+  REQUIRE_THROWS_AS(FksStaticSet32(std::vector<std::uint32_t>{1U}, 1U, 0U, 1U),
+                    std::invalid_argument);
+  REQUIRE_THROWS_AS(FksStaticSet32(std::vector<std::uint32_t>{1U}, 1U, 1U, 0U),
+                    std::invalid_argument);
+
+  std::vector<std::uint32_t> keys{
+      0U, 1U, 1U, 2U, 42U, std::numeric_limits<std::uint32_t>::max(),
+      1234567890U};
+  FksStaticSet32 set(keys, 0x123456789abcdef0ULL);
+  REQUIRE_EQ(set.size(), 6U);
+  REQUIRE(set.valid_structure());
+  REQUIRE(set.secondary_slot_count() <= 4U * set.size());
+  for (const std::uint32_t key : keys) {
+    REQUIRE(set.contains(key));
+  }
+  REQUIRE(!set.contains(3U));
+  REQUIRE(!set.contains(1234567891U));
+
+  std::reverse(keys.begin(), keys.end());
+  FksStaticSet32 replay(keys, 0x123456789abcdef0ULL);
+  REQUIRE_EQ(set.primary_hash_parameters(), replay.primary_hash_parameters());
+  REQUIRE_EQ(set.secondary_hash_parameters(), replay.secondary_hash_parameters());
+  REQUIRE_EQ(set.primary_attempts(), replay.primary_attempts());
+  REQUIRE_EQ(set.secondary_attempts(), replay.secondary_attempts());
+  REQUIRE_EQ(set.secondary_slot_count(), replay.secondary_slot_count());
+}
+
+TEST_CASE(fks_static_set_bounded_construction_failure_is_replayable) {
+  std::vector<std::uint32_t> keys;
+  for (std::uint32_t i = 0U; i < 64U; ++i) {
+    keys.push_back(i * 2654435761U);
+  }
+  REQUIRE_THROWS_AS(FksStaticSet32(keys, 20U, 1U, 128U), std::runtime_error);
+  REQUIRE_THROWS_AS(FksStaticSet32(keys, 0U, 128U, 1U), std::runtime_error);
+}
+
+TEST_CASE(fks_static_set_randomized_differential_and_storage_bound) {
+  std::mt19937_64 rng(0xF15CAFE123ULL);
+  for (std::size_t trial = 0U; trial < 300U; ++trial) {
+    const std::size_t requested = static_cast<std::size_t>(rng() % 129U);
+    std::vector<std::uint32_t> input;
+    input.reserve(requested + requested / 3U + 1U);
+    std::set<std::uint32_t> oracle;
+    for (std::size_t i = 0U; i < requested; ++i) {
+      const auto key = static_cast<std::uint32_t>(rng());
+      input.push_back(key);
+      oracle.insert(key);
+      if ((rng() & 3U) == 0U) {
+        input.push_back(key);
+      }
+    }
+
+    const std::uint64_t seed = rng();
+    FksStaticSet32 set(input, seed);
+    REQUIRE_EQ(set.size(), oracle.size());
+    REQUIRE(set.valid_structure());
+    REQUIRE(set.secondary_slot_count() <= 4U * set.size());
+    for (const std::uint32_t key : oracle) {
+      REQUIRE(set.contains(key));
+    }
+    for (std::size_t query = 0U; query < 256U; ++query) {
+      const auto key = static_cast<std::uint32_t>(rng());
+      REQUIRE_EQ(set.contains(key), oracle.count(key) != 0U);
+    }
+
+    std::shuffle(input.begin(), input.end(), rng);
+    FksStaticSet32 replay(input, seed);
+    REQUIRE_EQ(set.primary_hash_parameters(), replay.primary_hash_parameters());
+    REQUIRE_EQ(set.secondary_hash_parameters(), replay.secondary_hash_parameters());
+  }
 }
