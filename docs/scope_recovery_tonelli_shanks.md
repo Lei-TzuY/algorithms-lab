@@ -1,29 +1,47 @@
-# Scope recovery: exact prime-field square roots via Tonelli-Shanks
+# Scope recovery: exact prime-field square roots with Tonelli-Shanks
 
 ## Coverage decision
 
-A fresh live audit at `main@ebf105eebadd3fa140dbe034a23ce2bdec3e869c` found no Tonelli-Shanks, modular-square-root, or equivalent prime-field square-root capability in live code, PR history, or active branches. Several other recovery surfaces are already occupied — notably minimum cycle basis, general graph isomorphism, and linear recurrence — so this slice deliberately avoids competing with them.
-
-The slice also changes proof model after the merged SMAWK totally-monotone row-minimum checkpoint. It reuses the sealed deterministic primality and overflow-safe modular-arithmetic substrate, but it is not another discrete-logarithm or factorization wrapper.
+Fresh live code, pull-request history, and branch searches at
+`main@ebf105eebadd3fa140dbe034a23ce2bdec3e869c` found no modular-square-root,
+Tonelli-Shanks, or equivalent finite-field root-extraction capability. The
+minimum-cycle-basis, general-graph-isomorphism, and linear-recurrence recovery
+surfaces are already occupied, so this slice deliberately avoids those fronts.
+It also changes proof model immediately after the merged SMAWK checkpoint rather
+than farming another totally-monotone optimization primitive.
 
 ## Production contract
 
 `algorithms::number_theory::tonelli_shanks_square_root(value, prime_modulus)`:
 
-- requires a prime modulus and validates it through the sealed deterministic `is_prime` implementation;
+- requires a prime modulus and validates it through the sealed deterministic
+  full-`uint64_t` primality routine;
 - reduces `value` modulo the prime;
-- handles zero and the field `F_2` explicitly;
+- returns the smaller canonical root `r` when `r^2 == value (mod p)`;
 - returns `std::nullopt` for quadratic non-residues;
-- for a quadratic residue, returns the smaller canonical root `min(r, p-r)`;
-- uses the `p % 4 == 3` shortcut when available;
-- otherwise runs deterministic Tonelli-Shanks, selecting the smallest quadratic non-residue by ascending search;
-- reuses `multiply_mod` / `power_mod`, so no wider integer type or unchecked multiplication is introduced.
+- handles `p=2` and the zero residue explicitly;
+- supports the complete unsigned-64 prime domain without `__int128`, reusing the
+  repository's overflow-safe `multiply_mod` and `power_mod` primitives.
 
-## Correctness / proof boundary
+The returned root is canonical only under the ordinary integer order on the two
+field roots. No primitive-root, discrete-logarithm, composite-modulus square
+root, higher-root, or factorization capability is implied.
 
-Euler's criterion distinguishes nonzero quadratic residues from non-residues in a prime field. For odd prime `p`, write `p-1 = q * 2^s` with odd `q`. Tonelli-Shanks maintains the standard invariant that the current `root` and `residue` encode the target square-root problem inside the shrinking 2-primary subgroup; locating the least exponent that sends the current residue to one and multiplying by an appropriate power of a quadratic non-residue strictly decreases the active 2-adic exponent until the residue becomes one.
+## Algorithm / proof obligation
 
-Correctness therefore relies on the cyclic structure of `F_p^*`, Euler's criterion, and the classical Tonelli-Shanks invariant. Tests are implementation evidence rather than substitutes for those theorems.
+For an odd prime `p`, Euler's criterion first rejects non-residues. The easy
+`p mod 4 == 3` case uses `a^((p+1)/4)`. Otherwise production factors
+`p-1 = q * 2^s` with odd `q`, deterministically searches the smallest quadratic
+non-residue `z >= 2`, and applies Tonelli-Shanks to the state `(x,t,c,m)`.
+
+The loop invariant is that `x^2 == a*t (mod p)`, `t` lies in the `2^m`-torsion
+subgroup, and `c` has the required `2^m` order role. Choosing the least `i` with
+`t^(2^i)=1` and multiplying by the prescribed power of `c` strictly decreases
+`m`; termination with `t=1` therefore leaves `x^2 == a`.
+
+Correctness relies on Euler's criterion, cyclicity of the multiplicative group of
+a finite prime field, and the standard Tonelli-Shanks invariant. Tests are
+implementation evidence, not substitutes for those theorems.
 
 ## Verification
 
@@ -31,26 +49,36 @@ Focused pre-upload verification passed under:
 
 - GCC C++20 strict warnings-as-errors;
 - Clang C++20 strict warnings-as-errors;
-- actual GCC ASan+UBSan.
+- actual GCC ASan+UBSan with leak detection.
 
-Deterministic coverage includes composite-modulus rejection, `p=2`, zero, `p % 4 == 3`, a general Tonelli-Shanks case, explicit non-residues, a square over `998244353`, and a full-`uint64_t` prime near `2^64`.
+The primary small-domain oracle is independent brute-force root enumeration.
+For every prime `p <= 251` and every residue class `0 <= a < p`, production must
+exactly match the first brute-force root, which is the canonical smaller root.
+Deterministic regressions cover composite-modulus rejection, `p=2`, zero,
+`p mod 4 == 3`, the general `p mod 4 == 1` path, non-residues, the NTT prime
+`998244353`, and the full-width prime `18446744073709551557`.
 
-The primary oracle is structurally independent of Tonelli-Shanks: for every prime `p <= 251` and every residue class `a in [0,p)`, tests linearly scan all candidate roots and compare the exact canonical result. Full-width vectors use the sealed overflow-safe multiplication routine only to construct the square whose root is then recovered.
+The large-prime square witnesses are replayed through the sealed overflow-safe
+modular multiplication. A fixed full-width non-residue regression exercises the
+`std::nullopt` path without relying on floating-point or wider-integer arithmetic.
 
 ## Complexity / non-claims
 
-Let `p-1 = q * 2^s`, and let `j` be the first integer at least two that the deterministic search identifies as a quadratic non-residue. With modular exponentiation treated in the usual fixed-word arithmetic model, the non-residue search costs `O(j log p)` modular multiplications and the Tonelli-Shanks loop costs `O(s^2 + log p)` modular multiplications.
+Let `p-1 = q*2^s`, and let `j` be the number of deterministic candidates tested
+before the first quadratic non-residue is found. Counting modular
+multiplications/exponentiations, the search costs `O(j log p)` modular
+multiplications and the Tonelli-Shanks phase uses `O(s^2 + log p)` modular
+multiplications. In this repository each `multiply_mod` itself uses `O(log p)`
+word-level additions/doublings, so the code-local bound is correspondingly
+larger by that factor.
 
-Code-locally, this repository's first-principles `multiply_mod` itself uses `O(log p)` modular additions/doublings, so arithmetic cost inherits that factor.
-
-No constant-time or cryptographic implementation claim is made. The deterministic ascending non-residue search is not claimed to have a constant or logarithmic worst-case bound in the candidate value `j`. No composite-modulus square root, Hensel lifting, CRT composition, or arbitrary-precision claim is implied.
+No constant or logarithmic worst-case bound is claimed for the deterministic
+non-residue scan, and no cryptographic constant-time / side-channel property is
+claimed.
 
 ## Scope
 
-Exactly three files change:
-
-- `include/algorithms/number_theory/modular_square_root.hpp`;
-- the existing `tests/test_number_theory.cpp`;
-- this focused recovery proof document.
-
-No CMake, README, ROADMAP, recovery-authority, workflow, benchmark, compiler/backend, or occupied recovery-branch surface changes.
+Exactly three files change: one header-only production API, appended native
+number-theory tests in the already-registered test translation unit, and this
+proof document. No CMake, README, ROADMAP, recovery-authority, workflow,
+benchmark, compiler/backend, or occupied recovery-surface churn is included.
