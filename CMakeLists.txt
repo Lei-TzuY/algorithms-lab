@@ -106,6 +106,7 @@ add_library(algorithms_lab
   src/number_theory/modular.cpp
   src/polynomials/number_theoretic_transform.cpp
   src/polynomials/formal_power_series.cpp
+  src/streaming/count_min.cpp
   src/streaming/misra_gries.cpp
   src/strings/aho_corasick.cpp
   src/strings/palindromic_tree.cpp
@@ -238,6 +239,7 @@ if(BUILD_TESTING)
     tests/test_exact_convolution.cpp
     tests/test_formal_power_series.cpp
     tests/test_vertex_cover_approximation.cpp
+    tests/test_count_min.cpp
     tests/test_misra_gries.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
