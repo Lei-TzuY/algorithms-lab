@@ -91,6 +91,7 @@ add_library(algorithms_lab
   src/graphs/gomory_hu_tree.cpp
   src/graphs/min_cost_flow.cpp
   src/graphs/min_cost_circulation.cpp
+  src/graphs/minimum_mean_cycle.cpp
   src/graphs/bipartite_matching.cpp
   src/graphs/general_matching.cpp
   src/graphs/randomized_min_cut.cpp
@@ -213,6 +214,7 @@ if(BUILD_TESTING)
     tests/test_gomory_hu_tree.cpp
     tests/test_min_cost_flow.cpp
     tests/test_min_cost_circulation.cpp
+    tests/test_minimum_mean_cycle.cpp
     tests/test_hungarian_assignment.cpp
     tests/test_bipartite_matching.cpp
     tests/test_general_matching.cpp
