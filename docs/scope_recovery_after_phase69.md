@@ -117,6 +117,16 @@ inputs are checked against independent trial division, and full-width known
 factorizations cover adversarial arithmetic. No deterministic Pollard-Rho runtime,
 cryptographic-randomness, or probabilistic-correctness claim is implied.
 
+After exact factorization reached exact merged-main green, recovery again changed
+proof model. A fresh coverage audit found no exact-cover capability. The next
+slice therefore implements Knuth's Algorithm X over a first-principles Dancing
+Links sparse matrix. Cover/uncover is an explicitly reversible structural
+obligation; minimum-column choice is a deterministic search heuristic only.
+Returned row witnesses are replayed against every column, and small randomized
+instances are checked against independent exhaustive enumeration of row subsets.
+This deliberately leaves number theory again rather than farming arithmetic
+variants.
+
 ## Prospective frontier authority
 
 `ROADMAP.md` still contains historical presentation drift from the frozen
