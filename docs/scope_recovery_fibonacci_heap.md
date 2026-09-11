@@ -45,10 +45,12 @@ list. For every list entry, `left->right` and `right->left` return the node.
 Every non-root node has the expected parent, and every root has a null parent and
 is unmarked.
 
-Heap order is non-strict by key: every child key is at least its parent's key.
-`degree` equals the number of immediate children. The public minimum pointer is a
-root with the least `(key, handle)` pair, so duplicate keys have deterministic
-observable behavior.
+Heap order uses the same deterministic lexicographic `(key, handle)` ordering
+that the public minimum exposes: no child may be ordered before its parent. This
+matters when decrease-key makes a child key exactly equal to its parent key; an
+earlier handle is then cut so the globally least pair remains a root. `degree`
+equals the number of immediate children, and the public minimum pointer is the
+root with the least `(key, handle)` pair.
 
 A non-root node is marked only after it loses its first child while remaining a
 child. Losing another child cuts that node and recursively applies the same rule
@@ -95,8 +97,9 @@ Focused pre-upload verification passes under repository-equivalent settings:
 - GCC ASan+UBSan with frame pointers enabled.
 
 Deterministic coverage checks empty-heap exceptions, duplicate-key tie semantics,
-`INT64_MIN`, expired handles, illegal key increases, move construction/assignment,
-consolidation, repeated cuts, and the exact potential identity.
+an equal-key decrease that must cut on handle order, `INT64_MIN`, expired handles,
+illegal key increases, move construction/assignment, consolidation, repeated
+cuts, and the exact potential identity.
 
 The primary randomized differential trace executes 5,000 fixed-seed mixed
 insert/decrease/extract operations against an independent
