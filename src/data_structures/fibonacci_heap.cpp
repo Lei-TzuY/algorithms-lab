@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -45,11 +46,19 @@ FibonacciMinHeap::Entry FibonacciMinHeap::minimum() const {
 }
 
 FibonacciMinHeap::Handle FibonacciMinHeap::allocate_handle() {
-  const Handle handle = next_handle.fetch_add(1U, std::memory_order_relaxed);
-  if (handle == 0U) {
-    throw std::overflow_error("FibonacciMinHeap handle space exhausted");
+  Handle current = next_handle.load(std::memory_order_relaxed);
+  while (true) {
+    if (current == 0U) {
+      throw std::overflow_error("FibonacciMinHeap handle space exhausted");
+    }
+    const Handle next =
+        current == std::numeric_limits<Handle>::max() ? 0U : current + 1U;
+    if (next_handle.compare_exchange_weak(current, next,
+                                          std::memory_order_relaxed,
+                                          std::memory_order_relaxed)) {
+      return current;
+    }
   }
-  return handle;
 }
 
 FibonacciMinHeap::Handle FibonacciMinHeap::insert(Key key) {
@@ -140,6 +149,12 @@ void FibonacciMinHeap::meld(FibonacciMinHeap&& other) {
     root_count_ = other.root_count_;
     marked_count_ = other.marked_count_;
   } else {
+    // Complete all potentially allocating ownership bookkeeping before
+    // mutating either circular root list. With globally unique handles,
+    // unordered_map::merge then transfers the already-allocated nodes.
+    nodes_.reserve(nodes_.size() + other.nodes_.size());
+    nodes_.merge(other.nodes_);
+
     Node* first_right = min_->right;
     Node* second_left = other.min_->left;
 
@@ -153,12 +168,6 @@ void FibonacciMinHeap::meld(FibonacciMinHeap&& other) {
     }
     root_count_ += other.root_count_;
     marked_count_ += other.marked_count_;
-
-    nodes_.reserve(nodes_.size() + other.nodes_.size());
-    for (auto& [handle, node] : other.nodes_) {
-      nodes_.emplace(handle, std::move(node));
-    }
-    other.nodes_.clear();
   }
 
   other.min_ = nullptr;
