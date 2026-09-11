@@ -30,6 +30,7 @@ add_library(algorithms_lab
   src/combinatorial/exact_cover.cpp
   src/constraints/two_sat.cpp
   src/data_structures/byte_wavelet_matrix.cpp
+  src/data_structures/li_chao_tree.cpp
   src/data_structures/packed_rank_select.cpp
   src/data_structures/run_length_byte_rank.cpp
   src/data_structures/persistent_segment_tree.cpp
@@ -121,6 +122,7 @@ if(BUILD_TESTING)
     tests/test_exact_cover.cpp
     tests/test_searching_sorting.cpp
     tests/test_data_structures.cpp
+    tests/test_li_chao_tree.cpp
     tests/test_graphs.cpp
     tests/test_centroid_nearest_active.cpp
     tests/test_eulerian_trail.cpp

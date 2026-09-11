@@ -148,6 +148,16 @@ edge weights are intentionally ignored because the contract is edge-count
 distance. This changes proof model again—from field elimination to balanced
 separator decomposition—instead of farming adjacent linear-algebra routines.
 
+After the centroid-decomposition checkpoint reached exact merged-main green, a
+fresh coverage audit found no Li Chao tree or dynamic affine-line envelope in the
+repository. The next recovered slice therefore adds a bounded-exact integer Li
+Chao minimum tree with online whole-domain line insertion, deterministic point
+minimum witnesses, and dynamic node allocation. Its resident-midpoint routing
+invariant is verified against an independent full-line scan over every query
+coordinate in fixed-seed randomized traces. This deliberately leaves the recent
+tree-decomposition frontier and introduces a line-envelope comparison invariant
+instead of farming adjacent centroid or tree-query variants.
+
 ## Prospective frontier authority
 
 `ROADMAP.md` still contains historical presentation drift from the frozen
