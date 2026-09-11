@@ -52,6 +52,7 @@ add_library(algorithms_lab
   src/geometry/rectangle_union.cpp
   src/greedy/interval_scheduling.cpp
   src/graphs/graph.cpp
+  src/graphs/planarity.cpp
   src/graphs/tree_isomorphism.cpp
   src/graphs/maximum_clique.cpp
   src/graphs/centroid_nearest_active.cpp
@@ -146,6 +147,7 @@ if(BUILD_TESTING)
     tests/test_fibonacci_heap.cpp
     tests/test_li_chao_tree.cpp
     tests/test_graphs.cpp
+    tests/test_planarity.cpp
     tests/test_tree_isomorphism.cpp
     tests/test_maximum_clique.cpp
     tests/test_centroid_nearest_active.cpp
