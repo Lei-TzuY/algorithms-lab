@@ -1,6 +1,7 @@
 #include "algorithms/data_structures/fibonacci_heap.hpp"
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <limits>
 #include <stdexcept>
@@ -291,7 +292,12 @@ void FibonacciMinHeap::cascading_cut(Node* node) noexcept {
 void FibonacciMinHeap::consolidate() {
   std::vector<Node*> roots;
   roots.reserve(root_count_);
-  std::vector<Node*> by_degree(nodes_.size(), nullptr);
+
+  constexpr std::size_t kDegreeSlots =
+      std::size_t{2} *
+          static_cast<std::size_t>(std::numeric_limits<std::size_t>::digits) +
+      1U;
+  std::array<Node*, kDegreeSlots> by_degree{};
 
   Node* current = min_;
   for (std::size_t index = 0U; index < root_count_; ++index) {
@@ -299,8 +305,9 @@ void FibonacciMinHeap::consolidate() {
     current = current->right;
   }
 
-  // Complete all scratch allocation before mutating root-list topology. If an
-  // allocation above fails, the heap is still structurally unchanged.
+  // Complete all dynamic scratch allocation before mutating root-list topology.
+  // For a valid Fibonacci heap D(n) < 2*log2(n), so the fixed degree table is
+  // sufficient for every heap size representable by size_t.
   for (Node* root : roots) {
     make_singleton(root);
   }
