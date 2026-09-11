@@ -31,6 +31,7 @@ add_library(algorithms_lab
   src/combinatorial/matroid_intersection.cpp
   src/combinatorial/stable_matching.cpp
   src/constraints/two_sat.cpp
+  src/data_structures/b_tree_set.cpp
   src/data_structures/byte_wavelet_matrix.cpp
   src/data_structures/li_chao_tree.cpp
   src/data_structures/packed_rank_select.cpp
@@ -48,6 +49,22 @@ add_library(algorithms_lab
   src/geometry/rectangle_union.cpp
   src/greedy/interval_scheduling.cpp
   src/graphs/graph.cpp
+  src/graphs/traversal.cpp
+  src/graphs/shortest_paths.cpp
+  src/graphs/minimum_spanning_tree.cpp
+  src/graphs/strongly_connected_components.cpp
+  src/graphs/max_flow.cpp
+  src/graphs/gomory_hu_tree.cpp
+  src/graphs/min_cost_flow.cpp
+  src/graphs/min_cost_circulation.cpp
+  src/graphs/bipartite_matching.cpp
+  src/graphs/general_matching.cpp
+  src/graphs/randomized_min_cut.cpp
+  src/graphs/lowest_common_ancestor.cpp
+  src/graphs/heavy_light_decomposition.cpp
+  src/graphs/link_cut_tree.cpp
+  src/graphs/link_cut_tree_navigation.cpp
+  src/graphs/offline_dynamic_connectivity.cpp
   src/graphs/maximum_clique.cpp
   src/graphs/centroid_nearest_active.cpp
   src/graphs/eulerian_trail.cpp
@@ -79,22 +96,6 @@ add_library(algorithms_lab
   src/graphs/backend_semantic_cfg_execution.cpp
   src/graphs/backend_cfg_path_continuation.cpp
   src/graphs/backend_cfg_path_exit_event.cpp
-  src/graphs/traversal.cpp
-  src/graphs/shortest_paths.cpp
-  src/graphs/minimum_spanning_tree.cpp
-  src/graphs/strongly_connected_components.cpp
-  src/graphs/max_flow.cpp
-  src/graphs/gomory_hu_tree.cpp
-  src/graphs/min_cost_flow.cpp
-  src/graphs/min_cost_circulation.cpp
-  src/graphs/bipartite_matching.cpp
-  src/graphs/general_matching.cpp
-  src/graphs/randomized_min_cut.cpp
-  src/graphs/lowest_common_ancestor.cpp
-  src/graphs/heavy_light_decomposition.cpp
-  src/graphs/link_cut_tree.cpp
-  src/graphs/link_cut_tree_navigation.cpp
-  src/graphs/offline_dynamic_connectivity.cpp
   src/linear_algebra/finite_field_gaussian_elimination.cpp
   src/offline/mo_distinct.cpp
   src/online/paging.cpp
@@ -130,6 +131,7 @@ if(BUILD_TESTING)
     tests/test_stable_matching.cpp
     tests/test_searching_sorting.cpp
     tests/test_data_structures.cpp
+    tests/test_b_tree_set.cpp
     tests/test_li_chao_tree.cpp
     tests/test_graphs.cpp
     tests/test_maximum_clique.cpp
