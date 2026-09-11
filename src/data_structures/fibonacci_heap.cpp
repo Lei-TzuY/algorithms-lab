@@ -72,7 +72,7 @@ void FibonacciMinHeap::decrease_key(Handle handle, Key new_key) {
 
   node->key = new_key;
   Node* parent = node->parent;
-  if (parent != nullptr && node->key < parent->key) {
+  if (parent != nullptr && root_better(node, parent)) {
     cut(node, parent);
     cascading_cut(parent);
   }
@@ -342,7 +342,7 @@ bool FibonacciMinHeap::validate_subtree(
     ++marked;
   }
 
-  if (expected_parent != nullptr && node->key < expected_parent->key) {
+  if (expected_parent != nullptr && root_better(node, expected_parent)) {
     return false;
   }
 
