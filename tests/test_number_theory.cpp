@@ -1,4 +1,5 @@
 #include "algorithms/number_theory/discrete_logarithm.hpp"
+#include "algorithms/number_theory/modular_square_root.hpp"
 #include "algorithms/number_theory/modular.hpp"
 #include "test_framework.hpp"
 
@@ -15,6 +16,7 @@ using algorithms::number_theory::gcd;
 using algorithms::number_theory::is_prime;
 using algorithms::number_theory::multiply_mod;
 using algorithms::number_theory::power_mod;
+using algorithms::number_theory::tonelli_shanks_square_root;
 
 namespace {
 
@@ -67,6 +69,17 @@ std::optional<std::uint64_t> brute_discrete_log(std::uint64_t base,
       return exponent;
     }
     value = multiply_mod(value, base, prime);
+  }
+  return std::nullopt;
+}
+
+std::optional<std::uint64_t> brute_modular_square_root(
+    std::uint64_t value, std::uint64_t prime) {
+  value %= prime;
+  for (std::uint64_t root = 0U; root < prime; ++root) {
+    if ((root * root) % prime == value) {
+      return root;
+    }
   }
   return std::nullopt;
 }
@@ -179,4 +192,54 @@ TEST_CASE(number_theory_discrete_log_large_prime_and_resource_budget) {
   REQUIRE_THROWS_AS(
       baby_step_giant_step_discrete_log(base, target, prime, 100U),
       std::length_error);
+}
+
+TEST_CASE(number_theory_tonelli_shanks_validation_and_known_boundaries) {
+  REQUIRE_THROWS_AS(tonelli_shanks_square_root(1U, 1U),
+                    std::invalid_argument);
+  REQUIRE_THROWS_AS(tonelli_shanks_square_root(1U, 9U),
+                    std::invalid_argument);
+
+  REQUIRE_EQ(tonelli_shanks_square_root(0U, 2U),
+             std::optional<std::uint64_t>{0U});
+  REQUIRE_EQ(tonelli_shanks_square_root(3U, 2U),
+             std::optional<std::uint64_t>{1U});
+  REQUIRE_EQ(tonelli_shanks_square_root(0U, 13U),
+             std::optional<std::uint64_t>{0U});
+  REQUIRE_EQ(tonelli_shanks_square_root(2U, 7U),
+             std::optional<std::uint64_t>{3U});
+  REQUIRE_EQ(tonelli_shanks_square_root(10U, 13U),
+             std::optional<std::uint64_t>{6U});
+  REQUIRE_EQ(tonelli_shanks_square_root(3U, 7U), std::nullopt);
+  REQUIRE_EQ(tonelli_shanks_square_root(2U, 13U), std::nullopt);
+}
+
+TEST_CASE(number_theory_tonelli_shanks_exhaustive_small_prime_differential) {
+  for (std::uint64_t prime = 2U; prime <= 251U; ++prime) {
+    if (!trial_prime(prime)) {
+      continue;
+    }
+    for (std::uint64_t value = 0U; value < prime; ++value) {
+      REQUIRE_EQ(tonelli_shanks_square_root(value, prime),
+                 brute_modular_square_root(value, prime));
+    }
+  }
+}
+
+TEST_CASE(number_theory_tonelli_shanks_large_prime_full_width_vectors) {
+  constexpr std::uint64_t ntt_prime = 998244353U;
+  constexpr std::uint64_t ntt_root = 1'234'567U;
+  const std::uint64_t ntt_value =
+      multiply_mod(ntt_root, ntt_root, ntt_prime);
+  REQUIRE_EQ(tonelli_shanks_square_root(ntt_value, ntt_prime),
+             std::optional<std::uint64_t>{ntt_root});
+
+  constexpr std::uint64_t full_prime =
+      18'446'744'073'709'551'557ULL;
+  constexpr std::uint64_t full_root = 123'456'789ULL;
+  const std::uint64_t full_value =
+      multiply_mod(full_root, full_root, full_prime);
+  REQUIRE_EQ(tonelli_shanks_square_root(full_value, full_prime),
+             std::optional<std::uint64_t>{full_root});
+  REQUIRE_EQ(tonelli_shanks_square_root(2U, full_prime), std::nullopt);
 }
