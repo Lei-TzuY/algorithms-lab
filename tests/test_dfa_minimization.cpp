@@ -249,3 +249,235 @@ TEST_CASE(dfa_minimization_adversarial_refinement_chain_and_full_collapse) {
   verify_minimization(collapse, collapsed);
   REQUIRE_EQ(collapsed.transitions.size(), 1U);
 }
+
+#include "algorithms/automata/nfa_determinization.hpp"
+
+namespace {
+using algorithms::automata::DeterminizedNfa;
+using algorithms::automata::EpsilonNfa;
+
+std::vector<std::size_t> nfa_epsilon_closure_oracle(
+    const EpsilonNfa& nfa, const std::vector<std::size_t>& seeds) {
+  std::vector<unsigned char> seen(nfa.accepting.size(), 0U);
+  std::vector<std::size_t> queue;
+  for (const std::size_t seed : seeds) {
+    if (seen[seed] == 0U) {
+      seen[seed] = 1U;
+      queue.push_back(seed);
+    }
+  }
+  for (std::size_t head = 0U; head < queue.size(); ++head) {
+    for (const std::size_t next : nfa.epsilon_transitions[queue[head]]) {
+      if (seen[next] == 0U) {
+        seen[next] = 1U;
+        queue.push_back(next);
+      }
+    }
+  }
+  std::vector<std::size_t> result;
+  for (std::size_t state = 0U; state < seen.size(); ++state) {
+    if (seen[state] != 0U) {
+      result.push_back(state);
+    }
+  }
+  return result;
+}
+
+std::vector<std::size_t> nfa_step_oracle(
+    const EpsilonNfa& nfa, const std::vector<std::size_t>& subset,
+    std::size_t symbol) {
+  std::vector<unsigned char> selected(nfa.accepting.size(), 0U);
+  std::vector<std::size_t> seeds;
+  for (const std::size_t state : subset) {
+    for (const std::size_t next : nfa.transitions[state][symbol]) {
+      if (selected[next] == 0U) {
+        selected[next] = 1U;
+        seeds.push_back(next);
+      }
+    }
+  }
+  return nfa_epsilon_closure_oracle(nfa, seeds);
+}
+
+bool nfa_accepts_oracle(const EpsilonNfa& nfa,
+                        const std::vector<std::size_t>& word) {
+  auto active = nfa_epsilon_closure_oracle(nfa, {nfa.start_state});
+  for (const std::size_t symbol : word) {
+    active = nfa_step_oracle(nfa, active, symbol);
+  }
+  for (const std::size_t state : active) {
+    if (nfa.accepting[state]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool determinized_accepts(const DeterminizedNfa& result,
+                          const std::vector<std::size_t>& word) {
+  std::size_t state = result.dfa.start_state;
+  for (const std::size_t symbol : word) {
+    state = result.dfa.transitions[state][symbol];
+  }
+  return result.dfa.accepting[state];
+}
+
+void enumerate_nfa_words(std::size_t alphabet_size, std::size_t max_length,
+                         std::vector<std::vector<std::size_t>>& output) {
+  output.assign(1U, {});
+  if (alphabet_size == 0U) {
+    return;
+  }
+  std::vector<std::vector<std::size_t>> frontier(1U);
+  for (std::size_t length = 1U; length <= max_length; ++length) {
+    std::vector<std::vector<std::size_t>> next;
+    for (const auto& prefix : frontier) {
+      for (std::size_t symbol = 0U; symbol < alphabet_size; ++symbol) {
+        auto word = prefix;
+        word.push_back(symbol);
+        output.push_back(word);
+        next.push_back(std::move(word));
+      }
+    }
+    frontier = std::move(next);
+  }
+}
+
+void verify_determinized_nfa(const EpsilonNfa& nfa,
+                             const DeterminizedNfa& result) {
+  REQUIRE_EQ(result.dfa.start_state, 0U);
+  REQUIRE_EQ(result.dfa.transitions.size(), result.dfa_state_subsets.size());
+  REQUIRE_EQ(result.dfa.accepting.size(), result.dfa_state_subsets.size());
+  REQUIRE_EQ(result.dfa_state_subsets.front(),
+             nfa_epsilon_closure_oracle(nfa, {nfa.start_state}));
+
+  for (std::size_t state = 0U; state < result.dfa_state_subsets.size(); ++state) {
+    const auto& subset = result.dfa_state_subsets[state];
+    for (std::size_t index = 1U; index < subset.size(); ++index) {
+      REQUIRE(subset[index - 1U] < subset[index]);
+    }
+    REQUIRE_EQ(result.dfa.transitions[state].size(),
+               nfa.transitions.front().size());
+    bool accepting = false;
+    for (const std::size_t member : subset) {
+      accepting = accepting || nfa.accepting[member];
+    }
+    REQUIRE_EQ(result.dfa.accepting[state], accepting);
+    for (std::size_t symbol = 0U; symbol < nfa.transitions.front().size();
+         ++symbol) {
+      const std::size_t target = result.dfa.transitions[state][symbol];
+      REQUIRE(target < result.dfa_state_subsets.size());
+      REQUIRE_EQ(result.dfa_state_subsets[target],
+                 nfa_step_oracle(nfa, subset, symbol));
+    }
+  }
+}
+}  // namespace
+
+TEST_CASE(nfa_determinization_validation_budget_and_zero_alphabet) {
+  REQUIRE_THROWS_AS(
+      algorithms::automata::determinize_epsilon_nfa(EpsilonNfa{}, 8U),
+      std::invalid_argument);
+  const EpsilonNfa bad_start{1U, {false}, {{}}, {{}}};
+  REQUIRE_THROWS_AS(
+      algorithms::automata::determinize_epsilon_nfa(bad_start, 8U),
+      std::invalid_argument);
+  const EpsilonNfa bad_rows{0U, {false, false}, {{}, {}}, {{{}}, {}}};
+  REQUIRE_THROWS_AS(
+      algorithms::automata::determinize_epsilon_nfa(bad_rows, 8U),
+      std::invalid_argument);
+  const EpsilonNfa bad_epsilon{0U, {false}, {{1U}}, {{{}}}};
+  REQUIRE_THROWS_AS(
+      algorithms::automata::determinize_epsilon_nfa(bad_epsilon, 8U),
+      std::invalid_argument);
+
+  const EpsilonNfa budget{0U, {false, true}, {{}, {}}, {{{1U}}, {{1U}}}};
+  REQUIRE_THROWS_AS(
+      algorithms::automata::determinize_epsilon_nfa(budget, 0U),
+      std::invalid_argument);
+  REQUIRE_THROWS_AS(
+      algorithms::automata::determinize_epsilon_nfa(budget, 1U),
+      std::length_error);
+
+  const EpsilonNfa zero{0U, {false, true}, {{1U}, {}}, {{}, {}}};
+  const auto result = algorithms::automata::determinize_epsilon_nfa(zero, 4U);
+  REQUIRE_EQ(result.dfa_state_subsets.size(), 1U);
+  REQUIRE(result.dfa.transitions[0U].empty());
+  REQUIRE(result.dfa.accepting[0U]);
+  verify_determinized_nfa(zero, result);
+}
+
+TEST_CASE(nfa_determinization_epsilon_cycle_duplicates_and_dead_subset) {
+  const EpsilonNfa nfa{
+      0U,
+      {false, false, true},
+      {{1U}, {0U}, {}},
+      {{{}, {}}, {{1U, 2U, 2U}, {}}, {{2U}, {2U}}},
+  };
+  const auto result = algorithms::automata::determinize_epsilon_nfa(nfa, 16U);
+  verify_determinized_nfa(nfa, result);
+  REQUIRE(!determinized_accepts(result, {}));
+  REQUIRE(determinized_accepts(result, {0U}));
+  REQUIRE(!determinized_accepts(result, {1U}));
+  bool found_empty = false;
+  for (const auto& subset : result.dfa_state_subsets) {
+    found_empty = found_empty || subset.empty();
+  }
+  REQUIRE(found_empty);
+
+  const auto repeated = algorithms::automata::determinize_epsilon_nfa(nfa, 16U);
+  REQUIRE_EQ(result.dfa.transitions, repeated.dfa.transitions);
+  REQUIRE_EQ(result.dfa.accepting, repeated.dfa.accepting);
+  REQUIRE_EQ(result.dfa_state_subsets, repeated.dfa_state_subsets);
+}
+
+TEST_CASE(nfa_determinization_randomized_direct_simulation_and_dfa_minimization) {
+  std::mt19937_64 rng(0xE51A5EEDULL);
+  for (std::size_t trial = 0U; trial < 500U; ++trial) {
+    const std::size_t state_count =
+        1U + static_cast<std::size_t>(rng() % 6U);
+    const std::size_t alphabet_size = static_cast<std::size_t>(rng() % 4U);
+    EpsilonNfa nfa;
+    nfa.start_state = static_cast<std::size_t>(rng() % state_count);
+    nfa.accepting.assign(state_count, false);
+    nfa.epsilon_transitions.resize(state_count);
+    nfa.transitions.resize(
+        state_count,
+        std::vector<std::vector<std::size_t>>(alphabet_size));
+
+    for (std::size_t state = 0U; state < state_count; ++state) {
+      nfa.accepting[state] = (rng() % 4U) == 0U;
+      for (std::size_t target = 0U; target < state_count; ++target) {
+        if ((rng() % 7U) == 0U) {
+          nfa.epsilon_transitions[state].push_back(target);
+          if ((rng() % 9U) == 0U) {
+            nfa.epsilon_transitions[state].push_back(target);
+          }
+        }
+      }
+      for (std::size_t symbol = 0U; symbol < alphabet_size; ++symbol) {
+        for (std::size_t target = 0U; target < state_count; ++target) {
+          if ((rng() % 6U) == 0U) {
+            nfa.transitions[state][symbol].push_back(target);
+            if ((rng() % 11U) == 0U) {
+              nfa.transitions[state][symbol].push_back(target);
+            }
+          }
+        }
+      }
+    }
+
+    const auto result =
+        algorithms::automata::determinize_epsilon_nfa(nfa, 128U);
+    verify_determinized_nfa(nfa, result);
+    const auto minimized = algorithms::automata::minimize_dfa(result.dfa);
+
+    std::vector<std::vector<std::size_t>> words;
+    enumerate_nfa_words(alphabet_size, 5U, words);
+    for (const auto& word : words) {
+      const bool expected = nfa_accepts_oracle(nfa, word);
+      REQUIRE_EQ(determinized_accepts(result, word), expected);
+      REQUIRE_EQ(run_word(minimized, minimized.start_state, word), expected);
+    }
+  }
+}
