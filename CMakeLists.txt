@@ -29,6 +29,7 @@ add_library(algorithms_lab
   src/approximation/vertex_cover.cpp
   src/automata/dfa_minimization.cpp
   src/coding/huffman_byte_code.cpp
+  src/coding/lz78.cpp
   src/combinatorial/dilworth_decomposition.cpp
   src/combinatorial/exact_cover.cpp
   src/combinatorial/matroid_intersection.cpp
@@ -271,7 +272,8 @@ if(BUILD_TESTING)
     tests/test_vertex_cover_approximation.cpp
     tests/test_count_min.cpp
     tests/test_misra_gries.cpp
-    tests/test_huffman_byte_code.cpp)
+    tests/test_huffman_byte_code.cpp
+    tests/test_lz78.cpp)
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)
