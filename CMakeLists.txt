@@ -153,6 +153,7 @@ if(BUILD_TESTING)
     tests/test_chordal_graph.cpp
     tests/test_hamiltonian_cycle.cpp
     tests/test_tree_isomorphism.cpp
+    tests/test_treewidth.cpp
     tests/test_maximum_clique.cpp
     tests/test_centroid_nearest_active.cpp
     tests/test_eulerian_trail.cpp
