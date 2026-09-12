@@ -1,16 +1,21 @@
+#include "algorithms/geometry/dominance3d.hpp"
 #include "algorithms/geometry/geometry2d.hpp"
 #include "test_framework.hpp"
 
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <random>
+#include <span>
 #include <stdexcept>
 #include <vector>
 
 using algorithms::geometry::Orientation;
 using algorithms::geometry::Point2i;
+using algorithms::geometry::Point3i;
 using algorithms::geometry::convex_hull;
+using algorithms::geometry::dominance_counts_3d;
 using algorithms::geometry::on_segment;
 using algorithms::geometry::orientation;
 using algorithms::geometry::segments_intersect;
@@ -106,6 +111,20 @@ algorithms::geometry::ClosestPairResult brute_force_closest_pair(
     }
   }
   return best;
+}
+
+std::vector<std::uint64_t> quadratic_dominance3d(
+    std::span<const Point3i> points) {
+  std::vector<std::uint64_t> result(points.size(), 0U);
+  for (std::size_t i = 0; i < points.size(); ++i) {
+    for (std::size_t j = 0; j < points.size(); ++j) {
+      if (points[j].x <= points[i].x && points[j].y <= points[i].y &&
+          points[j].z <= points[i].z) {
+        ++result[i];
+      }
+    }
+  }
+  return result;
 }
 
 }  // namespace
@@ -268,5 +287,52 @@ TEST_CASE(geometry_closest_pair_randomized_quadratic_differential) {
     auto shuffled = points;
     std::shuffle(shuffled.begin(), shuffled.end(), rng);
     REQUIRE_EQ(closest_pair(shuffled).value(), expected);
+  }
+}
+
+TEST_CASE(dominance3d_empty_singleton_duplicates_and_incomparables) {
+  REQUIRE(dominance_counts_3d({}).empty());
+  const std::vector<Point3i> singleton{{7, -3, 11}};
+  REQUIRE_EQ(dominance_counts_3d(singleton), std::vector<std::uint64_t>{1});
+
+  const std::vector<Point3i> points{{0, 0, 0}, {0, 0, 0}, {0, 0, 0},
+                                    {1, 1, 1}, {-1, 2, 0}, {2, -1, 0}};
+  REQUIRE_EQ(dominance_counts_3d(points), quadratic_dominance3d(points));
+}
+
+TEST_CASE(dominance3d_equal_x_and_extreme_coordinates) {
+  const auto lo = std::numeric_limits<std::int64_t>::min();
+  const auto hi = std::numeric_limits<std::int64_t>::max();
+  const std::vector<Point3i> points{{0, -2, 5}, {0, -1, 4}, {0, -1, 5},
+                                    {0, 0, 3},  {lo, lo, lo}, {hi, hi, hi},
+                                    {lo, hi, lo}, {hi, lo, hi}};
+  REQUIRE_EQ(dominance_counts_3d(points), quadratic_dominance3d(points));
+}
+
+TEST_CASE(dominance3d_permutation_invariance_and_monotone_chain) {
+  std::vector<Point3i> points;
+  for (std::int64_t value = -64; value <= 64; ++value) {
+    points.push_back(Point3i{value, value, value});
+  }
+  REQUIRE_EQ(dominance_counts_3d(points), quadratic_dominance3d(points));
+
+  std::mt19937_64 rng(0xCD03D0ULL);
+  std::shuffle(points.begin(), points.end(), rng);
+  REQUIRE_EQ(dominance_counts_3d(points), quadratic_dominance3d(points));
+}
+
+TEST_CASE(dominance3d_randomized_differential) {
+  std::mt19937_64 rng(0xD031A4CEULL);
+  std::uniform_int_distribution<int> size_dist(0, 90);
+  std::uniform_int_distribution<std::int64_t> coord_dist(-6, 6);
+  for (int trial = 0; trial < 900; ++trial) {
+    const int raw_size = size_dist(rng);
+    const std::size_t size = static_cast<std::size_t>(raw_size);
+    std::vector<Point3i> points;
+    points.reserve(size);
+    for (std::size_t i = 0; i < size; ++i) {
+      points.push_back(Point3i{coord_dist(rng), coord_dist(rng), coord_dist(rng)});
+    }
+    REQUIRE_EQ(dominance_counts_3d(points), quadratic_dominance3d(points));
   }
 }
