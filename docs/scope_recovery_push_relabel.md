@@ -31,7 +31,9 @@ contract and returns the same `MaxFlowResult` certificate:
   than narrowed or wrapped.
 
 Self-loops are retained in the result with flow zero and do not materialize a
-residual pair.
+residual pair. Temporary preflow excess is accumulated in a two-limb unsigned
+counter so an intermediate excess larger than `UINT64_MAX` does not incorrectly
+reject a final maximum flow that is still representable as signed 64-bit.
 
 ## Algorithm and invariants
 
@@ -64,11 +66,18 @@ The exact focused candidate passed before upload under:
 - Clang C++20 strict warnings-as-errors: 4/4;
 - actual GCC ASan+UBSan: 4/4.
 
+A subsequent code-review gate found and fixed a representability bug in the
+initial candidate: three `INT64_MAX` source arcs entering one dead-end vertex can
+create a temporary excess greater than `UINT64_MAX` even though the true maximum
+flow is only one. The regression now requires that case to return flow one rather
+than throw, while the existing non-representable final-flow test must still fail
+closed.
+
 Deterministic cases cover the classical 23-unit network, malformed endpoints,
 negative capacities, source/sink equality, parallel and antiparallel edges,
 self-loops, zero capacities, disconnected/dead-end preflows that must return to
-the source, exact `INT64_MAX` flow, and non-representable aggregate-flow
-rejection.
+the source, exact `INT64_MAX` flow, wide temporary preflow with a narrow optimum,
+and non-representable aggregate-flow rejection.
 
 Primary randomized oracle: 700 fixed-seed directed multigraphs with 2..8 vertices,
 0..39 logical edges, and capacities in `[0,8]`. Every internal-vertex bipartition
