@@ -17,6 +17,7 @@
 #include "test_smith_normal_form_cases.hpp"
 #include "test_modular_linear_system_cases.hpp"
 #include "test_weighted_matroid_intersection_cases.hpp"
+#include "test_k_shortest_paths_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
