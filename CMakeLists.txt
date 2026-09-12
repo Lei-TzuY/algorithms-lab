@@ -27,6 +27,7 @@ endfunction()
 
 add_library(algorithms_lab
   src/approximation/vertex_cover.cpp
+  src/automata/cyk_parser.cpp
   src/automata/dfa_minimization.cpp
   src/coding/arithmetic_byte_code.cpp
   src/coding/huffman_byte_code.cpp
@@ -144,6 +145,7 @@ include(CTest)
 if(BUILD_TESTING)
   add_executable(algorithms_tests
     tests/test_main.cpp
+    tests/test_cyk_parser.cpp
     tests/test_dfa_minimization.cpp
     tests/test_two_sat.cpp
     tests/test_cnf_sat.cpp
