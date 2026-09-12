@@ -21,6 +21,7 @@
 #include "test_fractional_cascading_cases.hpp"
 #include "test_optimal_bst_cases.hpp"
 #include "test_general_graph_isomorphism_cases.hpp"
+#include "test_cartesian_tree_rmq_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
