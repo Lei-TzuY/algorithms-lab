@@ -21,19 +21,19 @@ struct ReedSolomonDecodeResult {
   std::vector<std::size_t> error_positions;
 };
 
-namespace {
+namespace detail {
 
-std::uint64_t subtract_mod(std::uint64_t lhs, std::uint64_t rhs,
-                           std::uint64_t modulus) noexcept {
+[[nodiscard]] inline std::uint64_t subtract_mod(
+    std::uint64_t lhs, std::uint64_t rhs, std::uint64_t modulus) noexcept {
   return lhs >= rhs ? lhs - rhs : modulus - (rhs - lhs);
 }
 
-std::uint64_t negate_mod(std::uint64_t value,
-                         std::uint64_t modulus) noexcept {
+[[nodiscard]] inline std::uint64_t negate_mod(
+    std::uint64_t value, std::uint64_t modulus) noexcept {
   return value == 0U ? 0U : modulus - value;
 }
 
-std::vector<std::uint64_t> normalized_distinct_points(
+[[nodiscard]] inline std::vector<std::uint64_t> normalized_distinct_points(
     std::span<const std::uint64_t> points, std::uint64_t prime_modulus) {
   if (!number_theory::is_prime(prime_modulus)) {
     throw std::invalid_argument("Reed-Solomon modulus must be prime");
@@ -54,7 +54,8 @@ std::vector<std::uint64_t> normalized_distinct_points(
   return normalized;
 }
 
-std::optional<std::vector<std::uint64_t>> divide_by_monic_exact(
+[[nodiscard]] inline std::optional<std::vector<std::uint64_t>>
+divide_by_monic_exact(
     std::vector<std::uint64_t> numerator,
     std::span<const std::uint64_t> monic_divisor, std::size_t quotient_size,
     std::uint64_t modulus) {
@@ -88,7 +89,7 @@ std::optional<std::vector<std::uint64_t>> divide_by_monic_exact(
   return quotient;
 }
 
-}  // namespace
+}  // namespace detail
 
 // Evaluation-form Reed-Solomon encoding over F_p. Message coefficients are
 // low-degree first; the message dimension and code length must both be positive,
@@ -104,7 +105,7 @@ std::optional<std::vector<std::uint64_t>> divide_by_monic_exact(
     throw std::invalid_argument("Reed-Solomon code length must be at least k");
   }
   const auto points =
-      normalized_distinct_points(evaluation_points, prime_modulus);
+      detail::normalized_distinct_points(evaluation_points, prime_modulus);
   std::vector<std::uint64_t> codeword;
   codeword.reserve(points.size());
   for (const std::uint64_t point : points) {
@@ -135,7 +136,7 @@ std::optional<std::vector<std::uint64_t>> divide_by_monic_exact(
         "Reed-Solomon requires n >= k + 2*max_errors");
   }
   const auto points =
-      normalized_distinct_points(evaluation_points, prime_modulus);
+      detail::normalized_distinct_points(evaluation_points, prime_modulus);
 
   const std::size_t q_count = message_length + max_errors;
   const std::size_t variable_count = q_count + max_errors;
@@ -158,7 +159,7 @@ std::optional<std::vector<std::uint64_t>> divide_by_monic_exact(
       const std::uint64_t scaled =
           number_theory::multiply_mod(y, power, prime_modulus);
       coefficients[row][q_count + degree] =
-          negate_mod(scaled, prime_modulus);
+          detail::negate_mod(scaled, prime_modulus);
       power = number_theory::multiply_mod(power, x, prime_modulus);
     }
     rhs[row] = number_theory::multiply_mod(y, power, prime_modulus);
@@ -178,7 +179,8 @@ std::optional<std::vector<std::uint64_t>> divide_by_monic_exact(
   }
   locator[max_errors] = 1U;
 
-  auto message = divide_by_monic_exact(q, locator, message_length, prime_modulus);
+  auto message =
+      detail::divide_by_monic_exact(q, locator, message_length, prime_modulus);
   if (!message.has_value()) {
     return std::nullopt;
   }
