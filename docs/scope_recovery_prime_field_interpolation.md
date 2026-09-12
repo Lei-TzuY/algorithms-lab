@@ -48,6 +48,6 @@ The focused candidate passed GCC C++20 strict warnings-as-errors, Clang C++20 st
 
 ## Complexity and non-claims
 
-For `n` samples, divided differences and Newton-to-monomial conversion perform `O(n^2)` field multiplications/additions plus `O(n)` field inversions. With the repository's bit-by-bit `multiply_mod` and exponentiation-based inverses, this deliberately makes no hidden constant-time-field-arithmetic claim. Storage is `O(n)` apart from the returned coefficient vector and temporary normalized/sorted x arrays.
+For `n` samples, this straightforward baseline fills `n(n-1)/2` divided-difference cells and therefore performs `Theta(n^2)` field inversions in addition to `O(n^2)` field additions/multiplications for divided differences and Newton-to-monomial conversion. Each inverse is implemented as `a^(p-2)` through `power_mod`; with the repository's current bit-by-bit `multiply_mod`, a conservative primitive modular-add/doubling bound is `O(n^2 log^2 p)`. Storage is `O(n)` apart from the returned coefficient vector and normalized/sorted x temporaries. No constant-time field-operation model is being smuggled into the implementation claim.
 
-This slice does **not** implement composite-modulus interpolation, Hermite/repeated-abscissa interpolation, fast product-tree interpolation, FFT/NTT-accelerated interpolation, multipoint evaluation, error-correcting interpolation, rational reconstruction, or polynomial fitting over non-fields.
+This slice does **not** implement composite-modulus interpolation, Hermite/repeated-abscissa interpolation, batch inversion, fast product-tree interpolation, FFT/NTT-accelerated interpolation, multipoint evaluation, error-correcting interpolation, rational reconstruction, or polynomial fitting over non-fields.
