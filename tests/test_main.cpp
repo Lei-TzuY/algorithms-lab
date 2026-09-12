@@ -1,6 +1,7 @@
 #include "test_framework.hpp"
 #include "test_distinct_degree_factorization_cases.hpp"
 #include "test_equal_degree_factorization_cases.hpp"
+#include "test_irreducible_factorization_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
