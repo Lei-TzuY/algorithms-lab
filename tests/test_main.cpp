@@ -2,6 +2,7 @@
 #include "test_distinct_degree_factorization_cases.hpp"
 #include "test_equal_degree_factorization_cases.hpp"
 #include "test_irreducible_factorization_cases.hpp"
+#include "test_spanning_tree_count_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
