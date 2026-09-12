@@ -3,6 +3,8 @@
 #include "test_equal_degree_factorization_cases.hpp"
 #include "test_irreducible_factorization_cases.hpp"
 #include "test_spanning_tree_count_cases.hpp"
+#include "test_earley_parser_cases.hpp"
+#include "test_earley_parser_randomized_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
