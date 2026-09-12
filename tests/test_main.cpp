@@ -10,6 +10,7 @@
 #include "test_euler_tour_forest_cases.hpp"
 #include "test_lz77_cases.hpp"
 #include "test_bareiss_cases.hpp"
+#include "test_reed_solomon_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
