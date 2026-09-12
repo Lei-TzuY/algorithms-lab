@@ -25,6 +25,7 @@
 #include "test_dsu_on_tree_frequency_cases.hpp"
 #include "test_cactus_decomposition_cases.hpp"
 #include "test_parity_game_cases.hpp"
+#include "test_fft_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
