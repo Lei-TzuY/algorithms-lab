@@ -1,4 +1,5 @@
 #include "algorithms/geometry/kd_tree.hpp"
+#include "algorithms/geometry/orthogonal_range_tree.hpp"
 #include "test_framework.hpp"
 
 #include <algorithm>
@@ -12,6 +13,7 @@
 
 using algorithms::geometry::KdNearestResult;
 using algorithms::geometry::KdTree2D;
+using algorithms::geometry::OrthogonalRangeTree2D;
 using algorithms::geometry::Point2i;
 
 namespace {
@@ -44,6 +46,18 @@ std::optional<std::pair<Point2i, std::int64_t>> brute_force(
     }
   }
   return std::pair<Point2i, std::int64_t>{best, best_distance};
+}
+
+std::size_t brute_range_count(const std::vector<Point2i>& points,
+                              Point2i lower, Point2i upper) {
+  std::size_t count = 0U;
+  for (const Point2i point : points) {
+    if (lower.x <= point.x && point.x <= upper.x &&
+        lower.y <= point.y && point.y <= upper.y) {
+      ++count;
+    }
+  }
+  return count;
 }
 
 }  // namespace
@@ -164,6 +178,88 @@ TEST_CASE(kd_tree_randomized_against_full_scan) {
         REQUIRE(actual->visited_nodes <= tree.size());
         const KdNearestResult replay = tree.nearest(query).value();
         REQUIRE_EQ(replay, actual.value());
+      }
+    }
+  }
+}
+
+TEST_CASE(orthogonal_range_tree_duplicates_extremes_and_validation) {
+  const OrthogonalRangeTree2D empty({});
+  REQUIRE(empty.empty());
+  REQUIRE(empty.valid_structure());
+  REQUIRE_EQ(empty.count_closed({0, 0}, {0, 0}).count, std::size_t{0});
+  REQUIRE_THROWS_AS(OrthogonalRangeTree2D({{0, 0}}).count_closed({1, 0}, {0, 1}),
+                    std::invalid_argument);
+  REQUIRE_THROWS_AS(OrthogonalRangeTree2D({{0, 0}}).count_closed({0, 1}, {1, 0}),
+                    std::invalid_argument);
+
+  const std::vector<Point2i> points{
+      {0, 0}, {0, 0}, {1, 2}, {-3, 4},
+      {std::numeric_limits<std::int32_t>::min(),
+       std::numeric_limits<std::int32_t>::max()},
+      {std::numeric_limits<std::int32_t>::max(),
+       std::numeric_limits<std::int32_t>::min()}};
+  const OrthogonalRangeTree2D tree(points);
+  REQUIRE_EQ(tree.size(), points.size());
+  REQUIRE(tree.valid_structure());
+  REQUIRE_EQ(tree.count_closed({0, 0}, {0, 0}).count, std::size_t{2});
+  REQUIRE_EQ(tree.count_closed(
+                 {std::numeric_limits<std::int32_t>::min(),
+                  std::numeric_limits<std::int32_t>::min()},
+                 {std::numeric_limits<std::int32_t>::max(),
+                  std::numeric_limits<std::int32_t>::max()})
+                 .count,
+             points.size());
+
+  std::vector<Point2i> reversed = points;
+  std::reverse(reversed.begin(), reversed.end());
+  const OrthogonalRangeTree2D replay(reversed);
+  REQUIRE(replay.valid_structure());
+  REQUIRE_EQ(replay.count_closed({-3, 0}, {1, 4}),
+             tree.count_closed({-3, 0}, {1, 4}));
+}
+
+TEST_CASE(orthogonal_range_tree_randomized_against_full_scan) {
+  std::mt19937_64 rng(0x52414E4745545245ULL);
+  for (std::size_t trial = 0U; trial < 700U; ++trial) {
+    const std::size_t count = static_cast<std::size_t>(rng() % 129U);
+    std::vector<Point2i> points;
+    points.reserve(count);
+    for (std::size_t i = 0U; i < count; ++i) {
+      points.push_back({
+          static_cast<std::int32_t>(static_cast<std::int64_t>(rng() % 101U) -
+                                    50),
+          static_cast<std::int32_t>(static_cast<std::int64_t>(rng() % 101U) -
+                                    50)});
+    }
+    const OrthogonalRangeTree2D tree(points);
+    REQUIRE(tree.valid_structure());
+
+    for (std::size_t query = 0U; query < 100U; ++query) {
+      std::int32_t x1 = static_cast<std::int32_t>(
+          static_cast<std::int64_t>(rng() % 121U) - 60);
+      std::int32_t x2 = static_cast<std::int32_t>(
+          static_cast<std::int64_t>(rng() % 121U) - 60);
+      std::int32_t y1 = static_cast<std::int32_t>(
+          static_cast<std::int64_t>(rng() % 121U) - 60);
+      std::int32_t y2 = static_cast<std::int32_t>(
+          static_cast<std::int64_t>(rng() % 121U) - 60);
+      if (x2 < x1) {
+        std::swap(x1, x2);
+      }
+      if (y2 < y1) {
+        std::swap(y1, y2);
+      }
+      const Point2i lower{x1, y1};
+      const Point2i upper{x2, y2};
+      const auto result = tree.count_closed(lower, upper);
+      REQUIRE_EQ(result.count, brute_range_count(points, lower, upper));
+      REQUIRE_EQ(result.secondary_binary_searches,
+                 std::size_t{2} * result.canonical_nodes);
+      if (!tree.empty()) {
+        const std::size_t bound = std::size_t{2} *
+            static_cast<std::size_t>(std::bit_width(tree.size()));
+        REQUIRE(result.canonical_nodes <= bound);
       }
     }
   }
