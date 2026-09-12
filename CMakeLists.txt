@@ -57,6 +57,7 @@ add_library(algorithms_lab
   src/geometry/rectangle_union.cpp
   src/greedy/interval_scheduling.cpp
   src/graphs/graph.cpp
+  src/graphs/elementary_cycles.cpp
   src/graphs/biconnected_components.cpp
   src/graphs/transitive_reduction.cpp
   src/graphs/planarity.cpp
@@ -160,6 +161,7 @@ if(BUILD_TESTING)
     tests/test_fibonacci_heap.cpp
     tests/test_li_chao_tree.cpp
     tests/test_graphs.cpp
+    tests/test_elementary_cycles.cpp
     tests/test_biconnected_components.cpp
     tests/test_transitive_reduction.cpp
     tests/test_planarity.cpp
