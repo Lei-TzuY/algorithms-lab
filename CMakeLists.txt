@@ -255,6 +255,7 @@ if(BUILD_TESTING)
     tests/test_finite_field_gaussian_elimination.cpp
     tests/test_number_theory.cpp
     tests/test_prime_field_polynomial_gcd.cpp
+    tests/test_prime_field_square_free_factorization.cpp
     tests/test_linear_recurrence.cpp
     tests/test_number_theoretic_transform.cpp
     tests/test_exact_convolution.cpp
