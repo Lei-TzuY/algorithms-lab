@@ -16,6 +16,7 @@
 #include "test_elias_fano_cases.hpp"
 #include "test_smith_normal_form_cases.hpp"
 #include "test_modular_linear_system_cases.hpp"
+#include "test_weighted_matroid_intersection_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
