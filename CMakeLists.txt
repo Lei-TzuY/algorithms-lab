@@ -121,6 +121,7 @@ add_library(algorithms_lab
   src/optimization/hungarian_assignment.cpp
   src/number_theory/factorization.cpp
   src/number_theory/modular.cpp
+  src/number_theory/polynomial_interpolation.cpp
   src/polynomials/number_theoretic_transform.cpp
   src/polynomials/formal_power_series.cpp
   src/streaming/count_min.cpp
@@ -270,6 +271,7 @@ if(BUILD_TESTING)
     tests/test_factorization.cpp
     tests/test_finite_field_gaussian_elimination.cpp
     tests/test_number_theory.cpp
+    tests/test_polynomial_interpolation.cpp
     tests/test_prime_field_polynomial_gcd.cpp
     tests/test_prime_field_square_free_factorization.cpp
     tests/test_linear_recurrence.cpp
