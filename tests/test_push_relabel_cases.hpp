@@ -147,6 +147,14 @@ TEST_CASE(push_relabel_representability_boundaries) {
   REQUIRE_EQ(result.cut_capacity, maximum);
   REQUIRE_EQ(result.edges[0].flow, maximum);
 
+  const std::vector<CapacityEdge> wide_temporary_excess = {
+      {0, 1, maximum}, {0, 1, maximum}, {0, 1, maximum}, {1, 2, 1}};
+  const auto narrow_optimum = algorithms::graphs::push_relabel_max_flow(
+      3, wide_temporary_excess, 0, 2);
+  REQUIRE_EQ(narrow_optimum.value, Capacity{1});
+  REQUIRE_EQ(narrow_optimum.cut_capacity, Capacity{1});
+  verify_small_flow(narrow_optimum, 3, wide_temporary_excess, 0, 2);
+
   const std::vector<CapacityEdge> overflow = {
       {0, 1, maximum}, {0, 1, maximum}};
   REQUIRE_THROWS_AS(

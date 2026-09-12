@@ -35,13 +35,58 @@ struct ArcLocation {
   return left + right;
 }
 
-[[nodiscard]] inline std::uint64_t checked_excess_add(std::uint64_t left,
-                                                      std::uint64_t right) {
-  if (right > std::numeric_limits<std::uint64_t>::max() - left) {
-    throw std::overflow_error("push-relabel excess is not representable");
+// A fixed two-limb accumulator is enough for every realizable input on targets
+// where size_t is at most 64 bits: at most SIZE_MAX edges can each contribute at
+// most INT64_MAX units, so total preflow is strictly below 2^127.
+static_assert(sizeof(std::size_t) <= sizeof(std::uint64_t),
+              "push-relabel wide excess assumes size_t is at most 64 bits");
+
+class WideExcess {
+ public:
+  [[nodiscard]] bool is_zero() const noexcept { return high_ == 0 && low_ == 0; }
+
+  void add(std::uint64_t amount) {
+    const std::uint64_t previous = low_;
+    low_ += amount;
+    if (low_ < previous) {
+      if (high_ == std::numeric_limits<std::uint64_t>::max()) {
+        throw std::overflow_error("push-relabel wide excess is not representable");
+      }
+      ++high_;
+    }
   }
-  return left + right;
-}
+
+  void subtract(std::uint64_t amount) {
+    if (high_ == 0 && low_ < amount) {
+      throw std::logic_error("push-relabel excess underflow");
+    }
+    const std::uint64_t previous = low_;
+    low_ -= amount;
+    if (previous < amount) {
+      --high_;
+    }
+  }
+
+  [[nodiscard]] std::uint64_t bounded_by(std::uint64_t upper) const noexcept {
+    if (high_ != 0) {
+      return upper;
+    }
+    return std::min(low_, upper);
+  }
+
+  [[nodiscard]] Capacity to_capacity() const {
+    const auto maximum =
+        static_cast<std::uint64_t>(std::numeric_limits<Capacity>::max());
+    if (high_ != 0 || low_ > maximum) {
+      throw std::overflow_error("push-relabel maximum flow is not representable");
+    }
+    return static_cast<Capacity>(low_);
+  }
+
+ private:
+  std::uint64_t high_ = 0;
+  std::uint64_t low_ = 0;
+};
 
 inline void validate_input(std::size_t vertex_count,
                            std::span<const CapacityEdge> edges, Vertex source,
@@ -67,7 +112,7 @@ class Solver {
  public:
   Solver(std::size_t vertex_count, Vertex source, Vertex sink)
       : adjacency_(vertex_count), height_(vertex_count, 0),
-        excess_(vertex_count, 0), next_arc_(vertex_count, 0),
+        excess_(vertex_count), next_arc_(vertex_count, 0),
         in_queue_(vertex_count, false), source_(source), sink_(sink) {}
 
   [[nodiscard]] ArcLocation add_edge(Vertex from, Vertex to,
@@ -94,7 +139,7 @@ class Solver {
       reverse.residual = checked_capacity_add(reverse.residual, pushed);
       if (arc.to != source_) {
         const auto amount = static_cast<std::uint64_t>(pushed);
-        excess_[arc.to] = checked_excess_add(excess_[arc.to], amount);
+        excess_[arc.to].add(amount);
         enqueue_if_active(arc.to);
       }
     }
@@ -107,15 +152,7 @@ class Solver {
     }
   }
 
-  [[nodiscard]] Capacity value() const {
-    const std::uint64_t sink_excess = excess_[sink_];
-    const auto max_capacity =
-        static_cast<std::uint64_t>(std::numeric_limits<Capacity>::max());
-    if (sink_excess > max_capacity) {
-      throw std::overflow_error("push-relabel maximum flow is not representable");
-    }
-    return static_cast<Capacity>(sink_excess);
-  }
+  [[nodiscard]] Capacity value() const { return excess_[sink_].to_capacity(); }
 
   [[nodiscard]] Capacity residual_at(const ArcLocation& location) const {
     return adjacency_[location.from][location.index].residual;
@@ -141,7 +178,7 @@ class Solver {
 
  private:
   void enqueue_if_active(Vertex vertex) {
-    if (vertex == source_ || vertex == sink_ || excess_[vertex] == 0 ||
+    if (vertex == source_ || vertex == sink_ || excess_[vertex].is_zero() ||
         in_queue_[vertex]) {
       return;
     }
@@ -151,18 +188,18 @@ class Solver {
 
   void push(Vertex from, ResidualArc& arc) {
     const std::uint64_t residual = static_cast<std::uint64_t>(arc.residual);
-    const std::uint64_t amount = std::min(excess_[from], residual);
+    const std::uint64_t amount = excess_[from].bounded_by(residual);
     if (amount == 0) {
       return;
     }
     const Capacity pushed = static_cast<Capacity>(amount);
-    const bool target_was_inactive = excess_[arc.to] == 0;
+    const bool target_was_inactive = excess_[arc.to].is_zero();
     arc.residual -= pushed;
     auto& reverse = adjacency_[arc.to][arc.reverse_index];
     reverse.residual = checked_capacity_add(reverse.residual, pushed);
-    excess_[from] -= amount;
+    excess_[from].subtract(amount);
     if (arc.to != source_) {
-      excess_[arc.to] = checked_excess_add(excess_[arc.to], amount);
+      excess_[arc.to].add(amount);
       if (target_was_inactive) {
         enqueue_if_active(arc.to);
       }
@@ -185,7 +222,7 @@ class Solver {
   }
 
   void discharge(Vertex vertex) {
-    while (excess_[vertex] > 0) {
+    while (!excess_[vertex].is_zero()) {
       if (next_arc_[vertex] == adjacency_[vertex].size()) {
         relabel(vertex);
         continue;
@@ -201,7 +238,7 @@ class Solver {
 
   std::vector<std::vector<ResidualArc>> adjacency_;
   std::vector<std::size_t> height_;
-  std::vector<std::uint64_t> excess_;
+  std::vector<WideExcess> excess_;
   std::vector<std::size_t> next_arc_;
   std::vector<bool> in_queue_;
   std::queue<Vertex> active_;
