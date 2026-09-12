@@ -22,6 +22,7 @@
 #include "test_optimal_bst_cases.hpp"
 #include "test_general_graph_isomorphism_cases.hpp"
 #include "test_cartesian_tree_rmq_cases.hpp"
+#include "test_dsu_on_tree_frequency_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
