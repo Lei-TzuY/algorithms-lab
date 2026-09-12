@@ -50,8 +50,12 @@ field theorem.
 
 ## Independent verification
 
-Focused final-candidate execution passed under strict GCC, strict Clang, and an
-actual GCC ASan+UBSan build.
+The production header blob is byte-identical to the candidate that passed strict
+GCC, strict Clang, and actual GCC ASan+UBSan focused execution. Before upload, the
+test harness used the same cases and oracles; its helper names were then prefixed
+to avoid collisions with other header-included tests in the repository's single
+test translation unit. Exact-head pull-request CI is therefore the authoritative
+integration gate for the uploaded test-header bytes.
 
 The primary small-field oracle is deliberately independent of production DDF and
 polynomial Euclid:
