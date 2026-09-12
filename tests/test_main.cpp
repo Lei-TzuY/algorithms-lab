@@ -27,6 +27,7 @@
 #include "test_parity_game_cases.hpp"
 #include "test_fft_cases.hpp"
 #include "test_strassen_matrix_cases.hpp"
+#include "test_push_relabel_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
