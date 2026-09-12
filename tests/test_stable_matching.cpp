@@ -1,4 +1,5 @@
 #include "algorithms/combinatorial/stable_matching.hpp"
+#include "algorithms/combinatorial/stable_roommates.hpp"
 #include "test_framework.hpp"
 
 #include <algorithm>
@@ -171,4 +172,187 @@ TEST_CASE(stable_matching_proposal_bound_and_adversarial_shared_first_choice) {
   verify_result(result, proposer, receiver);
   REQUIRE(result.proposal_count > n);
   REQUIRE(result.proposal_count <= n * n);
+}
+
+namespace {
+using algorithms::combinatorial::StableRoommatesResult;
+using algorithms::combinatorial::stable_roommates_irving;
+using RoommatePreferences = std::vector<std::vector<std::size_t>>;
+
+std::vector<std::vector<std::size_t>> roommate_build_ranks(
+    const RoommatePreferences& preferences) {
+  const std::size_t n = preferences.size();
+  std::vector<std::vector<std::size_t>> rank(
+      n, std::vector<std::size_t>(n, n));
+  for (std::size_t person = 0; person < n; ++person) {
+    for (std::size_t position = 0; position < preferences[person].size();
+         ++position) {
+      rank[person][preferences[person][position]] = position;
+    }
+  }
+  return rank;
+}
+
+bool roommate_matching_is_stable(
+    const std::vector<std::size_t>& partner,
+    const RoommatePreferences& preferences,
+    const std::vector<std::vector<std::size_t>>& rank) {
+  const std::size_t n = preferences.size();
+  if (partner.size() != n) {
+    return false;
+  }
+  for (std::size_t person = 0; person < n; ++person) {
+    if (partner[person] >= n || partner[person] == person ||
+        partner[partner[person]] != person) {
+      return false;
+    }
+  }
+  for (std::size_t first = 0; first < n; ++first) {
+    for (std::size_t second = first + 1U; second < n; ++second) {
+      if (partner[first] == second) {
+        continue;
+      }
+      if (rank[first][second] < rank[first][partner[first]] &&
+          rank[second][first] < rank[second][partner[second]]) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool roommate_exhaustive_search(
+    std::vector<std::size_t>& partner,
+    const RoommatePreferences& preferences,
+    const std::vector<std::vector<std::size_t>>& rank) {
+  const std::size_t n = preferences.size();
+  std::size_t first = 0U;
+  while (first < n && partner[first] != n) {
+    ++first;
+  }
+  if (first == n) {
+    return roommate_matching_is_stable(partner, preferences, rank);
+  }
+  for (std::size_t second = first + 1U; second < n; ++second) {
+    if (partner[second] != n) {
+      continue;
+    }
+    partner[first] = second;
+    partner[second] = first;
+    if (roommate_exhaustive_search(partner, preferences, rank)) {
+      return true;
+    }
+    partner[first] = n;
+    partner[second] = n;
+  }
+  return false;
+}
+
+bool roommate_has_stable_matching(const RoommatePreferences& preferences) {
+  const std::size_t n = preferences.size();
+  if (n == 0U) {
+    return true;
+  }
+  if ((n & 1U) != 0U) {
+    return false;
+  }
+  std::vector<std::size_t> partner(n, n);
+  return roommate_exhaustive_search(
+      partner, preferences, roommate_build_ranks(preferences));
+}
+
+RoommatePreferences random_roommate_preferences(const std::size_t n,
+                                                std::mt19937_64& rng) {
+  RoommatePreferences preferences(n);
+  for (std::size_t person = 0; person < n; ++person) {
+    for (std::size_t candidate = 0; candidate < n; ++candidate) {
+      if (candidate != person) {
+        preferences[person].push_back(candidate);
+      }
+    }
+    std::shuffle(preferences[person].begin(), preferences[person].end(), rng);
+  }
+  return preferences;
+}
+
+void verify_roommates_result(const StableRoommatesResult& result,
+                             const RoommatePreferences& preferences) {
+  const std::size_t n = preferences.size();
+  const auto rank = roommate_build_ranks(preferences);
+  REQUIRE(roommate_matching_is_stable(result.partner, preferences, rank));
+  REQUIRE(result.phase1_proposal_count <= n * (n - 1U));
+}
+}  // namespace
+
+TEST_CASE(stable_roommates_validation_trivial_and_odd_cardinality) {
+  const RoommatePreferences empty;
+  const auto empty_result = stable_roommates_irving(empty);
+  REQUIRE(empty_result.has_value());
+  REQUIRE(empty_result->partner.empty());
+  REQUIRE_EQ(empty_result->phase1_proposal_count, 0U);
+  REQUIRE_EQ(empty_result->rotation_count, 0U);
+
+  const RoommatePreferences pair{{1}, {0}};
+  const auto pair_result = stable_roommates_irving(pair);
+  REQUIRE(pair_result.has_value());
+  REQUIRE_EQ(pair_result->partner, std::vector<std::size_t>({1, 0}));
+  verify_roommates_result(*pair_result, pair);
+
+  const RoommatePreferences singleton{{}};
+  REQUIRE(!stable_roommates_irving(singleton).has_value());
+  const RoommatePreferences odd{{1, 2}, {0, 2}, {0, 1}};
+  REQUIRE(!stable_roommates_irving(odd).has_value());
+
+  REQUIRE_THROWS_AS(stable_roommates_irving({{1}, {0, 0}}),
+                    std::invalid_argument);
+  REQUIRE_THROWS_AS(stable_roommates_irving({{0}, {0}}),
+                    std::invalid_argument);
+  REQUIRE_THROWS_AS(stable_roommates_irving({{2}, {0}}),
+                    std::out_of_range);
+  REQUIRE_THROWS_AS(
+      stable_roommates_irving({{1, 1}, {0, 2}, {0, 1}}),
+      std::invalid_argument);
+}
+
+TEST_CASE(stable_roommates_rotation_and_unsatisfiable_regressions) {
+  const RoommatePreferences rotation{{4, 1, 2, 3, 5},
+                                     {2, 4, 0, 3, 5},
+                                     {4, 0, 5, 3, 1},
+                                     {5, 1, 0, 4, 2},
+                                     {0, 3, 2, 5, 1},
+                                     {1, 4, 3, 2, 0}};
+  const auto first = stable_roommates_irving(rotation);
+  const auto second = stable_roommates_irving(rotation);
+  REQUIRE(first.has_value());
+  REQUIRE_EQ(first, second);
+  REQUIRE_EQ(first->partner,
+             std::vector<std::size_t>({4, 2, 1, 5, 0, 3}));
+  REQUIRE_EQ(first->phase1_proposal_count, 7U);
+  REQUIRE_EQ(first->rotation_count, 1U);
+  verify_roommates_result(*first, rotation);
+
+  const RoommatePreferences no_stable{{5, 3, 4, 1, 2},
+                                      {3, 0, 4, 2, 5},
+                                      {5, 4, 3, 1, 0},
+                                      {2, 5, 0, 4, 1},
+                                      {3, 2, 5, 1, 0},
+                                      {0, 2, 4, 3, 1}};
+  REQUIRE(roommate_has_stable_matching(no_stable) == false);
+  REQUIRE(!stable_roommates_irving(no_stable).has_value());
+}
+
+TEST_CASE(stable_roommates_exhaustive_randomized_differential) {
+  std::mt19937_64 rng(0x1A71B6ULL);
+  constexpr std::size_t sizes[]{2U, 4U, 6U, 8U};
+  for (std::size_t trial = 0; trial < 1200U; ++trial) {
+    const std::size_t n = sizes[static_cast<std::size_t>(rng() % 4U)];
+    const RoommatePreferences preferences = random_roommate_preferences(n, rng);
+    const bool expected = roommate_has_stable_matching(preferences);
+    const auto actual = stable_roommates_irving(preferences);
+    REQUIRE_EQ(actual.has_value(), expected);
+    if (actual.has_value()) {
+      verify_roommates_result(*actual, preferences);
+      REQUIRE_EQ(actual, stable_roommates_irving(preferences));
+    }
+  }
 }
