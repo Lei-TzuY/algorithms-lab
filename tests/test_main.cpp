@@ -19,6 +19,7 @@
 #include "test_weighted_matroid_intersection_cases.hpp"
 #include "test_k_shortest_paths_cases.hpp"
 #include "test_fractional_cascading_cases.hpp"
+#include "test_optimal_bst_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
