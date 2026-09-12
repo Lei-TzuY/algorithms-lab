@@ -29,6 +29,7 @@ add_library(algorithms_lab
   src/approximation/vertex_cover.cpp
   src/automata/dfa_minimization.cpp
   src/coding/huffman_byte_code.cpp
+  src/combinatorial/dilworth_decomposition.cpp
   src/combinatorial/exact_cover.cpp
   src/combinatorial/matroid_intersection.cpp
   src/combinatorial/stable_matching.cpp
@@ -142,6 +143,7 @@ if(BUILD_TESTING)
     tests/test_dfa_minimization.cpp
     tests/test_two_sat.cpp
     tests/test_cnf_sat.cpp
+    tests/test_dilworth_decomposition.cpp
     tests/test_exact_cover.cpp
     tests/test_matroid_intersection.cpp
     tests/test_stable_matching.cpp
