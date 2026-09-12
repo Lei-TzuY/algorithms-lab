@@ -1,5 +1,6 @@
 #pragma once
 
+#include "algorithms/number_theory/modular.hpp"
 #include "algorithms/polynomials/equal_degree_factorization.hpp"
 #include "test_distinct_degree_factorization_cases.hpp"
 #include "test_framework.hpp"
@@ -17,6 +18,42 @@ using algorithms::polynomials::PrimeFieldPolynomial;
 using distinct_degree_test_detail::irreducibles;
 using distinct_degree_test_detail::multiply;
 using distinct_degree_test_detail::scale;
+
+[[nodiscard]] inline std::uint64_t add_mod_reconstruction(
+    std::uint64_t first, std::uint64_t second,
+    std::uint64_t prime) noexcept {
+  return first >= prime - second ? first - (prime - second) : first + second;
+}
+
+[[nodiscard]] inline PrimeFieldPolynomial multiply_reconstruction(
+    const PrimeFieldPolynomial& first, const PrimeFieldPolynomial& second,
+    std::uint64_t prime) {
+  if (first.empty() || second.empty()) {
+    return {};
+  }
+  PrimeFieldPolynomial result(first.size() + second.size() - 1U, 0U);
+  for (std::size_t left = 0U; left < first.size(); ++left) {
+    for (std::size_t right = 0U; right < second.size(); ++right) {
+      const std::uint64_t term = algorithms::number_theory::multiply_mod(
+          first[left], second[right], prime);
+      result[left + right] =
+          add_mod_reconstruction(result[left + right], term, prime);
+    }
+  }
+  distinct_degree_test_detail::trim(result);
+  return result;
+}
+
+[[nodiscard]] inline PrimeFieldPolynomial scale_reconstruction(
+    PrimeFieldPolynomial polynomial, std::uint64_t unit,
+    std::uint64_t prime) {
+  for (std::uint64_t& coefficient : polynomial) {
+    coefficient =
+        algorithms::number_theory::multiply_mod(coefficient, unit, prime);
+  }
+  distinct_degree_test_detail::trim(polynomial);
+  return polynomial;
+}
 
 inline void require_complete_factorization(
     const PrimeFieldPolynomial& input, std::size_t degree, std::uint64_t prime,
@@ -36,9 +73,9 @@ inline void require_complete_factorization(
   for (const auto& factor : result.factors) {
     REQUIRE_EQ(factor.size(), degree + 1U);
     REQUIRE_EQ(factor.back(), 1U);
-    reconstructed = multiply(reconstructed, factor, prime);
+    reconstructed = multiply_reconstruction(reconstructed, factor, prime);
   }
-  REQUIRE_EQ(scale(reconstructed, result.unit, prime), input);
+  REQUIRE_EQ(scale_reconstruction(reconstructed, result.unit, prime), input);
 }
 }  // namespace equal_degree_test_detail
 
@@ -125,6 +162,8 @@ TEST_CASE(prime_field_equal_degree_binary_trace_and_full_width_prime) {
           ? first_linear[0U] - (prime - second_linear[0U])
           : first_linear[0U] + second_linear[0U];
   full_width_group[2U] = 1U;
+  REQUIRE_EQ(multiply_reconstruction(first_linear, second_linear, prime),
+             full_width_group);
   require_complete_factorization(full_width_group, 1U, prime, 0xF00DULL,
                                  {first_linear, second_linear}, 1U);
 }
