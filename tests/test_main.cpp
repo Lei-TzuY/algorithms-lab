@@ -7,6 +7,7 @@
 #include "test_earley_parser_randomized_cases.hpp"
 #include "test_extension_field_cases.hpp"
 #include "test_metric_tsp_cases.hpp"
+#include "test_euler_tour_forest_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
