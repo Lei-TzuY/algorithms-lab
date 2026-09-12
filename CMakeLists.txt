@@ -27,6 +27,7 @@ endfunction()
 
 add_library(algorithms_lab
   src/approximation/vertex_cover.cpp
+  src/automata/dfa_minimization.cpp
   src/coding/huffman_byte_code.cpp
   src/combinatorial/exact_cover.cpp
   src/combinatorial/matroid_intersection.cpp
@@ -138,6 +139,7 @@ include(CTest)
 if(BUILD_TESTING)
   add_executable(algorithms_tests
     tests/test_main.cpp
+    tests/test_dfa_minimization.cpp
     tests/test_two_sat.cpp
     tests/test_cnf_sat.cpp
     tests/test_exact_cover.cpp
