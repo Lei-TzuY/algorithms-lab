@@ -13,6 +13,7 @@
 #include "test_reed_solomon_cases.hpp"
 #include "test_vertex_connectivity_cases.hpp"
 #include "test_radix_heap_cases.hpp"
+#include "test_elias_fano_cases.hpp"
 #include "test_smith_normal_form_cases.hpp"
 #include "test_modular_linear_system_cases.hpp"
 
