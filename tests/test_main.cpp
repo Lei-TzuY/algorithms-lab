@@ -45,6 +45,7 @@
 #include "test_open_ear_decomposition_cases.hpp"
 #include "test_st_numbering_cases.hpp"
 #include "test_densest_subgraph_cases.hpp"
+#include "test_alphabetic_code_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
