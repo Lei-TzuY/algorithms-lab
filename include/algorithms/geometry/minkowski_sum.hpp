@@ -114,19 +114,19 @@ inline void rotate_to_lexicographic_start(std::vector<Point2i>& hull) {
 }  // namespace minkowski_detail
 
 // Returns the canonical convex hull of conv(left) + conv(right).
-// Input coordinates are limited to [-500'000'000, 500'000'000] so every
-// returned point remains inside the repository's exact geometry domain.
-// Empty input yields the empty Minkowski sum.
+// Non-empty input coordinates are limited to [-500'000'000, 500'000'000]
+// so every returned point remains inside the repository's exact geometry domain.
+// Empty input yields the empty Minkowski sum before coordinate validation.
 [[nodiscard]] inline std::vector<Point2i> convex_minkowski_sum(
     std::span<const Point2i> left_points,
     std::span<const Point2i> right_points) {
   using namespace minkowski_detail;
-  validate_input(left_points);
-  validate_input(right_points);
-
   if (left_points.empty() || right_points.empty()) {
     return {};
   }
+
+  validate_input(left_points);
+  validate_input(right_points);
 
   std::vector<Point2i> left = convex_hull(left_points);
   std::vector<Point2i> right = convex_hull(right_points);
