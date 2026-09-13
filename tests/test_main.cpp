@@ -50,6 +50,7 @@
 #include "test_minimum_dominating_set_cases.hpp"
 #include "test_binary_permanent_cases.hpp"
 #include "test_linear_extension_count_cases.hpp"
+#include "test_gallai_edmonds_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
