@@ -85,16 +85,15 @@ static_assert(kCombinedModulus > kFactorial20);
 
   const std::uint64_t allowed_mask = (std::uint64_t{1} << n) - 1ULL;
   std::uint64_t covered_columns = 0;
+  bool has_zero_row = false;
   for (const std::uint64_t row_mask : row_masks) {
     if ((row_mask & ~allowed_mask) != 0ULL) {
       throw std::invalid_argument("binary permanent row mask exceeds dimension");
     }
-    if (row_mask == 0ULL) {
-      return BinaryPermanentResult{0, n, 0};
-    }
+    has_zero_row = has_zero_row || row_mask == 0ULL;
     covered_columns |= row_mask;
   }
-  if (covered_columns != allowed_mask) {
+  if (has_zero_row || covered_columns != allowed_mask) {
     return BinaryPermanentResult{0, n, 0};
   }
 
