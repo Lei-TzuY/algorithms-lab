@@ -111,6 +111,10 @@ TEST_CASE(binary_permanent_validation_and_bounds) {
                         std::vector<std::uint64_t>{0b100ULL, 0b01ULL}),
                     std::invalid_argument);
 
+  REQUIRE_THROWS_AS(binary_matrix_permanent(
+                        std::vector<std::uint64_t>{0ULL, 0b100ULL}),
+                    std::invalid_argument);
+
   const std::vector<std::uint64_t> boundary(20, 0ULL);
   const auto boundary_result = binary_matrix_permanent(boundary);
   REQUIRE_EQ(boundary_result.permanent, 0ULL);
