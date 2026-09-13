@@ -6,6 +6,7 @@
 #include "test_earley_parser_cases.hpp"
 #include "test_earley_parser_randomized_cases.hpp"
 #include "test_extension_field_cases.hpp"
+#include "test_bitwise_convolution_cases.hpp"
 #include "test_metric_tsp_cases.hpp"
 #include "test_euler_tour_forest_cases.hpp"
 #include "test_fully_dynamic_connectivity_cases.hpp"
