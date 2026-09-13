@@ -49,6 +49,17 @@ std::vector<std::uint8_t> transform_coloring(
   return transformed;
 }
 
+std::uint64_t encode_coloring(const std::vector<std::uint8_t>& coloring,
+                              std::uint8_t colors) {
+  std::uint64_t code = 0;
+  std::uint64_t place = 1;
+  for (const std::uint8_t color : coloring) {
+    code += static_cast<std::uint64_t>(color) * place;
+    place *= colors;
+  }
+  return code;
+}
+
 std::uint64_t exhaustive_orbit_count(
     std::size_t n, std::uint8_t colors,
     const std::vector<Permutation>& group) {
@@ -57,7 +68,7 @@ std::uint64_t exhaustive_orbit_count(
     total_colorings *= colors;
   }
 
-  std::set<std::vector<std::uint8_t>> visited;
+  std::set<std::uint64_t> visited;
   std::uint64_t orbits = 0;
   for (std::uint64_t code = 0; code < total_colorings; ++code) {
     std::uint64_t value = code;
@@ -66,12 +77,12 @@ std::uint64_t exhaustive_orbit_count(
       coloring[i] = static_cast<std::uint8_t>(value % colors);
       value /= colors;
     }
-    if (visited.contains(coloring)) {
+    if (visited.contains(code)) {
       continue;
     }
     ++orbits;
     for (const auto& permutation : group) {
-      visited.insert(transform_coloring(coloring, permutation));
+      visited.insert(encode_coloring(transform_coloring(coloring, permutation), colors));
     }
   }
   return orbits;
