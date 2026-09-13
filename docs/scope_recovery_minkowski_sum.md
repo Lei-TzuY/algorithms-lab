@@ -16,7 +16,7 @@ The Phase-45–69 compiler/backend surface remains frozen under
 `convex_minkowski_sum(left, right)` accepts two finite sets of integer points and
 returns the canonical convex hull of `conv(left) + conv(right)`:
 
-- either empty input gives the empty sum;
+- either empty input gives the empty sum before coordinate validation of the other side;
 - duplicate and interior input points are accepted and canonicalized through the
   sealed `convex_hull` implementation;
 - output is unique hull vertices in counterclockwise order, beginning at the
@@ -29,10 +29,12 @@ represent non-convex polygon interiors, holes, or polygon Boolean operations.
 
 ## Exactness / representability boundary
 
-Each input coordinate must lie in `[-500,000,000, 500,000,000]`. This is stricter
-than the repository's general `Point2i` predicate domain on purpose: every output
-coordinate is the sum of one left and one right coordinate and therefore lies in
-`[-1,000,000,000, 1,000,000,000]`, the sealed exact geometry domain.
+When both inputs are non-empty, each input coordinate must lie in
+`[-500,000,000, 500,000,000]`. This is stricter than the repository's general
+`Point2i` predicate domain on purpose: every output coordinate is the sum of one left
+and one right coordinate and therefore lies in `[-1,000,000,000, 1,000,000,000]`,
+the sealed exact geometry domain. If either side is empty, no output point is formed,
+so the empty result short-circuits before validating coordinates on the other side.
 
 For the proper-polygon merge, each input edge component has magnitude at most
 `1,000,000,000`. Comparing two edge directions uses the exact signed 64-bit cross
@@ -40,8 +42,9 @@ product `ax*by - ay*bx`, whose magnitude is at most `2e18`. Equal-angle edge vec
 may be added componentwise to at most `2e9`. The running output vertex is checked
 against the sealed `+-1e9` domain before conversion back to `Point2i`.
 
-Inputs outside the composable domain fail with `std::out_of_range`; impossible
-representability violations during the edge walk fail rather than wrap.
+For non-empty sums, inputs outside the composable domain fail with
+`std::out_of_range`; impossible representability violations during the edge walk fail
+rather than wrap.
 
 ## Edge-angle merge obligation
 
@@ -74,10 +77,11 @@ Focused repo-style execution passed:
 - Clang C++20 with the same strict warnings;
 - actual GCC ASan+UBSan with halt-on-error.
 
-Deterministic evidence covers empty sums, point translation, segment+segment,
-proper polygons, duplicate/interior input points, commutativity, exact positive and
-negative coordinate boundaries, domain rejection, and a polygon pair with parallel
-and opposite-direction boundary edges.
+Deterministic evidence covers empty sums including an out-of-domain non-empty
+counterpart, point translation, segment+segment, proper polygons, duplicate/interior
+input points, commutativity, exact positive and negative coordinate boundaries, domain
+rejection for non-empty sums, and a polygon pair with parallel and opposite-direction
+boundary edges.
 
 The primary randomized oracle is structurally independent of the angular merge. For
 2,000 fixed-seed pairs of point multisets, each side has `0..14` points with integer
