@@ -61,6 +61,7 @@
 #include "test_prufer_cases.hpp"
 #include "test_scapegoat_tree_cases.hpp"
 #include "test_skip_list_cases.hpp"
+#include "test_x_fast_trie_cases.hpp"
 #include "test_sprague_grundy_cases.hpp"
 #include "test_a_star_cases.hpp"
 
