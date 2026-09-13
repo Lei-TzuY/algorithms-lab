@@ -93,8 +93,11 @@ TEST_CASE(minkowski_sum_exact_domain_boundary_and_rejection) {
 
   const std::vector<Point2i> invalid{{500'000'001, 0}};
   const std::vector<Point2i> origin{{0, 0}};
+  const std::vector<Point2i> empty;
   REQUIRE_THROWS_AS(convex_minkowski_sum(invalid, origin), std::out_of_range);
   REQUIRE_THROWS_AS(convex_minkowski_sum(origin, invalid), std::out_of_range);
+  REQUIRE(convex_minkowski_sum(empty, invalid).empty());
+  REQUIRE(convex_minkowski_sum(invalid, empty).empty());
 }
 
 TEST_CASE(minkowski_sum_randomized_differential_against_pairwise_hull) {
