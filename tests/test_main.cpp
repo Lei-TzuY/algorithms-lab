@@ -33,6 +33,7 @@
 #include "test_lyndon_factorization_cases.hpp"
 #include "test_delaunay_triangulation_cases.hpp"
 #include "test_multipoint_evaluation_cases.hpp"
+#include "test_prime_counting_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
