@@ -46,6 +46,7 @@
 #include "test_st_numbering_cases.hpp"
 #include "test_densest_subgraph_cases.hpp"
 #include "test_feedback_vertex_set_cases.hpp"
+#include "test_jacobi_eigen_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
