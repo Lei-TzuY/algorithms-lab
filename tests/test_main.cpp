@@ -54,6 +54,7 @@
 #include "test_tutte_berge_cases.hpp"
 #include "test_cuckoo_hash_set_cases.hpp"
 #include "test_burnside_orbit_count_cases.hpp"
+#include "test_manacher_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
