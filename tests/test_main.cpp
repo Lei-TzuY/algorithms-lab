@@ -37,6 +37,7 @@
 #include "test_minkowski_sum_cases.hpp"
 #include "test_multipoint_evaluation_cases.hpp"
 #include "test_prime_counting_cases.hpp"
+#include "test_weighted_set_cover_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
