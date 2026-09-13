@@ -43,6 +43,7 @@
 #include "test_minimum_enclosing_circle_cases.hpp"
 #include "test_strong_orientation_cases.hpp"
 #include "test_open_ear_decomposition_cases.hpp"
+#include "test_st_numbering_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
