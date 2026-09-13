@@ -60,6 +60,7 @@
 #include "test_scapegoat_tree_cases.hpp"
 #include "test_skip_list_cases.hpp"
 #include "test_sprague_grundy_cases.hpp"
+#include "test_a_star_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
