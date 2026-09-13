@@ -9,6 +9,7 @@
 #include "test_metric_tsp_cases.hpp"
 #include "test_euler_tour_forest_cases.hpp"
 #include "test_fully_dynamic_connectivity_cases.hpp"
+#include "test_dynamic_minimum_spanning_forest_cases.hpp"
 #include "test_lz77_cases.hpp"
 #include "test_bareiss_cases.hpp"
 #include "test_reed_solomon_cases.hpp"
