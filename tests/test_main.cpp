@@ -57,6 +57,7 @@
 #include "test_manacher_cases.hpp"
 #include "test_prufer_cases.hpp"
 #include "test_scapegoat_tree_cases.hpp"
+#include "test_skip_list_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
