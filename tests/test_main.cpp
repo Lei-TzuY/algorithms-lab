@@ -48,6 +48,7 @@
 #include "test_feedback_vertex_set_cases.hpp"
 #include "test_tutte_polynomial_cases.hpp"
 #include "test_minimum_dominating_set_cases.hpp"
+#include "test_binary_permanent_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
