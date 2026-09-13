@@ -67,6 +67,7 @@
 #include "test_sprague_grundy_cases.hpp"
 #include "test_a_star_cases.hpp"
 #include "test_greedy_spanner_cases.hpp"
+#include "test_tournament_feedback_arc_set_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
