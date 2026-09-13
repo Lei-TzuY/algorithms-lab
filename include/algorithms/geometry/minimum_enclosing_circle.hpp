@@ -49,9 +49,21 @@ inline void validate_point(const Point2i point) {
 }
 
 inline void canonicalize_support(MinimumEnclosingCircle& circle) {
-  std::sort(circle.support.begin(),
-            circle.support.begin() + static_cast<std::ptrdiff_t>(circle.support_size),
-            lex_less);
+  if (circle.support_size > circle.support.size()) {
+    throw std::logic_error("minimum enclosing circle support size exceeds capacity");
+  }
+  if (circle.support_size >= 2U &&
+      lex_less(circle.support[1], circle.support[0])) {
+    std::swap(circle.support[0], circle.support[1]);
+  }
+  if (circle.support_size == 3U) {
+    if (lex_less(circle.support[2], circle.support[1])) {
+      std::swap(circle.support[1], circle.support[2]);
+    }
+    if (lex_less(circle.support[1], circle.support[0])) {
+      std::swap(circle.support[0], circle.support[1]);
+    }
+  }
 }
 
 [[nodiscard]] inline MinimumEnclosingCircle point_circle(const Point2i point) {
