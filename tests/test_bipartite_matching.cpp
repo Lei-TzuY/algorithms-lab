@@ -8,12 +8,18 @@
 #include <cstdint>
 #include <optional>
 #include <random>
+#include <set>
+#include <span>
 #include <stdexcept>
 #include <vector>
 
 namespace {
 using algorithms::graphs::BipartiteEdge;
 using algorithms::graphs::BipartiteMatchingResult;
+using algorithms::graphs::BipartiteEdgeColoringResult;
+using algorithms::graphs::Graph;
+using algorithms::graphs::Vertex;
+using algorithms::graphs::minimum_bipartite_edge_coloring;
 using algorithms::graphs::CapacityEdge;
 using algorithms::graphs::dinic_max_flow;
 using algorithms::graphs::hopcroft_karp;
@@ -173,6 +179,181 @@ TEST_CASE(bipartite_matching_randomized_exhaustive_and_flow_integration) {
     REQUIRE_EQ(result.cardinality,
                matching_via_flow(left_count, right_count, edges));
     verify_result(left_count, right_count, edges, result);
+  }
+}
+
+struct EdgeColorOracleEdge {
+  Vertex first;
+  Vertex second;
+  std::int64_t weight;
+};
+
+[[nodiscard]] std::vector<EdgeColorOracleEdge> edge_coloring_logical_edges(
+    const Graph& graph) {
+  std::vector<EdgeColorOracleEdge> edges;
+  for (Vertex first = 0; first < graph.vertex_count(); ++first) {
+    for (const auto& edge : graph.neighbors(first)) {
+      if (first < edge.to) {
+        edges.push_back(EdgeColorOracleEdge{first, edge.to, edge.weight});
+      }
+    }
+  }
+  return edges;
+}
+
+[[nodiscard]] std::size_t edge_coloring_maximum_degree(const Graph& graph) {
+  std::vector<std::size_t> degree(graph.vertex_count(), 0U);
+  std::size_t maximum = 0;
+  for (const auto& edge : edge_coloring_logical_edges(graph)) {
+    maximum = std::max(maximum, ++degree[edge.first]);
+    maximum = std::max(maximum, ++degree[edge.second]);
+  }
+  return maximum;
+}
+
+[[nodiscard]] bool edge_coloring_can_use(
+    std::span<const EdgeColorOracleEdge> edges, std::size_t vertex_count,
+    std::size_t color_count) {
+  if (edges.empty()) {
+    return true;
+  }
+  if (color_count == 0U) {
+    return false;
+  }
+  std::vector<std::vector<bool>> used(
+      vertex_count, std::vector<bool>(color_count, false));
+  auto search = [&](auto&& self, std::size_t index) -> bool {
+    if (index == edges.size()) {
+      return true;
+    }
+    const auto& edge = edges[index];
+    for (std::size_t color = 0; color < color_count; ++color) {
+      if (used[edge.first][color] || used[edge.second][color]) {
+        continue;
+      }
+      used[edge.first][color] = true;
+      used[edge.second][color] = true;
+      if (self(self, index + 1U)) {
+        return true;
+      }
+      used[edge.first][color] = false;
+      used[edge.second][color] = false;
+    }
+    return false;
+  };
+  return search(search, 0U);
+}
+
+void verify_edge_coloring(const Graph& graph,
+                          const BipartiteEdgeColoringResult& result) {
+  const auto oracle_edges = edge_coloring_logical_edges(graph);
+  REQUIRE_EQ(result.left_partition.size(), graph.vertex_count());
+  REQUIRE_EQ(result.edges.size(), oracle_edges.size());
+  REQUIRE_EQ(result.color_count, edge_coloring_maximum_degree(graph));
+
+  std::vector<std::set<std::size_t>> incident_colors(graph.vertex_count());
+  for (std::size_t edge_id = 0; edge_id < result.edges.size(); ++edge_id) {
+    const auto& actual = result.edges[edge_id];
+    const auto& expected = oracle_edges[edge_id];
+    REQUIRE_EQ(actual.edge_id, edge_id);
+    REQUIRE_EQ(actual.first, expected.first);
+    REQUIRE_EQ(actual.second, expected.second);
+    REQUIRE_EQ(actual.weight, expected.weight);
+    REQUIRE(actual.color < result.color_count);
+    REQUIRE(incident_colors[actual.first].insert(actual.color).second);
+    REQUIRE(incident_colors[actual.second].insert(actual.color).second);
+    REQUIRE(result.left_partition[actual.first] !=
+            result.left_partition[actual.second]);
+  }
+}
+
+TEST_CASE(bipartite_edge_coloring_empty_and_parallel_edges) {
+  Graph empty(5, false);
+  const auto empty_result = minimum_bipartite_edge_coloring(empty);
+  REQUIRE_EQ(empty_result.color_count, std::size_t{0});
+  REQUIRE(empty_result.edges.empty());
+
+  Graph graph(2, false);
+  graph.add_edge(0, 1, -9);
+  graph.add_edge(0, 1, 0);
+  graph.add_edge(0, 1, 42);
+  const auto result = minimum_bipartite_edge_coloring(graph);
+  REQUIRE_EQ(result.color_count, std::size_t{3});
+  REQUIRE_EQ(result.edges.size(), std::size_t{3});
+  REQUIRE_EQ(result.edges[0].weight, std::int64_t{-9});
+  REQUIRE_EQ(result.edges[1].weight, std::int64_t{0});
+  REQUIRE_EQ(result.edges[2].weight, std::int64_t{42});
+  verify_edge_coloring(graph, result);
+}
+
+TEST_CASE(bipartite_edge_coloring_complete_disconnected_and_deterministic) {
+  Graph graph(9, false);
+  for (Vertex left = 0; left < 3; ++left) {
+    for (Vertex right = 3; right < 6; ++right) {
+      graph.add_edge(left, right);
+    }
+  }
+  graph.add_edge(6, 7, 3);
+  graph.add_edge(6, 8, -4);
+  const auto first = minimum_bipartite_edge_coloring(graph);
+  const auto second = minimum_bipartite_edge_coloring(graph);
+  REQUIRE(first == second);
+  REQUIRE_EQ(first.color_count, std::size_t{3});
+  verify_edge_coloring(graph, first);
+}
+
+TEST_CASE(bipartite_edge_coloring_rejects_non_bipartite_domains) {
+  Graph directed(2, true);
+  directed.add_edge(0, 1);
+  REQUIRE_THROWS_AS(minimum_bipartite_edge_coloring(directed),
+                    std::invalid_argument);
+
+  Graph self_loop(1, false);
+  self_loop.add_edge(0, 0);
+  REQUIRE_THROWS_AS(minimum_bipartite_edge_coloring(self_loop),
+                    std::invalid_argument);
+
+  Graph triangle(3, false);
+  triangle.add_edge(0, 1);
+  triangle.add_edge(1, 2);
+  triangle.add_edge(2, 0);
+  REQUIRE_THROWS_AS(minimum_bipartite_edge_coloring(triangle),
+                    std::invalid_argument);
+}
+
+TEST_CASE(bipartite_edge_coloring_randomized_exhaustive_optimality) {
+  std::mt19937_64 rng(0xEC010A5ULL);
+  for (std::size_t trial = 0; trial < 700; ++trial) {
+    const std::size_t left_count = static_cast<std::size_t>(rng() % 4U);
+    const std::size_t right_count = static_cast<std::size_t>(rng() % 4U);
+    Graph graph(left_count + right_count, false);
+
+    std::size_t edge_budget = 8U;
+    for (std::size_t left = 0; left < left_count && edge_budget != 0U;
+         ++left) {
+      for (std::size_t right = 0;
+           right < right_count && edge_budget != 0U; ++right) {
+        const std::size_t copies =
+            std::min<std::size_t>(static_cast<std::size_t>(rng() % 3U),
+                                  edge_budget);
+        for (std::size_t copy = 0; copy < copies; ++copy) {
+          const auto weight = static_cast<std::int64_t>(rng() % 201U) - 100;
+          graph.add_edge(left, left_count + right, weight);
+        }
+        edge_budget -= copies;
+      }
+    }
+
+    const auto result = minimum_bipartite_edge_coloring(graph);
+    verify_edge_coloring(graph, result);
+    REQUIRE(result == minimum_bipartite_edge_coloring(graph));
+
+    const auto edges = edge_coloring_logical_edges(graph);
+    const std::size_t delta = edge_coloring_maximum_degree(graph);
+    if (delta != 0U) {
+      REQUIRE(!edge_coloring_can_use(edges, graph.vertex_count(), delta - 1U));
+      REQUIRE(edge_coloring_can_use(edges, graph.vertex_count(), delta));
+    }
   }
 }
 
