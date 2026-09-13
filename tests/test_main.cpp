@@ -41,6 +41,7 @@
 #include "test_conjugate_gradient_cases.hpp"
 #include "test_householder_qr_cases.hpp"
 #include "test_minimum_enclosing_circle_cases.hpp"
+#include "test_strong_orientation_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
