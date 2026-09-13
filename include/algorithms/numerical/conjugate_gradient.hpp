@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstddef>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 namespace algorithms::numerical {
