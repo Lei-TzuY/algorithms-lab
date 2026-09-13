@@ -31,6 +31,7 @@
 #include "test_strassen_matrix_cases.hpp"
 #include "test_push_relabel_cases.hpp"
 #include "test_lyndon_factorization_cases.hpp"
+#include "test_delaunay_triangulation_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
