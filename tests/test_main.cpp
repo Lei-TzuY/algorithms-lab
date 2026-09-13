@@ -39,6 +39,7 @@
 #include "test_prime_counting_cases.hpp"
 #include "test_weighted_set_cover_cases.hpp"
 #include "test_conjugate_gradient_cases.hpp"
+#include "test_cholesky_cases.hpp"
 #include "test_householder_qr_cases.hpp"
 #include "test_bidiagonalization_cases.hpp"
 #include "test_minimum_enclosing_circle_cases.hpp"
