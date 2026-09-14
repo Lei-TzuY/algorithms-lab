@@ -72,6 +72,7 @@
 #include "test_maximum_weight_closure_cases.hpp"
 #include "test_dag_path_cover_cases.hpp"
 #include "test_orthogonal_segment_intersections_cases.hpp"
+#include "test_suurballe_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
