@@ -90,8 +90,9 @@ inline std::tuple<std::int32_t, std::int32_t, std::int32_t> normalize_vertical(
 // exactly the horizontal segments whose closed x-interval contains x. Equal-x event
 // order is start, query, end, which makes both horizontal endpoints inclusive.
 //
-// Complexity: O((H + V) log(H + V + 1) + K) time and O(H + V + K) storage,
-// where K is the number of reported horizontal/vertical intersection pairs.
+// Complexity: O((H + V) log(H + V + 1) + K log(K + 1)) time and
+// O(H + V + K) storage. The sweep itself is output-sensitive; the K log(K + 1)
+// term comes from the final canonical witness ordering.
 [[nodiscard]] inline std::vector<OrthogonalSegmentIntersection>
 orthogonal_segment_intersections(std::span<const HorizontalSegment2i> horizontals,
                                  std::span<const VerticalSegment2i> verticals) {
