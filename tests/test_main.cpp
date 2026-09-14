@@ -43,6 +43,7 @@
 #include "test_cholesky_cases.hpp"
 #include "test_lu_factorization_cases.hpp"
 #include "test_householder_qr_cases.hpp"
+#include "test_least_squares_cases.hpp"
 #include "test_bidiagonalization_cases.hpp"
 #include "test_svd_cases.hpp"
 #include "test_minimum_enclosing_circle_cases.hpp"
