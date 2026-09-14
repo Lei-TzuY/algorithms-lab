@@ -1,3 +1,4 @@
+#include "algorithms/streaming/ams_f2.hpp"
 #include "algorithms/streaming/count_min.hpp"
 #include "algorithms/streaming/gk_quantiles.hpp"
 #include "algorithms/number_theory/modular.hpp"
@@ -14,9 +15,12 @@
 #include <vector>
 
 namespace {
+using algorithms::streaming::AmsF2FixedHorizonSketch;
+using algorithms::streaming::AmsF2SampleState;
 using algorithms::streaming::CountMinHashRow;
 using algorithms::streaming::CountMinSketch;
 using algorithms::streaming::GreenwaldKhannaSummary;
+using algorithms::streaming::ams_replayable_sample_positions;
 
 std::uint64_t toy_collision_count(std::uint64_t prime, std::uint64_t width,
                                   std::uint64_t first, std::uint64_t second) {
@@ -103,6 +107,57 @@ void enumerate_gk_small_streams(std::vector<std::int64_t>& stream,
   for (const std::int64_t value : std::array<std::int64_t, 3>{-1, 0, 1}) {
     stream.push_back(value);
     enumerate_gk_small_streams(stream, remaining - 1U);
+    stream.pop_back();
+  }
+}
+
+std::uint64_t exact_ams_f2(const std::vector<std::uint32_t>& stream) {
+  std::map<std::uint32_t, std::uint64_t> frequency;
+  for (const std::uint32_t item : stream) {
+    ++frequency[item];
+  }
+  std::uint64_t total = 0U;
+  for (const auto& [item, count] : frequency) {
+    static_cast<void>(item);
+    total += count * count;
+  }
+  return total;
+}
+
+std::vector<std::uint64_t> ams_every_position(std::size_t size) {
+  std::vector<std::uint64_t> positions;
+  positions.reserve(size);
+  for (std::size_t index = 0U; index < size; ++index) {
+    positions.push_back(static_cast<std::uint64_t>(index));
+  }
+  return positions;
+}
+
+void feed_ams(AmsF2FixedHorizonSketch& sketch,
+              const std::vector<std::uint32_t>& stream) {
+  for (const std::uint32_t item : stream) {
+    sketch.add(item);
+    REQUIRE(sketch.valid_state());
+  }
+}
+
+void enumerate_ams_binary_streams(std::vector<std::uint32_t>& stream,
+                                  std::size_t remaining) {
+  if (remaining == 0U) {
+    if (stream.empty()) {
+      return;
+    }
+    AmsF2FixedHorizonSketch sketch(
+        static_cast<std::uint64_t>(stream.size()),
+        ams_every_position(stream.size()));
+    feed_ams(sketch, stream);
+    REQUIRE_EQ(sketch.estimate_f2(),
+               static_cast<long double>(exact_ams_f2(stream)));
+    return;
+  }
+  for (const std::uint32_t value : std::array<std::uint32_t, 2>{0U, 1U}) {
+    stream.push_back(value);
+    enumerate_ams_binary_streams(stream, remaining - 1U);
     stream.pop_back();
   }
 }
@@ -287,4 +342,87 @@ TEST_CASE(gk_quantiles_compresses_long_monotone_stream_deterministically) {
     replay.insert(value);
   }
   REQUIRE_EQ(summary.tuples(), replay.tuples());
+}
+
+TEST_CASE(ams_f2_validation_and_known_identity) {
+  AmsF2FixedHorizonSketch empty(0U, {});
+  REQUIRE(empty.complete());
+  REQUIRE(empty.valid_state());
+  REQUIRE(empty.row_estimates().empty());
+  REQUIRE_EQ(empty.estimate_f2(), 0.0L);
+  REQUIRE_THROWS_AS(empty.add(7U), std::length_error);
+  REQUIRE_THROWS_AS(AmsF2FixedHorizonSketch(4U, {}), std::invalid_argument);
+  REQUIRE_THROWS_AS(AmsF2FixedHorizonSketch(4U, {4U}), std::out_of_range);
+  REQUIRE(ams_replayable_sample_positions(0U, 0U, 5U).empty());
+  REQUIRE_THROWS_AS(ams_replayable_sample_positions(0U, 1U, 5U),
+                    std::invalid_argument);
+
+  const std::vector<std::uint32_t> stream{11U, 22U, 11U, 11U, 22U};
+  AmsF2FixedHorizonSketch sketch(5U, {0U, 1U, 2U, 3U, 4U});
+  REQUIRE_THROWS_AS(sketch.estimate_f2(), std::logic_error);
+  feed_ams(sketch, stream);
+  REQUIRE_EQ(sketch.row_estimates(),
+             (std::vector<long double>{25.0L, 15.0L, 15.0L, 5.0L, 5.0L}));
+  REQUIRE_EQ(sketch.estimate_f2(), 13.0L);
+  REQUIRE_EQ(exact_ams_f2(stream), std::uint64_t{13});
+  REQUIRE_THROWS_AS(sketch.add(11U), std::length_error);
+}
+
+TEST_CASE(ams_f2_duplicate_rows_and_seeded_replay) {
+  const std::vector<std::uint32_t> stream{4U, 9U, 4U, 9U, 9U};
+  AmsF2FixedHorizonSketch sketch(5U, {1U, 1U, 3U});
+  feed_ams(sketch, stream);
+  REQUIRE_EQ(sketch.samples()[0], sketch.samples()[1]);
+  REQUIRE_EQ(sketch.samples()[0], (AmsF2SampleState{1U, 9U, 3U}));
+  REQUIRE_EQ(sketch.samples()[2], (AmsF2SampleState{3U, 9U, 2U}));
+
+  const auto first =
+      ams_replayable_sample_positions(17U, 64U, 0x123456789abcdef0ULL);
+  const auto second =
+      ams_replayable_sample_positions(17U, 64U, 0x123456789abcdef0ULL);
+  REQUIRE_EQ(first, second);
+  REQUIRE_EQ(first.size(), std::size_t{64});
+  for (const std::uint64_t position : first) {
+    REQUIRE(position < 17U);
+  }
+}
+
+TEST_CASE(ams_f2_exhaustive_all_positions_equal_exact_second_moment) {
+  std::vector<std::uint32_t> stream;
+  for (std::size_t length = 1U; length <= 7U; ++length) {
+    enumerate_ams_binary_streams(stream, length);
+  }
+}
+
+TEST_CASE(ams_f2_random_all_positions_differential) {
+  std::mt19937_64 rng(0xA45F200DULL);
+  for (std::size_t trial = 0U; trial < 500U; ++trial) {
+    const std::size_t length = 1U + static_cast<std::size_t>(rng() % 30U);
+    std::vector<std::uint32_t> stream(length);
+    for (std::uint32_t& item : stream) {
+      item = static_cast<std::uint32_t>(rng() % 9U);
+    }
+    AmsF2FixedHorizonSketch sketch(
+        static_cast<std::uint64_t>(length), ams_every_position(length));
+    feed_ams(sketch, stream);
+    REQUIRE_EQ(sketch.estimate_f2(),
+               static_cast<long double>(exact_ams_f2(stream)));
+  }
+}
+
+TEST_CASE(ams_f2_seeded_replay_is_not_an_exactness_contract) {
+  const std::vector<std::uint32_t> stream{
+      1U, 1U, 1U, 1U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U};
+  const auto positions = ams_replayable_sample_positions(
+      static_cast<std::uint64_t>(stream.size()), 3U, 9U);
+  AmsF2FixedHorizonSketch first(
+      static_cast<std::uint64_t>(stream.size()), positions);
+  AmsF2FixedHorizonSketch second(
+      static_cast<std::uint64_t>(stream.size()), positions);
+  feed_ams(first, stream);
+  feed_ams(second, stream);
+  REQUIRE_EQ(first.samples(), second.samples());
+  REQUIRE_EQ(first.estimate_f2(), second.estimate_f2());
+  REQUIRE(first.estimate_f2() !=
+          static_cast<long double>(exact_ams_f2(stream)));
 }
