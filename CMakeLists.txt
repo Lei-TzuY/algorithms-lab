@@ -60,6 +60,7 @@ add_library(algorithms_lab
   src/graphs/incremental_topological_order.cpp
   src/graphs/elementary_cycles.cpp
   src/graphs/biconnected_components.cpp
+  src/graphs/triconnectivity.cpp
   src/graphs/transitive_reduction.cpp
   src/graphs/planarity.cpp
   src/graphs/chordal_graph.cpp
@@ -166,6 +167,7 @@ if(BUILD_TESTING)
     tests/test_incremental_topological_order.cpp
     tests/test_elementary_cycles.cpp
     tests/test_biconnected_components.cpp
+    tests/test_triconnectivity.cpp
     tests/test_transitive_reduction.cpp
     tests/test_planarity.cpp
     tests/test_chordal_graph.cpp
