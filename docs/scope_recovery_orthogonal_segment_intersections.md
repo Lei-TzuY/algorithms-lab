@@ -42,10 +42,12 @@ For `H` horizontal segments, `V` vertical segments, and `K` reported pair inters
 - event construction/sort: `O((H+V) log(H+V))`;
 - horizontal activation/removal: `O(log(H+1))` per event;
 - each vertical query performs one ordered lower bound plus output-proportional range traversal;
-- total direct bound: `O((H+V) log(H+V) + K)` time;
+- the sweep before canonical output ordering is `O((H+V) log(H+V) + K)`;
+- final deterministic witness sorting costs `O(K log(K+1))`;
+- total direct bound: `O((H+V) log(H+V) + K log(K+1))` time;
 - resident event/active/result state: `O(H+V+K)`.
 
-`std::sort`, `std::map`, and `std::set` provide ordering containers; they do not implement the sweep-line algorithm under study.
+`std::sort`, `std::map`, and `std::set` provide ordering containers; they do not implement the sweep-line algorithm under study. The final `std::sort` is accounted for explicitly in the stated bound rather than hidden behind an output-sensitive claim.
 
 ## Verification
 
