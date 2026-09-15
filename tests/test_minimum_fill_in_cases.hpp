@@ -256,8 +256,7 @@ TEST_CASE(minimum_fill_in_randomized_against_all_elimination_orders) {
         if ((rng() % 100U) < 37U) {
           graph.add_edge(u, v, static_cast<std::int64_t>(rng()));
           if ((rng() % 5U) == 0U) {
-            graph.add_edge(u, v,
-                           -static_cast<std::int64_t>(rng() % 1000U));
+            graph.add_edge(u, v, -static_cast<std::int64_t>(rng() % 1000U));
           }
         }
       }
@@ -272,3 +271,4 @@ TEST_CASE(minimum_fill_in_randomized_against_all_elimination_orders) {
 }
 
 }  // namespace
+

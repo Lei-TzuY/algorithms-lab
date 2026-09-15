@@ -231,10 +231,10 @@ class Solver {
 // - graph.vertex_count() <= kExactMinimumFillInMaxVertices.
 //
 // The repository multigraph is projected to its underlying simple graph:
-// self-loops and weights are ignored and parallel copies collapse. The result
+// self-loops and weights are ignored and parallel copies collapse.  The result
 // returns the minimum number of added edges, the lexicographically smallest
 // optimal elimination order, every added fill edge, and a per-step replay
-// witness. Replaying those edges makes the returned elimination order a perfect
+// witness.  Replaying those edges makes the returned elimination order a perfect
 // elimination order of the completed graph.
 //
 // Direct bounded baseline: O(n^2 * 2^n) bitset-style work and O(2^n + n)
