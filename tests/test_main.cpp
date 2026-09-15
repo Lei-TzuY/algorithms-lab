@@ -89,6 +89,7 @@
 #include "test_soft_heap_cases.hpp"
 #include "test_quotient_filter_cases.hpp"
 #include "test_disjoint_sparse_table_cases.hpp"
+#include "test_xor_linear_basis_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
