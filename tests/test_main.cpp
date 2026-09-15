@@ -68,6 +68,7 @@
 #include "test_y_fast_trie_cases.hpp"
 #include "test_sprague_grundy_cases.hpp"
 #include "test_alpha_beta_cases.hpp"
+#include "test_hyperloglog_cases.hpp"
 #include "test_a_star_cases.hpp"
 #include "test_greedy_spanner_cases.hpp"
 #include "test_tournament_feedback_arc_set_cases.hpp"
