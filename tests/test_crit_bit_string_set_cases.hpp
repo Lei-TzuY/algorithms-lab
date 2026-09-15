@@ -12,6 +12,7 @@
 #include <set>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -65,6 +66,37 @@ TEST_CASE(crit_bit_prefix_and_arbitrary_byte_semantics) {
       "", "a", "ab", bytes({0x00U}), bytes({0x00U, 0xFFU}), bytes({0xFFU})};
   REQUIRE(set.valid_structure());
   REQUIRE_EQ(set.values_unsigned_lexicographic(), oracle_values(oracle));
+}
+
+TEST_CASE(crit_bit_move_operations_preserve_class_invariants) {
+  CritBitStringSet source;
+  REQUIRE(source.insert("alpha"));
+  REQUIRE(source.insert("beta"));
+  REQUIRE(source.insert(bytes({0x00U, 0xFFU})));
+  const auto expected = source.values_unsigned_lexicographic();
+
+  CritBitStringSet moved(std::move(source));
+  REQUIRE(source.empty());
+  REQUIRE_EQ(source.size(), 0U);
+  REQUIRE_EQ(source.internal_node_count(), 0U);
+  REQUIRE(source.valid_structure());
+  REQUIRE(source.values_unsigned_lexicographic().empty());
+  REQUIRE(moved.valid_structure());
+  REQUIRE_EQ(moved.values_unsigned_lexicographic(), expected);
+
+  CritBitStringSet assigned;
+  REQUIRE(assigned.insert("stale"));
+  assigned = std::move(moved);
+  REQUIRE(moved.empty());
+  REQUIRE_EQ(moved.size(), 0U);
+  REQUIRE_EQ(moved.internal_node_count(), 0U);
+  REQUIRE(moved.valid_structure());
+  REQUIRE(assigned.valid_structure());
+  REQUIRE_EQ(assigned.values_unsigned_lexicographic(), expected);
+
+  REQUIRE(source.insert("reused"));
+  REQUIRE(source.valid_structure());
+  REQUIRE(source.contains("reused"));
 }
 
 TEST_CASE(crit_bit_erase_compresses_internal_nodes) {
