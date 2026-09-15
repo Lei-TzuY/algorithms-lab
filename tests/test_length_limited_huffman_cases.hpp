@@ -153,6 +153,23 @@ TEST_CASE(length_limited_huffman_checked_cost_boundaries) {
                     std::overflow_error);
 }
 
+TEST_CASE(length_limited_huffman_full_byte_alphabet_capacity_boundary) {
+  using namespace length_limited_huffman_tests;
+
+  std::array<std::uint64_t, 256> frequencies{};
+  frequencies.fill(1U);
+  LengthLimitedHuffmanByteCodebook exact(frequencies, 8U);
+  REQUIRE_EQ(exact.symbol_count(), 256U);
+  REQUIRE_EQ(exact.weighted_bit_count(), 2048U);
+  for (std::size_t symbol = 0U; symbol < frequencies.size(); ++symbol) {
+    REQUIRE_EQ(exact.code_lengths()[symbol], 8U);
+  }
+  REQUIRE(exact.valid_codebook());
+
+  REQUIRE_THROWS_AS(LengthLimitedHuffmanByteCodebook(frequencies, 7U),
+                    std::invalid_argument);
+}
+
 TEST_CASE(length_limited_huffman_randomized_exhaustive_and_unconstrained_crosscheck) {
   using namespace length_limited_huffman_tests;
 
