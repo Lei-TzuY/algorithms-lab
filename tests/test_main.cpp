@@ -90,6 +90,7 @@
 #include "test_quotient_filter_cases.hpp"
 #include "test_disjoint_sparse_table_cases.hpp"
 #include "test_xor_linear_basis_cases.hpp"
+#include "test_myers_edit_distance_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
