@@ -66,8 +66,7 @@ std::vector<BkTreeMatch> bk_oracle_query(const std::vector<std::string>& values,
   return matches;
 }
 
-bool bk_insert_oracle(std::vector<std::string>& values,
-                      const std::string& value) {
+bool bk_insert_oracle(std::vector<std::string>& values, const std::string& value) {
   if (std::find(values.begin(), values.end(), value) != values.end()) {
     return false;
   }
