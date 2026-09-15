@@ -20,8 +20,16 @@ class CritBitStringSet {
   CritBitStringSet() = default;
   CritBitStringSet(const CritBitStringSet&) = delete;
   CritBitStringSet& operator=(const CritBitStringSet&) = delete;
-  CritBitStringSet(CritBitStringSet&&) noexcept = default;
-  CritBitStringSet& operator=(CritBitStringSet&&) noexcept = default;
+  CritBitStringSet(CritBitStringSet&& other) noexcept
+      : root_(std::move(other.root_)),
+        size_(std::exchange(other.size_, std::size_t{0})) {}
+  CritBitStringSet& operator=(CritBitStringSet&& other) noexcept {
+    if (this != &other) {
+      root_ = std::move(other.root_);
+      size_ = std::exchange(other.size_, std::size_t{0});
+    }
+    return *this;
+  }
 
   [[nodiscard]] bool empty() const noexcept { return size_ == 0U; }
   [[nodiscard]] std::size_t size() const noexcept { return size_; }
