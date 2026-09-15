@@ -79,6 +79,7 @@
 #include "test_karatsuba_cases.hpp"
 #include "test_bk_tree_cases.hpp"
 #include "test_pathwidth_cases.hpp"
+#include "test_length_limited_huffman_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
