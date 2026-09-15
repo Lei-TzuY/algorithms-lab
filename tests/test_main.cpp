@@ -76,6 +76,7 @@
 #include "test_orthogonal_segment_intersections_cases.hpp"
 #include "test_suurballe_cases.hpp"
 #include "test_minimum_fill_in_cases.hpp"
+#include "test_karatsuba_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
