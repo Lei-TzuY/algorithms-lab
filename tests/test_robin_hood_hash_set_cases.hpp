@@ -21,8 +21,7 @@ std::uint64_t robin_test_mix(std::uint64_t value, std::uint64_t seed) {
   return z ^ (z >> 31U);
 }
 
-std::vector<std::int64_t> robin_set_values(
-    const std::set<std::int64_t>& oracle) {
+std::vector<std::int64_t> robin_set_values(const std::set<std::int64_t>& oracle) {
   return std::vector<std::int64_t>(oracle.begin(), oracle.end());
 }
 
