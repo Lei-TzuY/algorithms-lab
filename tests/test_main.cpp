@@ -85,6 +85,7 @@
 #include "test_min_plus_cases.hpp"
 #include "test_crit_bit_string_set_cases.hpp"
 #include "test_slope_trick_cases.hpp"
+#include "test_pairing_heap_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
