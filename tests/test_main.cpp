@@ -4,6 +4,7 @@
 #include "test_irreducible_factorization_cases.hpp"
 #include "test_spanning_tree_count_cases.hpp"
 #include "test_directed_arborescence_count_cases.hpp"
+#include "test_pfaffian_cases.hpp"
 #include "test_earley_parser_cases.hpp"
 #include "test_earley_parser_randomized_cases.hpp"
 #include "test_extension_field_cases.hpp"
