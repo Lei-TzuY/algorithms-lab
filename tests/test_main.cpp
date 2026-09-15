@@ -93,6 +93,7 @@
 #include "test_myers_edit_distance_cases.hpp"
 #include "test_robin_hood_hash_set_cases.hpp"
 #include "test_persistent_byte_rope_cases.hpp"
+#include "test_point_quadtree_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
