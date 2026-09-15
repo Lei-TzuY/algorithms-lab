@@ -91,6 +91,7 @@
 #include "test_disjoint_sparse_table_cases.hpp"
 #include "test_xor_linear_basis_cases.hpp"
 #include "test_myers_edit_distance_cases.hpp"
+#include "test_robin_hood_hash_set_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
