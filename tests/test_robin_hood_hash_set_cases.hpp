@@ -21,7 +21,8 @@ std::uint64_t robin_test_mix(std::uint64_t value, std::uint64_t seed) {
   return z ^ (z >> 31U);
 }
 
-std::vector<std::int64_t> set_values(const std::set<std::int64_t>& oracle) {
+std::vector<std::int64_t> robin_set_values(
+    const std::set<std::int64_t>& oracle) {
   return std::vector<std::int64_t>(oracle.begin(), oracle.end());
 }
 
@@ -153,13 +154,13 @@ TEST_CASE(robin_hood_randomized_differential_and_structure) {
     if ((step % 61) == 0) {
       REQUIRE(set.valid_structure());
       REQUIRE(replay.valid_structure());
-      REQUIRE_EQ(set.values_sorted(), set_values(oracle));
+      REQUIRE_EQ(set.values_sorted(), robin_set_values(oracle));
       REQUIRE_EQ(set.debug_slots(), replay.debug_slots());
     }
   }
 
   REQUIRE(set.valid_structure());
-  REQUIRE_EQ(set.values_sorted(), set_values(oracle));
+  REQUIRE_EQ(set.values_sorted(), robin_set_values(oracle));
   REQUIRE_EQ(set.debug_slots(), replay.debug_slots());
 }
 
