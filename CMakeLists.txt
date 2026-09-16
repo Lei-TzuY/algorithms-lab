@@ -149,6 +149,23 @@ algorithms_enable_sanitizers(algorithms_lab)
 
 include(CTest)
 if(BUILD_TESTING)
+  file(GLOB ALGORITHMS_CASE_HEADERS CONFIGURE_DEPENDS
+       "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_*_cases.hpp")
+  list(SORT ALGORITHMS_CASE_HEADERS)
+  set(ALGORITHMS_CASE_SOURCES)
+  set(ALGORITHMS_GENERATED_TEST_DIR
+      "${CMAKE_CURRENT_BINARY_DIR}/generated_test_cases")
+  file(MAKE_DIRECTORY "${ALGORITHMS_GENERATED_TEST_DIR}")
+  foreach(test_header IN LISTS ALGORITHMS_CASE_HEADERS)
+    get_filename_component(test_header_name "${test_header}" NAME)
+    get_filename_component(test_case_name "${test_header}" NAME_WE)
+    set(TEST_HEADER_NAME "${test_header_name}")
+    set(test_source "${ALGORITHMS_GENERATED_TEST_DIR}/${test_case_name}.cpp")
+    file(CONFIGURE OUTPUT "${test_source}"
+         CONTENT "#include \"@TEST_HEADER_NAME@\"\n" @ONLY)
+    list(APPEND ALGORITHMS_CASE_SOURCES "${test_source}")
+  endforeach()
+
   add_executable(algorithms_tests
     tests/test_main.cpp
     tests/test_cyk_parser.cpp
@@ -288,12 +305,16 @@ if(BUILD_TESTING)
     tests/test_misra_gries.cpp
     tests/test_arithmetic_byte_code.cpp
     tests/test_huffman_byte_code.cpp
-    tests/test_lz78.cpp)
+    tests/test_lz78.cpp
+    ${ALGORITHMS_CASE_SOURCES})
   target_include_directories(algorithms_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
   target_link_libraries(algorithms_tests PRIVATE algorithms_lab)
   algorithms_enable_strict_warnings(algorithms_tests)
   algorithms_enable_sanitizers(algorithms_tests)
   add_test(NAME algorithms_tests COMMAND algorithms_tests)
+  add_test(NAME algorithms_tests_list COMMAND algorithms_tests --list)
+  add_test(NAME algorithms_tests_recovery_filter
+           COMMAND algorithms_tests --filter rake_compress_rejects_non_trees)
 endif()
 
 if(ALGORITHMS_BUILD_BENCHMARKS)
