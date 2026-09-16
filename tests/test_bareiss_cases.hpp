@@ -1,7 +1,6 @@
 #pragma once
 
 #include "algorithms/linear_algebra/bareiss_determinant.hpp"
-#include "test_framework.hpp"
 
 #include <algorithm>
 #include <cstddef>
