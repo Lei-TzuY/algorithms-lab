@@ -143,20 +143,4 @@ irreducibles(std::uint64_t prime, std::size_t maximum_degree) {
   return polynomial;
 }
 
-inline void require_factorization(
-    const PrimeFieldPolynomial& input, std::uint64_t prime,
-    std::uint64_t expected_unit,
-    const std::vector<std::pair<std::size_t, PrimeFieldPolynomial>>& expected) {
-  const auto result =
-      algorithms::polynomials::polynomial_distinct_degree_factorization_mod(
-          input, prime);
-  REQUIRE_EQ(result.unit, expected_unit);
-  REQUIRE_EQ(result.factors.size(), expected.size());
-  for (std::size_t index = 0U; index < expected.size(); ++index) {
-    REQUIRE_EQ(result.factors[index].irreducible_degree,
-               expected[index].first);
-    REQUIRE_EQ(result.factors[index].factor, expected[index].second);
-  }
-}
-
 }  // namespace distinct_degree_test_detail
