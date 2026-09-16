@@ -1,123 +1,97 @@
 #include "test_framework.hpp"
-#include "test_distinct_degree_factorization_cases.hpp"
-#include "test_equal_degree_factorization_cases.hpp"
-#include "test_irreducible_factorization_cases.hpp"
-#include "test_spanning_tree_count_cases.hpp"
-#include "test_directed_arborescence_count_cases.hpp"
-#include "test_pfaffian_cases.hpp"
-#include "test_earley_parser_cases.hpp"
-#include "test_earley_parser_randomized_cases.hpp"
-#include "test_extension_field_cases.hpp"
-#include "test_bitwise_convolution_cases.hpp"
-#include "test_metric_tsp_cases.hpp"
-#include "test_euler_tour_forest_cases.hpp"
-#include "test_fully_dynamic_connectivity_cases.hpp"
-#include "test_dynamic_minimum_spanning_forest_cases.hpp"
-#include "test_dulmage_mendelsohn_cases.hpp"
-#include "test_lz77_cases.hpp"
-#include "test_bareiss_cases.hpp"
-#include "test_reed_solomon_cases.hpp"
-#include "test_vertex_connectivity_cases.hpp"
-#include "test_radix_heap_cases.hpp"
-#include "test_elias_fano_cases.hpp"
-#include "test_smith_normal_form_cases.hpp"
-#include "test_modular_linear_system_cases.hpp"
-#include "test_weighted_matroid_intersection_cases.hpp"
-#include "test_matroid_union_cases.hpp"
-#include "test_linear_matroid_parity_cases.hpp"
-#include "test_symmetric_submodular_minimization_cases.hpp"
-#include "test_k_shortest_paths_cases.hpp"
-#include "test_fractional_cascading_cases.hpp"
-#include "test_optimal_bst_cases.hpp"
-#include "test_general_graph_isomorphism_cases.hpp"
-#include "test_cartesian_tree_rmq_cases.hpp"
-#include "test_dsu_on_tree_frequency_cases.hpp"
-#include "test_cactus_decomposition_cases.hpp"
-#include "test_parity_game_cases.hpp"
-#include "test_fft_cases.hpp"
-#include "test_strassen_matrix_cases.hpp"
-#include "test_push_relabel_cases.hpp"
-#include "test_lyndon_factorization_cases.hpp"
-#include "test_delaunay_triangulation_cases.hpp"
-#include "test_minkowski_sum_cases.hpp"
-#include "test_multipoint_evaluation_cases.hpp"
-#include "test_prime_counting_cases.hpp"
-#include "test_weighted_set_cover_cases.hpp"
-#include "test_conjugate_gradient_cases.hpp"
-#include "test_cholesky_cases.hpp"
-#include "test_lu_factorization_cases.hpp"
-#include "test_householder_qr_cases.hpp"
-#include "test_least_squares_cases.hpp"
-#include "test_bidiagonalization_cases.hpp"
-#include "test_svd_cases.hpp"
-#include "test_minimum_enclosing_circle_cases.hpp"
-#include "test_strong_orientation_cases.hpp"
-#include "test_open_ear_decomposition_cases.hpp"
-#include "test_st_numbering_cases.hpp"
-#include "test_densest_subgraph_cases.hpp"
-#include "test_feedback_vertex_set_cases.hpp"
-#include "test_tutte_polynomial_cases.hpp"
-#include "test_minimum_dominating_set_cases.hpp"
-#include "test_binary_permanent_cases.hpp"
-#include "test_linear_extension_count_cases.hpp"
-#include "test_gallai_edmonds_cases.hpp"
-#include "test_tutte_berge_cases.hpp"
-#include "test_cuckoo_hash_set_cases.hpp"
-#include "test_burnside_orbit_count_cases.hpp"
-#include "test_manacher_cases.hpp"
-#include "test_prufer_cases.hpp"
-#include "test_scapegoat_tree_cases.hpp"
-#include "test_skip_list_cases.hpp"
-#include "test_x_fast_trie_cases.hpp"
-#include "test_y_fast_trie_cases.hpp"
-#include "test_sprague_grundy_cases.hpp"
-#include "test_alpha_beta_cases.hpp"
-#include "test_a_star_cases.hpp"
-#include "test_greedy_spanner_cases.hpp"
-#include "test_tournament_feedback_arc_set_cases.hpp"
-#include "test_maximum_weight_closure_cases.hpp"
-#include "test_dag_path_cover_cases.hpp"
-#include "test_orthogonal_segment_intersections_cases.hpp"
-#include "test_suurballe_cases.hpp"
-#include "test_minimum_fill_in_cases.hpp"
-#include "test_karatsuba_cases.hpp"
-#include "test_bk_tree_cases.hpp"
-#include "test_pathwidth_cases.hpp"
-#include "test_length_limited_huffman_cases.hpp"
-#include "test_min_plus_cases.hpp"
-#include "test_crit_bit_string_set_cases.hpp"
-#include "test_slope_trick_cases.hpp"
-#include "test_pairing_heap_cases.hpp"
-#include "test_soft_heap_cases.hpp"
-#include "test_quotient_filter_cases.hpp"
-#include "test_xor_filter_cases.hpp"
-#include "test_disjoint_sparse_table_cases.hpp"
-#include "test_xor_linear_basis_cases.hpp"
-#include "test_myers_edit_distance_cases.hpp"
-#include "test_robin_hood_hash_set_cases.hpp"
-#include "test_persistent_byte_rope_cases.hpp"
-#include "test_point_quadtree_cases.hpp"
-#include "test_balanced_parentheses_tree_cases.hpp"
-#include "test_minimum_cycle_basis_cases.hpp"
-#include "test_frequent_directions_cases.hpp"
-#include "test_viterbi_convolutional_cases.hpp"
-#include "test_bounded_half_plane_intersection_cases.hpp"
-#include "test_kll_quantiles_cases.hpp"
-#include "test_gauss_lattice_reduction_cases.hpp"
-#include "test_garsia_wachs_cases.hpp"
-#include "test_robinson_schensted_cases.hpp"
-#include "test_graphical_degree_sequence_cases.hpp"
-#include "test_schroeppel_shamir_cases.hpp"
-#include "test_deterministic_selection_cases.hpp"
-#include "test_isotonic_regression_cases.hpp"
-#include "test_squared_distance_transform_cases.hpp"
-#include "test_partial_retroactive_queue_cases.hpp"
-#include "test_kinetic_affine_tournament_cases.hpp"
-#include "test_rake_compress_tree_contraction_cases.hpp"
 
-int main() {
+#include <algorithm>
+#include <cstddef>
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <vector>
+
+namespace {
+
+struct RunnerOptions {
+  bool list_only = false;
+  std::string filter;
+};
+
+void print_usage(const char* program) {
+  std::cerr << "usage: " << program << " [--list] [--filter <substring>]\n";
+}
+
+bool parse_options(int argc, char* argv[], RunnerOptions& options) {
+  for (int index = 1; index < argc; ++index) {
+    const std::string_view argument(argv[index]);
+    if (argument == "--list") {
+      options.list_only = true;
+      continue;
+    }
+    if (argument == "--filter") {
+      if (index + 1 >= argc || !options.filter.empty()) {
+        return false;
+      }
+      ++index;
+      options.filter = argv[index];
+      continue;
+    }
+    constexpr std::string_view prefix = "--filter=";
+    if (argument.starts_with(prefix) && options.filter.empty()) {
+      options.filter = std::string(argument.substr(prefix.size()));
+      continue;
+    }
+    return false;
+  }
+  return true;
+}
+
+bool selected(const testfw::TestCase& test, const std::string& filter) {
+  return filter.empty() || test.name.find(filter) != std::string::npos;
+}
+
+}  // namespace
+
+int main(int argc, char* argv[]) {
+  RunnerOptions options;
+  if (!parse_options(argc, argv, options)) {
+    print_usage(argv[0]);
+    return 2;
+  }
+
+  std::vector<testfw::TestCase> tests = testfw::registry();
+  std::sort(tests.begin(), tests.end(), [](const auto& left, const auto& right) {
+    return left.name < right.name;
+  });
+
+  for (std::size_t index = 1; index < tests.size(); ++index) {
+    if (tests[index - 1].name == tests[index].name) {
+      std::cerr << "duplicate test name: " << tests[index].name << '\n';
+      return 2;
+    }
+  }
+
+  std::size_t selected_count = 0;
+  for (const auto& test : tests) {
+    if (!selected(test, options.filter)) {
+      continue;
+    }
+    ++selected_count;
+    if (options.list_only) {
+      std::cout << test.name << '\n';
+    }
+  }
+
+  if (selected_count == 0) {
+    std::cerr << "no tests matched filter: " << options.filter << '\n';
+    return 2;
+  }
+  if (options.list_only) {
+    return 0;
+  }
+
   std::size_t passed = 0;
-  for (const auto& test : testfw::registry()) {
+  for (const auto& test : tests) {
+    if (!selected(test, options.filter)) {
+      continue;
+    }
     try {
       test.function();
       ++passed;
