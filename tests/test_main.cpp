@@ -88,6 +88,7 @@
 #include "test_pairing_heap_cases.hpp"
 #include "test_soft_heap_cases.hpp"
 #include "test_quotient_filter_cases.hpp"
+#include "test_xor_filter_cases.hpp"
 #include "test_disjoint_sparse_table_cases.hpp"
 #include "test_xor_linear_basis_cases.hpp"
 #include "test_myers_edit_distance_cases.hpp"
