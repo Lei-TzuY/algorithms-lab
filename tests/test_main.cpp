@@ -10,6 +10,7 @@
 #include "test_extension_field_cases.hpp"
 #include "test_bitwise_convolution_cases.hpp"
 #include "test_metric_tsp_cases.hpp"
+#include "test_christofides_tsp_cases.hpp"
 #include "test_euler_tour_forest_cases.hpp"
 #include "test_fully_dynamic_connectivity_cases.hpp"
 #include "test_dynamic_minimum_spanning_forest_cases.hpp"
