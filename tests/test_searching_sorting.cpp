@@ -1,8 +1,10 @@
 #include "test_framework.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <random>
 #include <span>
 #include <stdexcept>
@@ -10,6 +12,7 @@
 
 #include "algorithms/optimization/smawk.hpp"
 #include "algorithms/searching/binary_search.hpp"
+#include "algorithms/sorting/ford_johnson.hpp"
 #include "algorithms/sorting/merge_sort.hpp"
 #include "algorithms/sorting/quick_sort.hpp"
 
@@ -53,6 +56,21 @@ void require_both_sorts(std::vector<int> input) {
   auto quick_values = std::move(input);
   quick_sort(quick_values);
   REQUIRE_EQ(quick_values, expected);
+}
+
+std::size_t ford_johnson_classical_bound(std::size_t count) {
+  std::size_t total = 0U;
+  for (std::size_t k = 1U; k <= count; ++k) {
+    const std::size_t target = k - k / 4U;  // ceil(3k/4)
+    std::size_t power = 1U;
+    std::size_t term = 0U;
+    while (power < target) {
+      power *= 2U;
+      ++term;
+    }
+    total += term;
+  }
+  return total;
 }
 
 std::vector<std::size_t> naive_smawk_row_minima(const SmawkMatrix& matrix) {
@@ -109,6 +127,78 @@ TEST_CASE(sorts_randomized_differential_against_std_sort) {
       values.push_back(value_dist(rng));
     }
     require_both_sorts(values);
+  }
+}
+
+TEST_CASE(ford_johnson_edge_cases_duplicates_and_adversarial_count) {
+  using algorithms::sorting::ford_johnson_sort;
+
+  REQUIRE_EQ(ford_johnson_sort({}).comparisons, std::size_t{0});
+  const std::array<std::int64_t, 1> singleton{{42}};
+  REQUIRE_EQ(ford_johnson_sort(singleton).values,
+             (std::vector<std::int64_t>{42}));
+
+  const std::array<std::int64_t, 8> duplicates{{
+      std::numeric_limits<std::int64_t>::max(), 0, -7, 0,
+      std::numeric_limits<std::int64_t>::min(), -7, 5, 5,
+  }};
+  auto expected = std::vector<std::int64_t>(duplicates.begin(), duplicates.end());
+  std::sort(expected.begin(), expected.end());
+  const auto result = ford_johnson_sort(duplicates);
+  REQUIRE_EQ(result.values, expected);
+  REQUIRE(result.comparisons <= ford_johnson_classical_bound(duplicates.size()));
+
+  const std::array<std::int64_t, 9> adversarial{{0, 1, 2, 5, 3, 4, 6, 8, 7}};
+  const auto adversarial_result = ford_johnson_sort(adversarial);
+  REQUIRE_EQ(adversarial_result.values,
+             (std::vector<std::int64_t>{0, 1, 2, 3, 4, 5, 6, 7, 8}));
+  REQUIRE_EQ(adversarial_result.comparisons, std::size_t{19});
+}
+
+TEST_CASE(ford_johnson_exhaustive_small_permutation_comparison_bounds) {
+  using algorithms::sorting::ford_johnson_sort;
+  constexpr std::array<std::size_t, 9> expected_worst{{
+      0U, 0U, 1U, 3U, 5U, 7U, 10U, 13U, 16U,
+  }};
+
+  for (std::size_t size = 0U; size <= 8U; ++size) {
+    std::vector<std::int64_t> permutation(size);
+    for (std::size_t index = 0U; index < size; ++index) {
+      permutation[index] = static_cast<std::int64_t>(index);
+    }
+    std::size_t worst = 0U;
+    do {
+      const auto result = ford_johnson_sort(permutation);
+      std::vector<std::int64_t> sorted(size);
+      for (std::size_t index = 0U; index < size; ++index) {
+        sorted[index] = static_cast<std::int64_t>(index);
+      }
+      REQUIRE_EQ(result.values, sorted);
+      REQUIRE(result.comparisons <= ford_johnson_classical_bound(size));
+      worst = std::max(worst, result.comparisons);
+    } while (std::next_permutation(permutation.begin(), permutation.end()));
+    REQUIRE_EQ(worst, expected_worst[size]);
+  }
+}
+
+TEST_CASE(ford_johnson_randomized_differential_and_determinism) {
+  using algorithms::sorting::ford_johnson_sort;
+
+  std::mt19937_64 random(0x464F52444A4F484EULL);
+  for (std::size_t trial = 0U; trial < 1500U; ++trial) {
+    const auto size = static_cast<std::size_t>(random() % 129U);
+    std::vector<std::int64_t> values(size);
+    for (auto& value : values) {
+      value = static_cast<std::int64_t>(random() % 101U) - 50;
+    }
+    auto expected = values;
+    std::sort(expected.begin(), expected.end());
+
+    const auto first = ford_johnson_sort(values);
+    const auto second = ford_johnson_sort(values);
+    REQUIRE_EQ(first, second);
+    REQUIRE_EQ(first.values, expected);
+    REQUIRE(first.comparisons <= ford_johnson_classical_bound(size));
   }
 }
 
