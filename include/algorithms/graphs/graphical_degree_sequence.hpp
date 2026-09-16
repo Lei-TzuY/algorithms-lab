@@ -22,7 +22,7 @@ struct DegreeSequenceRealization {
                          const DegreeSequenceRealization&) = default;
 };
 
-namespace detail {
+namespace degree_sequence_detail {
 
 inline std::uint64_t checked_add_u64(std::uint64_t lhs, std::uint64_t rhs) {
   if (lhs > std::numeric_limits<std::uint64_t>::max() - rhs) {
@@ -53,13 +53,13 @@ inline void validate_degree_domain(std::span<const std::size_t> degrees) {
   }
 }
 
-}  // namespace detail
+}  // namespace degree_sequence_detail
 
 // Erdős-Gallai graphicality criterion for a simple undirected graph.
 // This direct educational baseline uses an O(n^2) right-hand-side scan after
 // sorting, rather than the prefix/binary-search optimization.
 inline bool erdos_gallai_graphical(std::span<const std::size_t> degrees) {
-  detail::validate_degree_domain(degrees);
+  degree_sequence_detail::validate_degree_domain(degrees);
   const std::size_t n = degrees.size();
   if (n == 0U) {
     return true;
@@ -70,7 +70,7 @@ inline bool erdos_gallai_graphical(std::span<const std::size_t> degrees) {
 
   std::uint64_t total = 0;
   for (const std::size_t degree : sorted) {
-    total = detail::checked_add_u64(total, detail::checked_size_to_u64(degree));
+    total = degree_sequence_detail::checked_add_u64(total, degree_sequence_detail::checked_size_to_u64(degree));
   }
   if ((total & 1U) != 0U) {
     return false;
@@ -78,18 +78,18 @@ inline bool erdos_gallai_graphical(std::span<const std::size_t> degrees) {
 
   std::uint64_t left = 0;
   for (std::size_t k = 1; k <= n; ++k) {
-    left = detail::checked_add_u64(left,
-                                   detail::checked_size_to_u64(sorted[k - 1U]));
+    left = degree_sequence_detail::checked_add_u64(left,
+                                   degree_sequence_detail::checked_size_to_u64(sorted[k - 1U]));
 
     std::uint64_t right = 0;
-    const std::uint64_t k64 = detail::checked_size_to_u64(k);
+    const std::uint64_t k64 = degree_sequence_detail::checked_size_to_u64(k);
     for (std::size_t i = 0; i < k; ++i) {
-      right = detail::checked_add_u64(right, k64 - 1U);
+      right = degree_sequence_detail::checked_add_u64(right, k64 - 1U);
     }
     for (std::size_t i = k; i < n; ++i) {
       const std::size_t capped = std::min(sorted[i], k);
-      right = detail::checked_add_u64(right,
-                                      detail::checked_size_to_u64(capped));
+      right = degree_sequence_detail::checked_add_u64(right,
+                                      degree_sequence_detail::checked_size_to_u64(capped));
     }
     if (left > right) {
       return false;
@@ -104,7 +104,7 @@ inline bool erdos_gallai_graphical(std::span<const std::size_t> degrees) {
 // witness is sorted by endpoint pair.
 inline std::optional<DegreeSequenceRealization> havel_hakimi_realization(
     std::span<const std::size_t> degrees) {
-  detail::validate_degree_domain(degrees);
+  degree_sequence_detail::validate_degree_domain(degrees);
   const std::size_t n = degrees.size();
   struct ResidualVertex {
     std::size_t degree{};
