@@ -1,5 +1,25 @@
 #pragma once
 
+#include "earley_parser_test_support.hpp"
+
+#include <cstddef>
+#include <cstdint>
+#include <random>
+#include <string>
+#include <utility>
+
+using earley_test_support::CnfBinaryRule;
+using earley_test_support::CnfGrammar;
+using earley_test_support::CnfTerminalRule;
+using earley_test_support::EarleyParseResult;
+using earley_test_support::GeneralCfgGrammar;
+using earley_test_support::GeneralCfgRule;
+using earley_test_support::ch;
+using earley_test_support::cyk_parse;
+using earley_test_support::earley_recognize;
+using earley_test_support::fixed_point_oracle;
+using earley_test_support::nt;
+
 TEST_CASE(earley_randomized_least_fixed_point_differential) {
   std::mt19937_64 rng(0xEA71E1ULL);
   for (std::size_t trial = 0; trial < 1000U; ++trial) {
@@ -20,11 +40,15 @@ TEST_CASE(earley_randomized_least_fixed_point_differential) {
         }
       }
       grammar.rules.push_back(std::move(rule));
-      if ((rng() % 7U) == 0U) grammar.rules.push_back(grammar.rules.back());
+      if ((rng() % 7U) == 0U) {
+        grammar.rules.push_back(grammar.rules.back());
+      }
     }
     const std::size_t input_length = static_cast<std::size_t>(rng() % 6U);
     std::string input(input_length, '\0');
-    for (char& byte : input) byte = static_cast<char>(rng() % 3U);
+    for (char& byte : input) {
+      byte = static_cast<char>(rng() % 3U);
+    }
 
     const bool expected = fixed_point_oracle(grammar, input);
     const EarleyParseResult first = earley_recognize(grammar, input);
@@ -34,7 +58,6 @@ TEST_CASE(earley_randomized_least_fixed_point_differential) {
     REQUIRE_EQ(first.chart_item_counts.size(), input.size() + 1U);
   }
 }
-
 
 TEST_CASE(earley_matches_sealed_cyk_on_cnf_subdomain) {
   CnfGrammar empty_cnf{1U, 0U, true, {}, {}};
@@ -70,12 +93,16 @@ TEST_CASE(earley_matches_sealed_cyk_on_cnf_subdomain) {
       general.rules.push_back(GeneralCfgRule{rule.lhs, {ch(rule.terminal)}});
     }
     for (const CnfBinaryRule& rule : cnf.binary_rules) {
-      general.rules.push_back(GeneralCfgRule{rule.lhs, {nt(rule.left), nt(rule.right)}});
+      general.rules.push_back(
+          GeneralCfgRule{rule.lhs, {nt(rule.left), nt(rule.right)}});
     }
 
     const std::size_t input_length = static_cast<std::size_t>(rng() % 6U);
     std::string input(input_length, '\0');
-    for (char& byte : input) byte = static_cast<char>(rng() % 3U);
-    REQUIRE_EQ(earley_recognize(general, input).accepted, cyk_parse(cnf, input).accepted);
+    for (char& byte : input) {
+      byte = static_cast<char>(rng() % 3U);
+    }
+    REQUIRE_EQ(earley_recognize(general, input).accepted,
+               cyk_parse(cnf, input).accepted);
   }
 }
