@@ -8,9 +8,9 @@ This checkpoint changes verification architecture rather than adding another alg
 
 ## Isolated recovery-suite compilation
 
-Every source-tree header matching `tests/test_*_cases.hpp` is treated as one self-registering recovery test suite. CMake discovers these headers with `CONFIGURE_DEPENDS` and generates one tiny wrapper source per header in the build tree. Each wrapper includes exactly one case header.
+Every source-tree header matching `tests/test_*_cases.hpp` is treated as one self-registering recovery test suite. CMake discovers these headers with `CONFIGURE_DEPENDS` and generates one tiny wrapper source per header in the build tree. Each wrapper first includes the shared `test_framework.hpp` registration/assertion contract and then includes exactly one case header.
 
-The wrappers are linked into the existing `algorithms_tests` executable together with the ordinary `tests/test_*.cpp` sources. The public test execution model stays one executable and one full-suite CTest gate, but each recovery header must now compile as a self-contained translation unit. Private helper names, transitive includes, and macros therefore cannot leak between unrelated recovery suites.
+The wrappers are linked into the existing `algorithms_tests` executable together with the ordinary `tests/test_*.cpp` sources. The public test execution model stays one executable and one full-suite CTest gate, but each recovery suite now compiles in its own translation unit with only the shared test framework prelude. Private helper names and transitive includes therefore cannot leak between unrelated recovery suites, while historical case headers do not each need to duplicate the common framework include.
 
 The filename convention is part of the verification contract: a new recovery suite named `test_<surface>_cases.hpp` is auto-enrolled after CMake reconfiguration. No generated wrapper is written into the source tree.
 
@@ -22,6 +22,6 @@ Default invocation still executes every registered test. `--list` lists the sele
 
 ## Evidence and non-claims
 
-The full GCC release, Clang release, and GCC ASan+UBSan CI matrix remains the integration authority. Successful compilation under this layout is itself evidence that every recovery case header is self-contained and free from cross-header compile collisions. Full-suite execution verifies that cross-translation-unit registration still discovers and runs the suites.
+The full GCC release, Clang release, and GCC ASan+UBSan CI matrix remains the integration authority. Successful compilation under this layout is evidence that every recovery suite is isolated from neighboring case headers and that the shared test framework prelude is sufficient for registration/assertion macros. Full-suite execution verifies that cross-translation-unit registration still discovers and runs the suites.
 
 This checkpoint makes no clean-build speedup claim. Splitting a mega translation unit trades repeated parsing/link inputs for compile isolation and finer incremental rebuild boundaries. It also does not introduce a property-testing framework, randomized-test scheduler, or CI sharding policy; those would require separate evidence if they become real bottlenecks.
