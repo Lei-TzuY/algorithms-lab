@@ -99,6 +99,7 @@
 #include "test_frequent_directions_cases.hpp"
 #include "test_viterbi_convolutional_cases.hpp"
 #include "test_bounded_half_plane_intersection_cases.hpp"
+#include "test_kll_quantiles_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
