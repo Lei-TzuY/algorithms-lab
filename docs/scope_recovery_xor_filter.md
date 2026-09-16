@@ -84,11 +84,12 @@ uses the more conservative roughly-2n resident-slot baseline.
 
 ## Complexity and non-claims
 
-Let `n` be the number of distinct input keys and `A` the number of construction
-attempts actually used. Deterministic duplicate normalization costs
-`O(n log n)`. Each peel attempt is `O(n)` time and `O(n)` construction workspace,
-so total build time is `O(n log n + A n)`. The resident filter uses `O(n)` bytes
-of fingerprint state, and each membership query is `O(1)` time.
+Let `m` be the number of input keys before duplicate removal, `n` the number of
+distinct keys, and `A` the number of construction attempts actually used.
+Deterministic duplicate normalization costs `O(m log m)`. Each peel attempt is
+`O(n)` time and `O(n)` construction workspace, so total build time is
+`O(m log m + A n)`. The resident filter uses `O(n)` bytes of fingerprint state,
+and each membership query is `O(1)` time.
 
 The deterministic mixer is not cryptographic. No adversarial false-positive
 bound, cryptographic property, random-oracle proof, construction-success
