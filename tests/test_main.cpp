@@ -111,6 +111,7 @@
 #include "test_deterministic_selection_cases.hpp"
 #include "test_isotonic_regression_cases.hpp"
 #include "test_squared_distance_transform_cases.hpp"
+#include "test_partial_retroactive_queue_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
