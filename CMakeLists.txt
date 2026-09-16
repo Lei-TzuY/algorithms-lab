@@ -162,7 +162,7 @@ if(BUILD_TESTING)
     set(TEST_HEADER_NAME "${test_header_name}")
     set(test_source "${ALGORITHMS_GENERATED_TEST_DIR}/${test_case_name}.cpp")
     file(CONFIGURE OUTPUT "${test_source}"
-         CONTENT "#include \"@TEST_HEADER_NAME@\"\n" @ONLY)
+         CONTENT "#include \"test_framework.hpp\"\n#include \"@TEST_HEADER_NAME@\"\n" @ONLY)
     list(APPEND ALGORITHMS_CASE_SOURCES "${test_source}")
   endforeach()
 
