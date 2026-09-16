@@ -113,6 +113,7 @@
 #include "test_squared_distance_transform_cases.hpp"
 #include "test_partial_retroactive_queue_cases.hpp"
 #include "test_kinetic_affine_tournament_cases.hpp"
+#include "test_rake_compress_tree_contraction_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
