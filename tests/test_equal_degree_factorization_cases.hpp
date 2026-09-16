@@ -2,7 +2,7 @@
 
 #include "algorithms/number_theory/modular.hpp"
 #include "algorithms/polynomials/equal_degree_factorization.hpp"
-#include "test_distinct_degree_factorization_cases.hpp"
+#include "prime_field_factorization_test_support.hpp"
 #include "test_framework.hpp"
 
 #include <algorithm>
