@@ -12,7 +12,7 @@ Every source-tree header matching `tests/test_*_cases.hpp` is treated as one sel
 
 The wrappers are linked into the existing `algorithms_tests` executable together with the ordinary `tests/test_*.cpp` sources. The public test execution model stays one executable and one full-suite CTest gate, but each recovery suite now compiles in its own translation unit with only the shared test framework prelude. Private helper names and transitive includes therefore cannot leak between unrelated recovery suites, while historical case headers do not each need to duplicate the common framework include.
 
-The filename convention is part of the verification contract: a new recovery suite named `test_<surface>_cases.hpp` is auto-enrolled after CMake reconfiguration. No generated wrapper is written into the source tree.
+The filename convention is part of the verification contract: a new recovery suite named `test_<surface>_cases.hpp` is auto-enrolled after CMake reconfiguration. Auto-enrolled case headers must not include another `test_*_cases.hpp`, because that would register the nested suite a second time when its own wrapper is linked. Shared oracle code, fixture types, or reconstruction helpers must live in a support header whose filename does not match the auto-enrollment pattern; each case header then includes that support directly. No generated wrapper is written into the source tree.
 
 ## Deterministic registry contract
 
