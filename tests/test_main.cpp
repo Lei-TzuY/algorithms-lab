@@ -104,6 +104,7 @@
 #include "test_garsia_wachs_cases.hpp"
 #include "test_robinson_schensted_cases.hpp"
 #include "test_graphical_degree_sequence_cases.hpp"
+#include "test_schroeppel_shamir_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
