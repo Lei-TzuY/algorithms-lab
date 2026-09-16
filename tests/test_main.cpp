@@ -101,6 +101,7 @@
 #include "test_bounded_half_plane_intersection_cases.hpp"
 #include "test_kll_quantiles_cases.hpp"
 #include "test_gauss_lattice_reduction_cases.hpp"
+#include "test_garsia_wachs_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
