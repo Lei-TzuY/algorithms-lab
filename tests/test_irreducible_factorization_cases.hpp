@@ -1,7 +1,7 @@
 #pragma once
 
 #include "algorithms/polynomials/irreducible_factorization.hpp"
-#include "test_equal_degree_factorization_cases.hpp"
+#include "equal_degree_factorization_test_support.hpp"
 #include "test_framework.hpp"
 
 #include <algorithm>
@@ -161,14 +161,17 @@ TEST_CASE(prime_field_irreducible_factorization_random_independent_oracle) {
     for (std::size_t trial = 0U; trial < 40U; ++trial) {
       std::shuffle(pool.begin(), pool.end(), rng);
       const std::size_t count =
-          1U + static_cast<std::size_t>(rng() % std::min<std::size_t>(3U, pool.size()));
+          1U + static_cast<std::size_t>(
+                   rng() % std::min<std::size_t>(3U, pool.size()));
       PrimeFieldPolynomial monic{1U};
       std::vector<IrreduciblePolynomialFactor> expected;
       for (std::size_t index = 0U; index < count; ++index) {
         const std::uint64_t multiplicity = 1U + (rng() % 3U);
-        expected.push_back(IrreduciblePolynomialFactor{pool[index], multiplicity});
+        expected.push_back(
+            IrreduciblePolynomialFactor{pool[index], multiplicity});
         monic = multiply_reconstruction(
-            monic, power_reconstruction(pool[index], multiplicity, prime), prime);
+            monic, power_reconstruction(pool[index], multiplicity, prime),
+            prime);
       }
       const std::uint64_t unit = 1U + (rng() % (prime - 1U));
       const PrimeFieldPolynomial input =
