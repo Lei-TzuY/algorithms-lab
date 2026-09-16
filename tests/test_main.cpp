@@ -96,6 +96,7 @@
 #include "test_point_quadtree_cases.hpp"
 #include "test_balanced_parentheses_tree_cases.hpp"
 #include "test_minimum_cycle_basis_cases.hpp"
+#include "test_frequent_directions_cases.hpp"
 
 int main() {
   std::size_t passed = 0;
