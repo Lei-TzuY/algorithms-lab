@@ -26,6 +26,7 @@
 #include "test_matroid_union_cases.hpp"
 #include "test_linear_matroid_parity_cases.hpp"
 #include "test_symmetric_submodular_minimization_cases.hpp"
+#include "test_consecutive_ones_cases.hpp"
 #include "test_k_shortest_paths_cases.hpp"
 #include "test_fractional_cascading_cases.hpp"
 #include "test_optimal_bst_cases.hpp"
