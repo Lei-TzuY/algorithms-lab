@@ -41,8 +41,8 @@ A state stores the previous `K-1` input bits. For each time step and each state,
 production retains the minimum Hamming metric among all message prefixes ending
 there. Every longer path has exactly one predecessor state plus one new input bit,
 so Bellman's optimality principle makes the two-predecessor relaxation complete.
-The final minimum over states is therefore the maximum-likelihood path under an
-independent binary symmetric hard-decision metric.
+The final minimum over states is therefore the exact minimum-Hamming path over all
+equal-length messages from the documented zero initial state.
 
 Deterministic tie breaking is itself stateful. Each retained prefix receives its
 lexicographic rank. A one-bit extension has key `(previous_rank,input_bit)`, so
