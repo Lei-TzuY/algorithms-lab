@@ -155,7 +155,7 @@ class FunctionalGraphIndex {
   }
 
   [[nodiscard]] Vertex kth_successor(Vertex vertex,
-                                     std::uint64_t steps) const {
+                                       std::uint64_t steps) const {
     validate_vertex(vertex);
     std::size_t bit = 0U;
     while (steps != 0U) {
