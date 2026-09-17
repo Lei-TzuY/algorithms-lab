@@ -36,8 +36,8 @@ OracleVertexInfo oracle_info(const std::vector<Vertex>& successor,
     current = successor[current];
   }
   const std::size_t cycle_begin = first[current];
-  std::vector<Vertex> cycle(
-      path.begin() + static_cast<std::ptrdiff_t>(cycle_begin), path.end());
+  std::vector<Vertex> cycle(path.begin() + static_cast<std::ptrdiff_t>(cycle_begin),
+                                      path.end());
   const auto minimum_it = std::min_element(cycle.begin(), cycle.end());
   std::rotate(cycle.begin(), minimum_it, cycle.end());
   const Vertex entry = path[cycle_begin];
@@ -47,8 +47,9 @@ OracleVertexInfo oracle_info(const std::vector<Vertex>& successor,
                           std::move(cycle)};
 }
 
-Vertex oracle_kth(const std::vector<Vertex>& successor, Vertex vertex,
-                  std::uint64_t steps) {
+Vertex oracle_kth(const std::vector<Vertex>& successor,
+                            Vertex vertex, std::uint64_t steps) {
+  // Small-instance independent simulation with explicit cycle detection.
   const std::size_t n = successor.size();
   if (steps <= static_cast<std::uint64_t>(2U * n + 2U)) {
     for (std::uint64_t step = 0U; step < steps; ++step) {
@@ -75,7 +76,8 @@ Vertex oracle_kth(const std::vector<Vertex>& successor, Vertex vertex,
 }
 
 std::optional<std::uint64_t> oracle_steps_to_reach(
-    const std::vector<Vertex>& successor, const Vertex from, const Vertex to) {
+    const std::vector<Vertex>& successor,
+    const Vertex from, const Vertex to) {
   const std::size_t n = successor.size();
   Vertex current = from;
   for (std::size_t step = 0U; step <= 2U * n; ++step) {
@@ -148,11 +150,8 @@ TEST_CASE(functional_graph_validates_and_handles_empty_singleton) {
   REQUIRE_EQ(single.size(), 1U);
   REQUIRE_EQ(single.component_count(), 1U);
   REQUIRE_EQ(single.cycles(), (std::vector<std::vector<Vertex>>{{0U}}));
-  REQUIRE_EQ(single.kth_successor(0U,
-                                  std::numeric_limits<std::uint64_t>::max()),
-             0U);
-  REQUIRE_EQ(single.steps_to_reach(0U, 0U),
-             std::optional<std::uint64_t>{0U});
+  REQUIRE_EQ(single.kth_successor(0U, std::numeric_limits<std::uint64_t>::max()), 0U);
+  REQUIRE_EQ(single.steps_to_reach(0U, 0U), std::optional<std::uint64_t>{0U});
 
   REQUIRE_THROWS_AS(FunctionalGraphIndex({1U}), std::out_of_range);
   REQUIRE_THROWS_AS(single.successor(1U), std::out_of_range);
@@ -165,7 +164,7 @@ TEST_CASE(functional_graph_decomposes_cycles_and_reverse_trees_deterministically
   FunctionalGraphIndex index(successor);
   REQUIRE_EQ(index.cycles(),
              (std::vector<std::vector<Vertex>>{{0U, 1U, 2U}, {4U},
-                                                {6U, 7U}}));
+                                                          {6U, 7U}}));
   REQUIRE_EQ(index.component_count(), 3U);
 
   REQUIRE_EQ(index.distance_to_cycle(3U), 1U);
@@ -176,12 +175,9 @@ TEST_CASE(functional_graph_decomposes_cycles_and_reverse_trees_deterministically
   REQUIRE_EQ(index.cycle_entry(9U), 7U);
   REQUIRE_EQ(index.cycle_entry_position(9U), 1U);
 
-  REQUIRE_EQ(index.steps_to_reach(9U, 8U),
-             std::optional<std::uint64_t>{1U});
-  REQUIRE_EQ(index.steps_to_reach(9U, 7U),
-             std::optional<std::uint64_t>{2U});
-  REQUIRE_EQ(index.steps_to_reach(9U, 6U),
-             std::optional<std::uint64_t>{3U});
+  REQUIRE_EQ(index.steps_to_reach(9U, 8U), std::optional<std::uint64_t>{1U});
+  REQUIRE_EQ(index.steps_to_reach(9U, 7U), std::optional<std::uint64_t>{2U});
+  REQUIRE_EQ(index.steps_to_reach(9U, 6U), std::optional<std::uint64_t>{3U});
   REQUIRE(!index.steps_to_reach(8U, 9U).has_value());
   REQUIRE(!index.steps_to_reach(0U, 4U).has_value());
 }
