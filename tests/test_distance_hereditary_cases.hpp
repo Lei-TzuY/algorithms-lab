@@ -229,7 +229,8 @@ TEST_CASE(distance_hereditary_exhaustive_simple_graphs_up_to_five_vertices) {
   using namespace distance_hereditary_test_detail;
 
   for (std::size_t n = 0U; n <= 5U; ++n) {
-    const std::size_t edge_count = n * (n - 1U) / 2U;
+    const std::size_t edge_count =
+        n < 2U ? 0U : n * (n - 1U) / 2U;
     const std::uint64_t graph_count = 1ULL << edge_count;
     for (std::uint64_t mask = 0ULL; mask < graph_count; ++mask) {
       require_matches_definition(graph_from_edge_mask(n, mask));
