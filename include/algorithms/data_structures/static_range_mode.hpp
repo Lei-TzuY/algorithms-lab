@@ -192,7 +192,7 @@ class StaticRangeMode {
       for (std::size_t last = first; last < block_count_; ++last) {
         const std::size_t block_begin = last * block_size_;
         const std::size_t block_end =
-            std::min(size_, block_begin + block_size_);
+            block_begin + std::min(block_size_, size_ - block_begin);
 
         for (std::size_t index = block_begin; index < block_end; ++index) {
           const std::size_t id = compressed_[index];
