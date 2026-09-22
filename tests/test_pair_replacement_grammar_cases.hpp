@@ -138,7 +138,7 @@ TEST_CASE(pair_replacement_grammar_uses_nonoverlap_count_and_lexicographic_ties)
 
   const auto tied = pair_replacement_encode_bytes("ababcdcd");
   REQUIRE(!tied.rules.empty());
-  REQUIRE(tied.rules.front() == PairReplacementRule{97U, 98U});
+  REQUIRE((tied.rules.front() == PairReplacementRule{97U, 98U}));
   REQUIRE(pair_replacement_decode_bytes(tied) == "ababcdcd");
 }
 
