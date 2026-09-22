@@ -140,17 +140,6 @@ inline void validate_binary_bits(
   }
 }
 
-[[nodiscard]] inline std::uint16_t codeword_mask(
-    const std::span<const std::uint8_t> bits) {
-  std::uint16_t mask = 0U;
-  for (std::size_t index = 0U; index < bits.size(); ++index) {
-    if (bits[index] != 0U) {
-      mask |= static_cast<std::uint16_t>(UINT16_C(1) << index);
-    }
-  }
-  return mask;
-}
-
 [[nodiscard]] inline Bch1575Codeword codeword_from_mask(
     const std::uint16_t mask) {
   Bch1575Codeword result{};
