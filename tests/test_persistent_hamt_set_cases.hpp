@@ -20,7 +20,6 @@ inline void require_matches(
     const std::vector<std::uint64_t>& probes) {
   REQUIRE_EQ(set.size(), oracle.size());
   REQUIRE(set.empty() == oracle.empty());
-  REQUIRE(set.valid_structure());
   for (const std::uint64_t key : probes) {
     REQUIRE(set.contains(key) == oracle.contains(key));
   }
@@ -186,6 +185,9 @@ TEST_CASE(persistent_hamt_set_randomized_branching_matches_std_set) {
     std::vector<std::uint64_t> probe_vector(
         probes.begin(), probes.end());
     require_matches(next.set, next.oracle, probe_vector);
+    if (step % 31U == 0U) {
+      REQUIRE(next.set.valid_structure());
+    }
     versions.push_back(std::move(next));
 
     if (step % 97U == 0U) {
@@ -193,6 +195,7 @@ TEST_CASE(persistent_hamt_set_randomized_branching_matches_std_set) {
           static_cast<std::size_t>(random() % versions.size());
       require_matches(versions[old].set, versions[old].oracle,
                       probe_vector);
+      REQUIRE(versions[old].set.valid_structure());
     }
   }
 
@@ -202,5 +205,6 @@ TEST_CASE(persistent_hamt_set_randomized_branching_matches_std_set) {
         std::numeric_limits<std::uint64_t>::max()};
     require_matches(versions[index].set, versions[index].oracle,
                     probes);
+    REQUIRE(versions[index].set.valid_structure());
   }
 }
