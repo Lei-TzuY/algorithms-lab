@@ -9,6 +9,7 @@
 #include <random>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 using algorithms::coding::RansByteBlock;
 using algorithms::coding::kRansByteLowerBound;
@@ -76,6 +77,19 @@ TEST_CASE(rans_byte_known_balanced_model_is_deterministic) {
   REQUIRE_EQ(first.state, UINT64_C(34359758848));
   REQUIRE(first.bytes.empty());
   REQUIRE_EQ(rans_decode_bytes(first), input);
+}
+
+TEST_CASE(rans_byte_known_nontrivial_state_and_renormalization_byte) {
+  RansByteBlock expected;
+  expected.symbol_count = 6U;
+  expected.frequencies[static_cast<std::uint8_t>('a')] = 2048U;
+  expected.frequencies[static_cast<std::uint8_t>('b')] = 683U;
+  expected.frequencies[static_cast<std::uint8_t>('n')] = 1365U;
+  expected.state = UINT64_C(3623880887);
+  expected.bytes = std::vector<std::uint8_t>{173U};
+
+  REQUIRE_EQ(rans_decode_bytes(expected), std::string("banana"));
+  REQUIRE(rans_encode_bytes("banana") == expected);
 }
 
 TEST_CASE(rans_byte_all_byte_values_and_skewed_distribution_roundtrip) {
