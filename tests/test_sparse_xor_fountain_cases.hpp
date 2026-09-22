@@ -163,6 +163,13 @@ TEST_CASE(sparse_xor_fountain_reports_stopping_set_not_gaussian_solution) {
   REQUIRE(!decoded.has_value());
 }
 
+TEST_CASE(sparse_xor_fountain_nonempty_source_without_packets_stalls) {
+  const auto decoded =
+      decode_sparse_xor_fountain_peeling(
+          3U, std::vector<SparseXorFountainPacket>{});
+  REQUIRE(!decoded.has_value());
+}
+
 TEST_CASE(sparse_xor_fountain_detects_inconsistent_equations) {
   const std::vector<SparseXorFountainPacket> packets{
       {{0U}, 41U},
