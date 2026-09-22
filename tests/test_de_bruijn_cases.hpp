@@ -117,7 +117,7 @@ TEST_CASE(de_bruijn_small_parameter_grid_matches_definition) {
 TEST_CASE(de_bruijn_nonbinary_medium_cases_match_definition) {
   using namespace de_bruijn_test_detail;
 
-  for (const auto [alphabet_size, order] :
+  for (const auto& [alphabet_size, order] :
        std::vector<std::pair<std::size_t, std::size_t>>{
            {3U, 6U}, {4U, 5U}, {7U, 4U}}) {
     const auto sequence =
