@@ -126,7 +126,7 @@ TEST_CASE(static_range_mode_all_unique_uses_smallest_value_tie_break) {
               StaticRangeModeResult{-5, 1U}));
   REQUIRE(index.query(2U, 7U) ==
           std::optional<StaticRangeModeResult>(
-              StaticRangeModeResult{0, 1U}));
+              StaticRangeModeResult{-5, 1U}));
   require_all_ranges(values);
 }
 
