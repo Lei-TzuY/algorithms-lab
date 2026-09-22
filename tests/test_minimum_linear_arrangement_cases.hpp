@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <numeric>
 #include <random>
@@ -86,27 +87,23 @@ edge_list_from_mask(
 }  // namespace minimum_linear_arrangement_test_detail
 
 TEST_CASE(minimum_linear_arrangement_empty_single_and_edgeless) {
-  REQUIRE(
-      minimum_linear_arrangement(0U, {}) ==
-      MinimumLinearArrangementResult{0U, {}});
+  const MinimumLinearArrangementResult empty_expected{0U, {}};
+  const MinimumLinearArrangementResult singleton_expected{0U, {0U}};
+  const MinimumLinearArrangementResult edgeless_expected{
+      0U, {0U, 1U, 2U, 3U, 4U}};
 
-  REQUIRE(
-      minimum_linear_arrangement(1U, {}) ==
-      MinimumLinearArrangementResult{0U, {0U}});
-
-  REQUIRE(
-      minimum_linear_arrangement(5U, {}) ==
-      MinimumLinearArrangementResult{
-          0U, {0U, 1U, 2U, 3U, 4U}});
+  REQUIRE(minimum_linear_arrangement(0U, {}) == empty_expected);
+  REQUIRE(minimum_linear_arrangement(1U, {}) == singleton_expected);
+  REQUIRE(minimum_linear_arrangement(5U, {}) == edgeless_expected);
 }
 
 TEST_CASE(minimum_linear_arrangement_known_path_and_complete_graph) {
   const std::vector<std::pair<std::size_t, std::size_t>> path{
       {0U, 1U}, {1U, 2U}, {2U, 3U}};
+  const MinimumLinearArrangementResult path_expected{
+      3U, {0U, 1U, 2U, 3U}};
   REQUIRE(
-      minimum_linear_arrangement(4U, path) ==
-      MinimumLinearArrangementResult{
-          3U, {0U, 1U, 2U, 3U}});
+      minimum_linear_arrangement(4U, path) == path_expected);
 
   std::vector<std::pair<std::size_t, std::size_t>> complete;
   for (std::size_t first = 0U; first < 4U; ++first) {
@@ -114,10 +111,10 @@ TEST_CASE(minimum_linear_arrangement_known_path_and_complete_graph) {
       complete.emplace_back(first, second);
     }
   }
+  const MinimumLinearArrangementResult complete_expected{
+      10U, {0U, 1U, 2U, 3U}};
   REQUIRE(
-      minimum_linear_arrangement(4U, complete) ==
-      MinimumLinearArrangementResult{
-          10U, {0U, 1U, 2U, 3U}});
+      minimum_linear_arrangement(4U, complete) == complete_expected);
 }
 
 TEST_CASE(minimum_linear_arrangement_rejects_invalid_simple_graphs) {
