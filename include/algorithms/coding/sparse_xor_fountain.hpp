@@ -160,7 +160,7 @@ make_deterministic_sparse_xor_fountain_packet(
   }
 
   std::vector<std::size_t> pool(source.size());
-  std::iota(pool.begin(), pool.end(), 0U);
+  std::iota(pool.begin(), pool.end(), std::size_t{0});
 
   const std::uint64_t packet_key =
       sparse_xor_fountain_detail::splitmix64(
