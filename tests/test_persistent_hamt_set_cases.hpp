@@ -11,9 +11,9 @@
 #include <set>
 #include <vector>
 
-namespace persistent_hamt_set_test_detail {
-
 using algorithms::data_structures::PersistentHamtSet64;
+
+namespace persistent_hamt_set_test_detail {
 
 inline void require_matches(
     const PersistentHamtSet64& set,
