@@ -54,6 +54,11 @@ struct OrderedRootedTree {
     PreparedTree out;
     const std::size_t n = tree.nodes.size();
 
+    if (n == std::numeric_limits<std::size_t>::max()) {
+      throw std::length_error(
+          "ordered tree is too large for postorder indexing");
+    }
+
     if (n == 0U) {
       if (tree.root.has_value()) {
         throw std::invalid_argument(
