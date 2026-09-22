@@ -102,9 +102,6 @@ class RealTimeQueue {
     }
 
     if (const auto* reversing = std::get_if<Reversing>(&rotation_)) {
-      if (reversing->ok < 0) {
-        return false;
-      }
       const std::size_t f =
           bounded_list_length(reversing->front, front_size_ + 1U);
       const std::size_t r =
@@ -116,15 +113,12 @@ class RealTimeQueue {
     }
 
     if (const auto* appending = std::get_if<Appending>(&rotation_)) {
-      if (appending->ok < 0) {
-        return false;
-      }
       const std::size_t copied =
           bounded_list_length(appending->front_reversed, front_size_ + 1U);
       const std::size_t candidate =
           bounded_list_length(appending->rear_reversed, front_size_ + 2U);
       if (copied == kTooLong || candidate == kTooLong ||
-          static_cast<std::size_t>(appending->ok) > copied ||
+          appending->ok > copied ||
           candidate == 0U) {
         return false;
       }
@@ -150,7 +144,7 @@ class RealTimeQueue {
   struct Idle {};
 
   struct Reversing {
-    std::ptrdiff_t ok;
+    std::size_t ok;
     List front;
     List front_reversed;
     List rear;
@@ -158,7 +152,7 @@ class RealTimeQueue {
   };
 
   struct Appending {
-    std::ptrdiff_t ok;
+    std::size_t ok;
     List front_reversed;
     List rear_reversed;
   };
@@ -241,7 +235,7 @@ class RealTimeQueue {
 
   [[nodiscard]] Rotation invalidate(const Rotation& state) const {
     if (const auto* reversing = std::get_if<Reversing>(&state)) {
-      if (reversing->ok <= 0) {
+      if (reversing->ok == 0U) {
         throw std::logic_error(
             "real-time queue invalidated unfinished rotation");
       }
