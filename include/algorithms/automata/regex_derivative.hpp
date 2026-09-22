@@ -24,6 +24,27 @@ class ByteRegex {
     star,
   };
 
+ private:
+  struct Node {
+    Kind kind;
+    std::uint8_t byte{};
+    std::shared_ptr<const Node> left;
+    std::shared_ptr<const Node> right;
+
+    explicit Node(const Kind node_kind) : kind(node_kind) {}
+
+    explicit Node(const std::uint8_t literal_byte)
+        : kind(Kind::literal), byte(literal_byte) {}
+
+    Node(const Kind node_kind,
+         std::shared_ptr<const Node> lhs,
+         std::shared_ptr<const Node> rhs)
+        : kind(node_kind),
+          left(std::move(lhs)),
+          right(std::move(rhs)) {}
+  };
+
+ public:
   [[nodiscard]] static ByteRegex empty() {
     static const auto node = std::make_shared<const Node>(Kind::empty_set);
     return ByteRegex(node);
@@ -111,25 +132,6 @@ class ByteRegex {
   }
 
  private:
-  struct Node {
-    Kind kind;
-    std::uint8_t byte{};
-    std::shared_ptr<const Node> left;
-    std::shared_ptr<const Node> right;
-
-    explicit Node(const Kind node_kind) : kind(node_kind) {}
-
-    explicit Node(const std::uint8_t literal_byte)
-        : kind(Kind::literal), byte(literal_byte) {}
-
-    Node(const Kind node_kind,
-         std::shared_ptr<const Node> lhs,
-         std::shared_ptr<const Node> rhs)
-        : kind(node_kind),
-          left(std::move(lhs)),
-          right(std::move(rhs)) {}
-  };
-
   std::shared_ptr<const Node> node_;
 
   explicit ByteRegex(std::shared_ptr<const Node> node)
