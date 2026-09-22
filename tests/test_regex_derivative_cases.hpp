@@ -223,6 +223,15 @@ TEST_CASE(regex_derivative_basic_language_contract) {
   REQUIRE(repeated.matches(""));
   REQUIRE(repeated.matches("abbaab"));
   REQUIRE(!repeated.matches("abc"));
+
+  const ByteRegex optional_a =
+      ByteRegex::alternate(epsilon, a);
+  const ByteRegex optional_then_b =
+      ByteRegex::concatenate(optional_a, b);
+  REQUIRE(optional_then_b.matches("b"));
+  REQUIRE(optional_then_b.matches("ab"));
+  REQUIRE(!optional_then_b.matches("a"));
+  REQUIRE(!optional_then_b.matches("abb"));
 }
 
 TEST_CASE(regex_derivative_smart_constructor_identities) {
