@@ -379,6 +379,11 @@ class PersistentHamtSet64 {
             node->children.size()) {
       return false;
     }
+    for (const NodePtr& child : node->children) {
+      if (child == nullptr) {
+        return false;
+      }
+    }
     if (node->children.size() == 1U &&
         node->children.front()->kind == NodeKind::leaf) {
       return false;
