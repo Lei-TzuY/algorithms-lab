@@ -3,6 +3,7 @@
 #include "algorithms/data_structures/persistent_hamt_set.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
