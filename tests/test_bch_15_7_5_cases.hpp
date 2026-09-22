@@ -233,7 +233,7 @@ TEST_CASE(bch_15_7_5_beyond_radius_never_returns_an_invalid_correction) {
   using namespace bch_15_7_5_test_detail;
 
   const auto codebook = independent_codebook();
-  std::mt19937_64 random(0xBCH1575ULL);
+  std::mt19937_64 random(0xBC1575ULL);
 
   for (std::size_t trial = 0U; trial < 500U; ++trial) {
     const std::uint16_t message_mask =
