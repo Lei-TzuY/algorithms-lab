@@ -9,6 +9,7 @@
 #include <limits>
 #include <optional>
 #include <random>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
