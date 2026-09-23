@@ -247,3 +247,16 @@ TEST_CASE(thorup_zwick_k2_random_small_graphs_respect_three_stretch) {
     }
   }
 }
+
+
+TEST_CASE(thorup_zwick_k2_rejects_unrepresentable_shortest_paths) {
+  Graph graph(3U, false);
+  graph.add_edge(
+      0U, 1U,
+      std::numeric_limits<Weight>::max());
+  graph.add_edge(1U, 2U, 1);
+
+  REQUIRE_THROWS_AS(
+      ThorupZwickK2Oracle(graph, 1U),
+      std::overflow_error);
+}
