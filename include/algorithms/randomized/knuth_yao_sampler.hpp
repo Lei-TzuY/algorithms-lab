@@ -220,10 +220,12 @@ class DyadicKnuthYaoSampler {
     if (precision_bits_ == 0U) {
       std::optional<std::size_t> sole;
       for (std::size_t symbol = 0U; symbol < weights_.size(); ++symbol) {
-        if (weights_[symbol] == 0U) {
+        const std::uint64_t normalized_weight =
+            weights_[symbol] >> normalization_shift_;
+        if (normalized_weight == 0U) {
           continue;
         }
-        if (weights_[symbol] != 1U || sole.has_value()) {
+        if (normalized_weight != 1U || sole.has_value()) {
           throw std::logic_error(
               "unit Knuth-Yao distribution is not deterministic");
         }
