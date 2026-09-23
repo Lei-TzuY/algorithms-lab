@@ -270,8 +270,18 @@ class ThorupZwickK2Oracle {
     }
 
     std::mt19937_64 random(seed_);
+    const auto divisor =
+        static_cast<std::uint64_t>(denominator);
+    const std::uint64_t rejection_threshold =
+        (std::uint64_t{0} - divisor) % divisor;
+
     for (Vertex vertex = 0U; vertex < vertex_count_; ++vertex) {
-      if (random() % denominator == 0U) {
+      std::uint64_t draw = 0U;
+      do {
+        draw = random();
+      } while (draw < rejection_threshold);
+
+      if (draw % divisor == 0U) {
         landmark_[vertex] = 1U;
       }
     }
