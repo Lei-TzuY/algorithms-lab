@@ -221,18 +221,17 @@ TEST_CASE(strong_connectivity_augmentation_known_minimum_witnesses) {
   const auto chain_result =
       minimum_strong_connectivity_augmentation(chain);
   REQUIRE_EQ(chain_result.added_edges.size(), 1U);
-  REQUIRE(
-      chain_result.added_edges ==
-      std::vector<std::pair<Vertex, Vertex>>{{2U, 0U}});
+  const std::vector<std::pair<Vertex, Vertex>> expected_chain{
+      {2U, 0U}};
+  REQUIRE(chain_result.added_edges == expected_chain);
   require_valid_minimum_augmentation(chain);
 
   Graph two_isolated(2U, true);
   const auto isolated_result =
       minimum_strong_connectivity_augmentation(two_isolated);
-  REQUIRE(
-      isolated_result.added_edges ==
-      (std::vector<std::pair<Vertex, Vertex>>{
-          {0U, 1U}, {1U, 0U}}));
+  const std::vector<std::pair<Vertex, Vertex>> expected_isolated{
+      {0U, 1U}, {1U, 0U}};
+  REQUIRE(isolated_result.added_edges == expected_isolated);
   require_valid_minimum_augmentation(two_isolated);
 
   Graph out_star(4U, true);
@@ -269,9 +268,9 @@ TEST_CASE(strong_connectivity_augmentation_uses_original_vertex_representatives)
   const auto result =
       minimum_strong_connectivity_augmentation(graph);
   REQUIRE_EQ(result.added_edges.size(), 1U);
-  REQUIRE(
-      result.added_edges ==
-      std::vector<std::pair<Vertex, Vertex>>{{2U, 0U}});
+  const std::vector<std::pair<Vertex, Vertex>> expected{
+      {2U, 0U}};
+  REQUIRE(result.added_edges == expected);
   require_valid_minimum_augmentation(graph);
 }
 
@@ -311,7 +310,7 @@ TEST_CASE(strong_connectivity_augmentation_random_four_vertex_oracle) {
   std::mt19937_64 random(0x57A0C0DEULL);
   for (std::size_t trial = 0U; trial < 180U; ++trial) {
     const std::uint64_t mask =
-        random() & (UINT64_C(1) << 12U) - UINT64_C(1);
+        random() & ((UINT64_C(1) << 12U) - UINT64_C(1));
     require_valid_minimum_augmentation(
         graph_from_mask(4U, mask));
   }
