@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <limits>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 namespace algorithms::numerical {
@@ -177,6 +178,19 @@ template <typename Function>
       rule.nodes.size() != rule.weights.size()) {
     throw std::invalid_argument(
         "Gauss-Legendre rule shape is invalid");
+  }
+  for (std::size_t index = 0U;
+       index < rule.nodes.size(); ++index) {
+    if (!std::isfinite(rule.nodes[index]) ||
+        !(rule.nodes[index] > -1.0L &&
+          rule.nodes[index] < 1.0L) ||
+        !std::isfinite(rule.weights[index]) ||
+        !(rule.weights[index] > 0.0L) ||
+        (index != 0U &&
+         !(rule.nodes[index - 1U] < rule.nodes[index]))) {
+      throw std::invalid_argument(
+          "Gauss-Legendre rule contents are invalid");
+    }
   }
   if (!std::isfinite(lower) || !std::isfinite(upper)) {
     throw std::invalid_argument(
