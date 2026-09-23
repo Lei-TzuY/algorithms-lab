@@ -31,7 +31,7 @@ class RrrBitVector15 {
   static constexpr std::size_t kBlockBits = 15U;
   static constexpr std::size_t kBlocksPerSuperblock = 16U;
 
-  RrrBitVector15() { build({}); }
+  RrrBitVector15() { build(std::span<const Bit>{}); }
 
   explicit RrrBitVector15(const std::span<const Bit> bits) {
     build(bits);
@@ -354,6 +354,9 @@ class RrrBitVector15 {
     std::size_t prefix_zeros = 0U;
     superblock_ones_.push_back(0U);
     superblock_zeros_.push_back(0U);
+    if (block_count == 0U) {
+      return;
+    }
 
     for (std::size_t block = 0U; block < block_count; ++block) {
       if (block != 0U && block % kBlocksPerSuperblock == 0U) {
