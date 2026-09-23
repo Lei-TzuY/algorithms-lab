@@ -7,6 +7,7 @@
 #include <limits>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -57,15 +58,12 @@ class RoaringStyleBitmap32 {
 
   // Returns true exactly when the set changed.
   bool insert(const Value value) {
-    if (size_ == std::numeric_limits<std::size_t>::max()) {
-      throw std::length_error("Roaring-style bitmap cardinality exhausted");
-    }
-
     const std::uint16_t high = high_bits(value);
     const std::uint16_t low = low_bits(value);
     auto it = lower_bound_container(high);
 
     if (it == containers_.end() || it->high != high) {
+      ensure_insert_capacity();
       Container fresh(high, low);
       containers_.insert(it, std::move(fresh));
       ++size_;
@@ -79,6 +77,7 @@ class RoaringStyleBitmap32 {
       if (position != values.end() && *position == low) {
         return false;
       }
+      ensure_insert_capacity();
       values.insert(position, low);
       ++it->cardinality;
       ++size_;
@@ -95,6 +94,7 @@ class RoaringStyleBitmap32 {
     if ((words[word_index] & mask) != 0U) {
       return false;
     }
+    ensure_insert_capacity();
     words[word_index] |= mask;
     ++it->cardinality;
     ++size_;
@@ -266,6 +266,13 @@ class RoaringStyleBitmap32 {
 
   std::vector<Container> containers_;
   std::size_t size_{};
+
+  void ensure_insert_capacity() const {
+    if (size_ == std::numeric_limits<std::size_t>::max()) {
+      throw std::length_error(
+          "Roaring-style bitmap cardinality exhausted");
+    }
+  }
 
   [[nodiscard]] static constexpr std::uint16_t high_bits(
       const Value value) noexcept {
