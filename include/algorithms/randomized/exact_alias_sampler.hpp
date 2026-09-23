@@ -95,44 +95,40 @@ class ExactAliasSampler {
 
   // Expensive exact diagnostic. It reconstructs the number of replay states
   // selecting every outcome and compares that mass to n * weight[i].
-  [[nodiscard]] bool valid_distribution() const noexcept {
-    try {
-      if (weights_.empty() || cells_.size() != weights_.size() ||
-          total_weight_ == 0U) {
+  [[nodiscard]] bool valid_distribution() const {
+    if (weights_.empty() || cells_.size() != weights_.size() ||
+        total_weight_ == 0U) {
+      return false;
+    }
+
+    using Wide = unsigned __int128;
+    const Wide n =
+        static_cast<Wide>(weights_.size());
+    const Wide total =
+        static_cast<Wide>(total_weight_);
+
+    std::vector<Wide> mass(weights_.size(), Wide{0});
+    for (std::size_t column = 0U;
+         column < cells_.size(); ++column) {
+      const ExactAliasCell current = cells_[column];
+      if (current.alias >= cells_.size() ||
+          current.threshold > total_weight_) {
         return false;
       }
 
-      using Wide = unsigned __int128;
-      const Wide n =
-          static_cast<Wide>(weights_.size());
-      const Wide total =
-          static_cast<Wide>(total_weight_);
-
-      std::vector<Wide> mass(weights_.size(), Wide{0});
-      for (std::size_t column = 0U;
-           column < cells_.size(); ++column) {
-        const ExactAliasCell current = cells_[column];
-        if (current.alias >= cells_.size() ||
-            current.threshold > total_weight_) {
-          return false;
-        }
-
-        mass[column] += static_cast<Wide>(current.threshold);
-        mass[current.alias] +=
-            total - static_cast<Wide>(current.threshold);
-      }
-
-      for (std::size_t index = 0U;
-           index < weights_.size(); ++index) {
-        if (mass[index] !=
-            n * static_cast<Wide>(weights_[index])) {
-          return false;
-        }
-      }
-      return true;
-    } catch (...) {
-      return false;
+      mass[column] += static_cast<Wide>(current.threshold);
+      mass[current.alias] +=
+          total - static_cast<Wide>(current.threshold);
     }
+
+    for (std::size_t index = 0U;
+         index < weights_.size(); ++index) {
+      if (mass[index] !=
+          n * static_cast<Wide>(weights_[index])) {
+        return false;
+      }
+    }
+    return true;
   }
 
  private:
