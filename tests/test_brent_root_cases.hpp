@@ -161,6 +161,15 @@ TEST_CASE(brent_root_validation_and_nonfinite_callback) {
   REQUIRE_THROWS_AS(
       brent_root(nonfinite, -1.0, 1.0),
       std::overflow_error);
+
+  REQUIRE_THROWS_AS(
+      brent_root(identity,
+                 -std::numeric_limits<double>::max(),
+                 std::numeric_limits<double>::max(),
+                 1.0,
+                 2.0,
+                 8U),
+      std::overflow_error);
 }
 
 TEST_CASE(brent_root_iteration_limit_preserves_bracket) {
