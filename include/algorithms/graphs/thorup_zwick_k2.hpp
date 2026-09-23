@@ -25,8 +25,9 @@ struct ThorupZwickK2BunchEntry {
 
 // k=2 Thorup-Zwick-style distance oracle for undirected, non-negative graphs.
 //
-// A_0 is the full vertex set. A_1 is sampled with probability
-// 1/ceil(sqrt(n)) using mt19937_64 modulo the exact integer denominator.
+// A_0 is the full vertex set. A_1 is sampled with exact probability
+// 1/ceil(sqrt(n)) from mt19937_64 using rejection sampling before the
+// integer residue test, avoiding modulo bias.
 // Every connected component with no sampled vertex receives its smallest
 // vertex as a forced landmark. A_2 is empty.
 //
