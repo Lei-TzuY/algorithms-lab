@@ -22,7 +22,8 @@ capability boundary rather than replacing one FFT algorithm with another.
 `Complex64 == std::complex<double>`.
 
 - empty input is a no-op;
-- every non-empty representable length is accepted;
+- every non-empty length whose checked convolution span and padded power-of-two
+  workspace are representable is accepted;
 - inputs must have finite real and imaginary components;
 - forward convention is
   `exp(-2*pi*i*k/n)`;
