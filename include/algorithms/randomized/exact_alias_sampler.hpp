@@ -10,6 +10,10 @@
 
 namespace algorithms::randomized {
 
+namespace detail {
+__extension__ typedef unsigned __int128 AliasWide;
+}  // namespace detail
+
 struct ExactAliasCell {
   std::uint64_t threshold{};
   std::size_t alias{};
@@ -101,7 +105,7 @@ class ExactAliasSampler {
       return false;
     }
 
-    using Wide = unsigned __int128;
+    using Wide = detail::AliasWide;
     const Wide n =
         static_cast<Wide>(weights_.size());
     const Wide total =
@@ -170,7 +174,7 @@ class ExactAliasSampler {
       }
     }
 
-    using Wide = unsigned __int128;
+    using Wide = detail::AliasWide;
     Wide total = 0U;
     for (const std::uint64_t weight : weights_) {
       total += static_cast<Wide>(weight);
