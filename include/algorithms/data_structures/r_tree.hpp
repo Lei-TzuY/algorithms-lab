@@ -16,7 +16,7 @@ namespace algorithms::data_structures {
 //
 // Nodes have a fixed maximum occupancy of 8 entries and a minimum non-root
 // occupancy of 4 entries. Insertion descends by minimum bounding-rectangle
-// enlargement and uses a deterministic quadratic-style split on overflow.
+// enlargement and uses a deterministic area-spread split on overflow.
 //
 // This slice intentionally provides insertion and overlap search only. It does
 // not claim R*-tree reinsertion, deletion/condensation, bulk loading,
@@ -37,7 +37,7 @@ class RTree2D {
   static constexpr std::size_t kMaxEntries = 8U;
   static constexpr std::size_t kMinEntries = 4U;
 
-  RTree2D() : root_(std::make_unique<Node>(true)) {}
+  RTree2D();
 
   [[nodiscard]] std::size_t size() const noexcept { return size_; }
   [[nodiscard]] bool empty() const noexcept { return size_ == 0U; }
@@ -503,3 +503,7 @@ class RTree2D {
 };
 
 }  // namespace algorithms::data_structures
+
+inline RTree2D::RTree2D()
+    : root_(std::make_unique<Node>(true)) {}
+
