@@ -117,6 +117,15 @@ TEST_CASE(gauss_legendre_known_low_order_rules) {
   require_close(order_two.nodes[1], expected_node, 2e-15L);
   require_close(order_two.weights[0], 1.0L, 2e-15L);
   require_close(order_two.weights[1], 1.0L, 2e-15L);
+
+  const auto order_three = gauss_legendre_rule(3U);
+  const long double outer = std::sqrt(3.0L / 5.0L);
+  require_close(order_three.nodes[0], -outer, 2e-15L);
+  require_close(order_three.nodes[1], 0.0L, 2e-18L);
+  require_close(order_three.nodes[2], outer, 2e-15L);
+  require_close(order_three.weights[0], 5.0L / 9.0L, 2e-15L);
+  require_close(order_three.weights[1], 8.0L / 9.0L, 2e-15L);
+  require_close(order_three.weights[2], 5.0L / 9.0L, 2e-15L);
 }
 
 TEST_CASE(gauss_legendre_rules_are_symmetric_positive_and_normalized) {
@@ -255,4 +264,26 @@ TEST_CASE(gauss_legendre_converges_on_smooth_nonpolynomial_integral) {
   REQUIRE(error_eight < error_four);
   REQUIRE(error_sixteen <= error_eight);
   require_close(order_sixteen, exact, 2e-13L);
+}
+
+TEST_CASE(gauss_legendre_maximum_supported_order_is_well_formed) {
+  using namespace gauss_legendre_test_detail;
+
+  const auto rule =
+      gauss_legendre_rule(kMaxGaussLegendreOrder);
+  REQUIRE_EQ(rule.nodes.size(), kMaxGaussLegendreOrder);
+  REQUIRE_EQ(rule.weights.size(), kMaxGaussLegendreOrder);
+
+  long double total_weight = 0.0L;
+  for (std::size_t index = 0U;
+       index < rule.nodes.size(); ++index) {
+    REQUIRE(rule.nodes[index] > -1.0L);
+    REQUIRE(rule.nodes[index] < 1.0L);
+    REQUIRE(rule.weights[index] > 0.0L);
+    if (index != 0U) {
+      REQUIRE(rule.nodes[index - 1U] < rule.nodes[index]);
+    }
+    total_weight += rule.weights[index];
+  }
+  require_close(total_weight, 2.0L, 2e-11L);
 }
