@@ -45,8 +45,8 @@ struct StrongConnectivityAugmentation {
 // Conservative time bound:
 //   O(E log E + S * (C + E_c) + S * S * T + V)
 // where C/E_c are condensation vertices/edges; the E log E term comes from
-// deterministic duplicate removal in condensation_graph(). Space is
-// O(V + E_c + S*T).
+// deterministic duplicate removal in condensation_graph(). Peak auxiliary
+// space is O(V + E + S*T).
 [[nodiscard]] inline StrongConnectivityAugmentation
 minimum_strong_connectivity_augmentation(const Graph& graph) {
   if (!graph.directed()) {
