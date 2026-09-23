@@ -296,6 +296,38 @@ TEST_CASE(coffman_graham_fixed_precedence_shapes_are_optimal) {
   }
 }
 
+TEST_CASE(coffman_graham_exhaustive_five_node_dags_are_optimal) {
+  using namespace coffman_graham_test_detail;
+
+  constexpr std::size_t n = 5U;
+  std::vector<std::pair<std::size_t, std::size_t>> possible_edges;
+  for (std::size_t from = 0U; from < n; ++from) {
+    for (std::size_t to = from + 1U; to < n; ++to) {
+      possible_edges.emplace_back(from, to);
+    }
+  }
+
+  const std::size_t graph_count =
+      std::size_t{1} << possible_edges.size();
+  for (std::size_t mask = 0U; mask < graph_count; ++mask) {
+    std::vector<std::vector<std::size_t>> graph(n);
+    for (std::size_t edge = 0U;
+         edge < possible_edges.size(); ++edge) {
+      if ((mask & (std::size_t{1} << edge)) == 0U) {
+        continue;
+      }
+      const auto [from, to] = possible_edges[edge];
+      graph[from].push_back(to);
+    }
+
+    const auto schedule =
+        coffman_graham_two_processor_schedule(graph);
+    REQUIRE(valid_schedule(graph, schedule));
+    REQUIRE_EQ(schedule.makespan(),
+               brute_optimal_makespan(graph));
+  }
+}
+
 TEST_CASE(coffman_graham_random_dags_match_exhaustive_optimum) {
   using namespace coffman_graham_test_detail;
 
