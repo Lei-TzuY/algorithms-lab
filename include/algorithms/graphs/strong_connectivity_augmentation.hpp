@@ -208,11 +208,10 @@ minimum_strong_connectivity_augmentation(const Graph& graph) {
   // endpoints one strongly-connected core.
   for (std::size_t index = 0U;
        index < matched_pairs.size(); ++index) {
-    const auto [source_index, sink_index] = matched_pairs[index];
-    const auto [next_source_index, ignored_sink] =
-        matched_pairs[(index + 1U) % matched_pairs.size()];
-    (void)source_index;
-    (void)ignored_sink;
+    const std::size_t sink_index =
+        matched_pairs[index].second;
+    const std::size_t next_source_index =
+        matched_pairs[(index + 1U) % matched_pairs.size()].first;
 
     result.added_edges.emplace_back(
         representative[sinks[sink_index]],
