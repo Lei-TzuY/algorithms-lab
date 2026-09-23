@@ -240,8 +240,8 @@ TEST_CASE(ordered_tree_edit_witness_validator_rejects_bad_certificates) {
   const OrderedRootedTree first{
       {
           {0, {1U, 2U}},
-          {1, {}},
-          {2, {}},
+          {0, {}},
+          {0, {}},
       },
       0U};
   const OrderedRootedTree second = first;
@@ -274,6 +274,15 @@ TEST_CASE(ordered_tree_edit_witness_validator_rejects_bad_certificates) {
       6U, {}};
   REQUIRE(!valid_ordered_tree_edit_witness(
       first, second, non_optimal));
+
+  const OrderedRootedTree malformed{
+      {
+          {0, {1U}},
+      },
+      0U};
+  REQUIRE_THROWS_AS(
+      ordered_tree_edit_witness(malformed, second),
+      std::invalid_argument);
 }
 
 TEST_CASE(ordered_tree_edit_witness_random_tiny_matches_mapping_oracle) {
