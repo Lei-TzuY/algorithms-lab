@@ -55,8 +55,22 @@ class DyadicKnuthYaoSampler {
           "Knuth-Yao dyadic weights must sum to a power of two");
     }
 
-    precision_bits_ =
+    const std::size_t denominator_bits =
         static_cast<std::size_t>(std::bit_width(total_weight_) - 1U);
+    normalization_shift_ = denominator_bits;
+    for (const std::uint64_t weight : weights_) {
+      if (weight == 0U) {
+        continue;
+      }
+      normalization_shift_ =
+          std::min(normalization_shift_,
+                   static_cast<std::size_t>(std::countr_zero(weight)));
+    }
+
+    const std::uint64_t normalized_total =
+        total_weight_ >> normalization_shift_;
+    precision_bits_ = static_cast<std::size_t>(
+        std::bit_width(normalized_total) - 1U);
     build_tree();
 
     if (!valid_structure()) {
@@ -186,6 +200,7 @@ class DyadicKnuthYaoSampler {
   std::vector<std::uint64_t> weights_;
   std::uint64_t total_weight_{};
   std::size_t precision_bits_{};
+  std::size_t normalization_shift_{};
   std::vector<Node> nodes_;
 
   [[nodiscard]] std::size_t append_node() {
@@ -247,7 +262,9 @@ class DyadicKnuthYaoSampler {
       std::size_t used = 0U;
       for (std::size_t symbol = 0U;
            symbol < weights_.size(); ++symbol) {
-        if (((weights_[symbol] >> shift) & UINT64_C(1)) == 0U) {
+        const std::uint64_t normalized_weight =
+            weights_[symbol] >> normalization_shift_;
+        if (((normalized_weight >> shift) & UINT64_C(1)) == 0U) {
           continue;
         }
         if (used >= slots.size()) {
