@@ -39,7 +39,8 @@ namespace detail {
 
 // In-place arbitrary-length complex DFT using Bluestein's chirp transform.
 //
-// Empty input is a no-op. Non-empty inputs may have any representable length.
+// Empty input is a no-op. Non-empty inputs may have any length whose checked
+// Bluestein convolution span and padded power-of-two workspace are representable.
 // Forward transform uses exp(-2*pi*i*k/n). Inverse uses the opposite sign and
 // divides every output by n, matching fast_fourier_transform.
 //
