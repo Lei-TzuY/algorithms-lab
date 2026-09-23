@@ -70,7 +70,7 @@ TEST_CASE(knuth_yao_rejects_invalid_weight_domains) {
 }
 
 TEST_CASE(knuth_yao_unit_mass_consumes_zero_bits) {
-  const DyadicKnuthYaoSampler sampler({0U, 1U, 0U});
+  const DyadicKnuthYaoSampler sampler({0U, 8U, 0U});
   std::size_t calls = 0U;
   const KnuthYaoSample result =
       sampler.sample([&]() {
@@ -81,7 +81,7 @@ TEST_CASE(knuth_yao_unit_mass_consumes_zero_bits) {
   REQUIRE_EQ(result.symbol, 1U);
   REQUIRE_EQ(result.bits_consumed, 0U);
   REQUIRE_EQ(calls, 0U);
-  REQUIRE_EQ(sampler.total_weight(), 1U);
+  REQUIRE_EQ(sampler.total_weight(), 8U);
   REQUIRE_EQ(sampler.max_bits_per_sample(), 0U);
   REQUIRE(sampler.valid_structure());
 }
@@ -116,6 +116,7 @@ TEST_CASE(knuth_yao_exact_known_dyadic_distributions) {
 
   require_exact_full_word_distribution({1U, 1U});
   require_exact_full_word_distribution({1U, 3U});
+  require_exact_full_word_distribution({2U, 6U});
   require_exact_full_word_distribution({1U, 1U, 2U});
   require_exact_full_word_distribution({0U, 1U, 0U, 3U});
   require_exact_full_word_distribution({2U, 0U, 5U, 1U});
