@@ -134,7 +134,8 @@ integer_characteristic_polynomial(
     }
   }
 
-  if (n > static_cast<std::size_t>(
+  if (n == std::numeric_limits<std::size_t>::max() ||
+      n > static_cast<std::size_t>(
               std::numeric_limits<std::int64_t>::max())) {
     throw std::length_error(
         "characteristic polynomial matrix dimension is too large");
