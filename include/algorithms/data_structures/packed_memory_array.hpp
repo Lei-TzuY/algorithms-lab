@@ -84,9 +84,8 @@ class PackedMemoryArraySequence {
     }
 
     if (highest_violating_width == capacity()) {
-      grow_for(size_ + 1U);
-      insert_after_global_growth(rank, value);
-      return;
+      throw std::logic_error(
+          "packed-memory-array root density precheck failed");
     }
 
     const std::size_t width =
@@ -328,18 +327,6 @@ class PackedMemoryArraySequence {
     if (target != capacity()) {
       rebuild_capacity(target);
     }
-  }
-
-  void insert_after_global_growth(
-      const std::size_t rank,
-      const Value value) {
-    std::vector<Value> values = to_vector();
-    values.insert(
-        values.begin() + static_cast<std::ptrdiff_t>(rank),
-        value);
-    ++size_;
-    slots_.assign(capacity(), std::nullopt);
-    place_evenly(0U, capacity(), values);
   }
 
   void rebuild_capacity(const std::size_t new_capacity) {
