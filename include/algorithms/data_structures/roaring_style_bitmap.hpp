@@ -290,7 +290,7 @@ class RoaringStyleBitmap32 {
     return static_cast<std::uint16_t>(value & UINT32_C(0xffff));
   }
 
-  [[nodiscard]] auto lower_bound_container(
+  [[nodiscard]] std::vector<Container>::iterator lower_bound_container(
       const std::uint16_t high) noexcept {
     return std::lower_bound(
         containers_.begin(), containers_.end(), high,
@@ -299,7 +299,7 @@ class RoaringStyleBitmap32 {
         });
   }
 
-  [[nodiscard]] auto lower_bound_container(
+  [[nodiscard]] std::vector<Container>::const_iterator lower_bound_container(
       const std::uint16_t high) const noexcept {
     return std::lower_bound(
         containers_.begin(), containers_.end(), high,
