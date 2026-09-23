@@ -117,6 +117,8 @@ TEST_CASE(knuth_yao_exact_known_dyadic_distributions) {
   require_exact_full_word_distribution({1U, 1U});
   require_exact_full_word_distribution({1U, 3U});
   require_exact_full_word_distribution({2U, 6U});
+  const DyadicKnuthYaoSampler reduced({2U, 6U});
+  REQUIRE_EQ(reduced.max_bits_per_sample(), 2U);
   require_exact_full_word_distribution({1U, 1U, 2U});
   require_exact_full_word_distribution({0U, 1U, 0U, 3U});
   require_exact_full_word_distribution({2U, 0U, 5U, 1U});
