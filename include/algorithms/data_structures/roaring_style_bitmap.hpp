@@ -78,12 +78,15 @@ class RoaringStyleBitmap32 {
         return false;
       }
       ensure_insert_capacity();
-      values.insert(position, low);
+      if (it->cardinality == kArrayLimit) {
+        BitmapPayload replacement =
+            bitmap_from_array_with_insert(values, low);
+        it->payload = std::move(replacement);
+      } else {
+        values.insert(position, low);
+      }
       ++it->cardinality;
       ++size_;
-      if (it->cardinality > kArrayLimit) {
-        convert_to_bitmap(*it);
-      }
       return true;
     }
 
@@ -134,15 +137,18 @@ class RoaringStyleBitmap32 {
       return false;
     }
 
+    if (it->cardinality == kArrayLimit + 1U) {
+      ArrayPayload replacement =
+          array_from_bitmap_without(words, low, kArrayLimit);
+      it->payload = std::move(replacement);
+      --it->cardinality;
+      --size_;
+      return true;
+    }
+
     words[word_index] &= ~mask;
     --it->cardinality;
     --size_;
-
-    if (it->cardinality == 0U) {
-      containers_.erase(it);
-    } else if (it->cardinality <= kArrayLimit) {
-      convert_to_array(*it);
-    }
     return true;
   }
 
@@ -319,14 +325,8 @@ class RoaringStyleBitmap32 {
             (UINT64_C(1) << bit_index)) != 0U;
   }
 
-  static void convert_to_bitmap(Container& container) {
-    if (!container.is_array()) {
-      throw std::logic_error(
-          "Roaring-style bitmap conversion requires array payload");
-    }
-
-    const auto& values =
-        std::get<ArrayPayload>(container.payload);
+  [[nodiscard]] static BitmapPayload bitmap_from_array_with_insert(
+      const ArrayPayload& values, const std::uint16_t inserted) {
     BitmapPayload words(kBitmapWords, UINT64_C(0));
     for (const std::uint16_t low : values) {
       const std::size_t word_index =
@@ -335,19 +335,20 @@ class RoaringStyleBitmap32 {
           static_cast<std::size_t>(low) % 64U;
       words[word_index] |= UINT64_C(1) << bit_index;
     }
-    container.payload = std::move(words);
+
+    const std::size_t inserted_word =
+        static_cast<std::size_t>(inserted) / 64U;
+    const std::size_t inserted_bit =
+        static_cast<std::size_t>(inserted) % 64U;
+    words[inserted_word] |= UINT64_C(1) << inserted_bit;
+    return words;
   }
 
-  static void convert_to_array(Container& container) {
-    if (container.is_array()) {
-      throw std::logic_error(
-          "Roaring-style array conversion requires bitmap payload");
-    }
-
-    const auto& words =
-        std::get<BitmapPayload>(container.payload);
+  [[nodiscard]] static ArrayPayload array_from_bitmap_without(
+      const BitmapPayload& words, const std::uint16_t erased,
+      const std::size_t expected_size) {
     ArrayPayload values;
-    values.reserve(container.cardinality);
+    values.reserve(expected_size);
 
     for (std::size_t word_index = 0U;
          word_index < words.size(); ++word_index) {
@@ -355,17 +356,20 @@ class RoaringStyleBitmap32 {
       while (remaining != 0U) {
         const unsigned bit =
             static_cast<unsigned>(std::countr_zero(remaining));
-        values.push_back(static_cast<std::uint16_t>(
-            word_index * 64U + bit));
+        const std::uint16_t low =
+            static_cast<std::uint16_t>(word_index * 64U + bit);
+        if (low != erased) {
+          values.push_back(low);
+        }
         remaining &= remaining - UINT64_C(1);
       }
     }
 
-    if (values.size() != container.cardinality) {
+    if (values.size() != expected_size) {
       throw std::logic_error(
           "Roaring-style bitmap cardinality mismatch");
     }
-    container.payload = std::move(values);
+    return values;
   }
 
   [[nodiscard]] static std::size_t rank_low(
