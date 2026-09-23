@@ -107,6 +107,18 @@ inline void require_certificate(
 TEST_CASE(nagamochi_ibaraki_zero_threshold_and_validation) {
   using namespace nagamochi_ibaraki_test_detail;
 
+  REQUIRE(
+      nagamochi_ibaraki_sparse_certificate(
+          0U, std::vector<EdgePair>{}, 7U)
+          .empty());
+
+  const std::vector<EdgePair> one_vertex_loops{
+      {0U, 0U}, {0U, 0U}};
+  REQUIRE(
+      nagamochi_ibaraki_sparse_certificate(
+          1U, one_vertex_loops, 7U)
+          .empty());
+
   const std::vector<EdgePair> edges{
       {0U, 1U}, {1U, 2U}, {2U, 0U}};
 
@@ -166,14 +178,12 @@ TEST_CASE(nagamochi_ibaraki_parallel_edges_and_loops) {
 
   REQUIRE_EQ(
       nagamochi_ibaraki_sparse_certificate(
-          2U, edges, 3U)
-          .size(),
-      3U);
+          2U, edges, 3U),
+      (std::vector<std::size_t>{1U, 2U, 3U}));
   REQUIRE_EQ(
       nagamochi_ibaraki_sparse_certificate(
-          2U, edges, 99U)
-          .size(),
-      5U);
+          2U, edges, 99U),
+      (std::vector<std::size_t>{1U, 2U, 3U, 4U, 5U}));
 }
 
 TEST_CASE(nagamochi_ibaraki_disconnected_graph) {
