@@ -103,7 +103,8 @@ coffman_graham_two_processor_schedule(
         return left < right;
       };
 
-  for (std::size_t label = 1U; label <= n; ++label) {
+  for (std::size_t assigned = 0U; assigned < n; ++assigned) {
+    const std::size_t label = assigned + 1U;
     if (ready.empty()) {
       throw std::invalid_argument(
           "Coffman-Graham precedence graph contains a directed cycle");
