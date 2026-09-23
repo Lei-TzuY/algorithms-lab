@@ -67,7 +67,9 @@ inline void require_certificate(
     REQUIRE(edges[id].first != edges[id].second);
   }
 
-  if (vertex_count >= 1U && threshold != 0U) {
+  if (vertex_count <= 1U) {
+    REQUIRE(ids.empty());
+  } else if (threshold != 0U) {
     const std::size_t simple_bound =
         threshold <=
                 std::numeric_limits<std::size_t>::max() /
