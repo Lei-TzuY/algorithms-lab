@@ -14,7 +14,7 @@ using algorithms::randomized::ExactAliasSampler;
 
 namespace exact_alias_sampler_test_detail {
 
-using Wide = unsigned __int128;
+__extension__ typedef unsigned __int128 Wide;
 
 inline std::vector<Wide> reconstruct_mass(
     const ExactAliasSampler& sampler) {
