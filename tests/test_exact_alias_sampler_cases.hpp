@@ -104,9 +104,8 @@ TEST_CASE(exact_alias_sampler_single_outcome_extreme_weight) {
   REQUIRE_EQ(sampler.size(), 1U);
   REQUIRE_EQ(sampler.total_weight(), maximum);
   REQUIRE_EQ(sampler.weight(0U), maximum);
-  REQUIRE(
-      sampler.cell(0U) ==
-      ExactAliasCell{maximum, 0U});
+  const ExactAliasCell expected{maximum, 0U};
+  REQUIRE(sampler.cell(0U) == expected);
   REQUIRE_EQ(
       sampler.sample_from_draws(0U, 0U), 0U);
   REQUIRE_EQ(
@@ -147,9 +146,9 @@ TEST_CASE(exact_alias_sampler_equal_weights_cover_every_cell) {
 
   for (std::size_t column = 0U;
        column < sampler.size(); ++column) {
-    REQUIRE(
-        sampler.cell(column) ==
-        ExactAliasCell{sampler.total_weight(), column});
+    const ExactAliasCell expected{
+        sampler.total_weight(), column};
+    REQUIRE(sampler.cell(column) == expected);
   }
 }
 
