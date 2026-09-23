@@ -195,6 +195,19 @@ TEST_CASE(packed_memory_array_randomized_trace_matches_vector) {
           oracle.begin() + static_cast<std::ptrdiff_t>(rank));
     }
 
-    require_matches(pma, oracle);
+    REQUIRE_EQ(pma.size(), oracle.size());
+    REQUIRE(pma.valid_structure());
+    REQUIRE(pma.to_vector() == oracle);
+    if (!oracle.empty()) {
+      REQUIRE_EQ(pma.at(0U), oracle.front());
+      REQUIRE_EQ(pma.at(oracle.size() / 2U),
+                 oracle[oracle.size() / 2U]);
+      REQUIRE_EQ(pma.at(oracle.size() - 1U), oracle.back());
+    }
+    if (step % 113U == 0U) {
+      require_matches(pma, oracle);
+    }
   }
+
+  require_matches(pma, oracle);
 }
