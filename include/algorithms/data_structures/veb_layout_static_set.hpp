@@ -322,6 +322,12 @@ class VebLayoutStaticSet64 {
         if (color[frame.node] != 0U) {
           return false;
         }
+        if ((current.left != kNoIndex &&
+             current.left >= nodes_.size()) ||
+            (current.right != kNoIndex &&
+             current.right >= nodes_.size())) {
+          return false;
+        }
         color[frame.node] = 1U;
         stack.push_back(Frame{current.right, false});
         stack.push_back(Frame{frame.node, true});
