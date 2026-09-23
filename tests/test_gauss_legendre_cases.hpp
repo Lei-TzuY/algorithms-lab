@@ -75,6 +75,23 @@ TEST_CASE(gauss_legendre_rejects_invalid_orders_and_rules) {
           [](const long double x) { return x; }),
       std::invalid_argument);
 
+  GaussLegendreRule invalid_contents;
+  invalid_contents.nodes = {0.0L};
+  invalid_contents.weights = {-1.0L};
+  REQUIRE_THROWS_AS(
+      gauss_legendre_integrate(
+          invalid_contents, -1.0L, 1.0L,
+          [](const long double x) { return x; }),
+      std::invalid_argument);
+
+  invalid_contents.nodes = {1.5L};
+  invalid_contents.weights = {1.0L};
+  REQUIRE_THROWS_AS(
+      gauss_legendre_integrate(
+          invalid_contents, -1.0L, 1.0L,
+          [](const long double x) { return x; }),
+      std::invalid_argument);
+
   const auto rule = gauss_legendre_rule(2U);
   REQUIRE_THROWS_AS(
       gauss_legendre_integrate(
