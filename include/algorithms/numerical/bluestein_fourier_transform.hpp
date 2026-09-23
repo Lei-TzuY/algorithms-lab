@@ -70,7 +70,7 @@ inline void bluestein_fourier_transform(
         "Bluestein convolution span is not representable");
   }
 
-  const std::size_t convolution_size = 2U * n - 1U;
+  const std::size_t convolution_size = n + (n - 1U);
   const std::size_t transform_size =
       detail::next_power_of_two(convolution_size);
 
