@@ -175,9 +175,9 @@ TEST_CASE(ordered_tree_edit_witness_empty_single_and_relabel) {
       ordered_tree_edit_witness(one_a, one_a);
   REQUIRE_EQ(equal_witness.distance, 0U);
   REQUIRE_EQ(equal_witness.mapping.size(), 1U);
-  REQUIRE(
-      equal_witness.mapping ==
-      std::vector<std::pair<std::size_t, std::size_t>>{{0U, 0U}});
+  const std::vector<std::pair<std::size_t, std::size_t>>
+      expected_equal_mapping{{0U, 0U}};
+  REQUIRE(equal_witness.mapping == expected_equal_mapping);
   REQUIRE(valid_ordered_tree_edit_witness(
       one_a, one_a, equal_witness));
 
@@ -201,9 +201,9 @@ TEST_CASE(ordered_tree_edit_witness_root_delete_promotes_child) {
   const OrderedTreeEditWitness witness =
       ordered_tree_edit_witness(source, target);
   REQUIRE_EQ(witness.distance, 1U);
-  REQUIRE(
-      witness.mapping ==
-      std::vector<std::pair<std::size_t, std::size_t>>{{1U, 0U}});
+  const std::vector<std::pair<std::size_t, std::size_t>>
+      expected_promoted_mapping{{1U, 0U}};
+  REQUIRE(witness.mapping == expected_promoted_mapping);
   REQUIRE(valid_ordered_tree_edit_witness(
       source, target, witness));
 }
