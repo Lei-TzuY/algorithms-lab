@@ -10,6 +10,7 @@
 #include <limits>
 #include <numbers>
 #include <random>
+#include <stdexcept>
 #include <vector>
 
 using algorithms::numerical::Complex64;
@@ -148,7 +149,7 @@ TEST_CASE(bluestein_transform_matches_direct_dft_fixed_lengths) {
 TEST_CASE(bluestein_power_of_two_matches_radix2_fft) {
   using namespace bluestein_fourier_transform_test_detail;
 
-  std::mt19937_64 random(0xB1UE57E1ULL);
+  std::mt19937_64 random(0xB1E57E1ULL);
   const std::array<std::size_t, 6U> lengths{
       1U, 2U, 4U, 8U, 16U, 32U};
 
