@@ -165,6 +165,35 @@ TEST_CASE(dfa_equivalence_returns_shortest_lexicographic_witness) {
           second, result.distinguishing_word));
 }
 
+TEST_CASE(dfa_equivalence_reconstructs_deeper_shortest_witness) {
+  const Dfa first{
+      0U,
+      {
+          {1U, 0U},
+          {1U, 2U},
+          {2U, 2U},
+      },
+      {false, false, true}};
+  const Dfa second{
+      0U,
+      {
+          {1U, 0U},
+          {1U, 1U},
+      },
+      {false, false}};
+
+  const auto result =
+      compare_dfa_languages(first, second, 6U);
+  REQUIRE(!result.equivalent);
+  REQUIRE(result.distinguishing_word ==
+          std::vector<std::size_t>{0U, 1U});
+  REQUIRE(
+      dfa_equivalence_test_detail::accepts_word(
+          first, result.distinguishing_word) !=
+      dfa_equivalence_test_detail::accepts_word(
+          second, result.distinguishing_word));
+}
+
 TEST_CASE(dfa_equivalence_ignores_unreachable_state_differences) {
   const Dfa first{
       0U,
